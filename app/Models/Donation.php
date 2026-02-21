@@ -9,10 +9,15 @@ class Donation extends Model
 {
     use HasFactory;
 
+    protected $table = 'donations';
+
     protected $fillable = [
         'donor_name',
-        'email',
+        'phone_number',
         'amount',
-        'payment_method',
+        'mode_of_payment',
+        'transaction_id',
     ];
+
+    public $timestamps = false; // We only have created_at, no updated_at
 }

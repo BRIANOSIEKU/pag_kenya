@@ -11,8 +11,16 @@ class Devotion extends Model
 
     protected $fillable = [
         'title',
+        'author',
         'content',
         'date',
+        'like_count',
+        'thumbnail',
+    ];
+
+    // Cast 'date' to a Carbon date object
+    protected $casts = [
+        'date' => 'date',
     ];
 
     // A devotion can have many comments

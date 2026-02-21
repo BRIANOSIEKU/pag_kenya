@@ -3,39 +3,28 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\News;
+use App\Models\Devotion;
+use App\Models\Department;
+use App\Models\ContactInfo; // ✅ Add this
 
 class HomeController extends Controller
 {
     public function index()
     {
-        $devotion = [
-            'title' => 'Daily Devotion Title',
-            'content' => 'Short excerpt of the daily devotion goes here...',
-            'image' => asset('images/devotion-placeholder.jpg'),
-            'date' => now()->format('F j, Y'),
-        ];
+        // --- Fetch latest 4 news items for homepage ---
+        $news = News::with('photos')->orderBy('created_at', 'desc')->take(4)->get();
 
-        $departments = [
-            [
-                'id' => 1,
-                'name' => 'Youth Ministry',
-                'overview' => 'Engaging young people in faith and community.',
-                'image' => asset('images/department-placeholder.jpg')
-            ],
-            [
-                'id' => 2,
-                'name' => 'Music Ministry',
-                'overview' => 'Leading worship through music and praise.',
-                'image' => asset('images/department-placeholder.jpg')
-            ],
-            [
-                'id' => 3,
-                'name' => 'Outreach',
-                'overview' => 'Serving the community with love.',
-                'image' => asset('images/department-placeholder.jpg')
-            ],
-        ];
+        // --- Fetch latest 4 devotions for Featured Devotions section ---
+        $devotions = Devotion::orderBy('date', 'desc')->take(4)->get();
 
+        // --- Fetch all departments (use leadership column directly) ---
+        $departments = Department::all();
+
+        // --- Fetch latest Contact Info for Contact Us section ---
+        $contactInfo = ContactInfo::latest()->first(); // ✅ Added
+
+        // --- Programs Section (static placeholder) ---
         $programs = [
             [
                 'title' => 'Sunday School',
@@ -54,27 +43,7 @@ class HomeController extends Controller
             ],
         ];
 
-        $news = [
-            [
-                'id' => 1,
-                'title' => 'Annual Conference',
-                'content' => 'Highlights from our annual conference.',
-                'image' => asset('images/news-placeholder.jpg')
-            ],
-            [
-                'id' => 2,
-                'title' => 'Mission Trip',
-                'content' => 'Our recent mission trip to the local community.',
-                'image' => asset('images/news-placeholder.jpg')
-            ],
-            [
-                'id' => 3,
-                'title' => 'Charity Drive',
-                'content' => 'Updates on our charity initiatives.',
-                'image' => asset('images/news-placeholder.jpg')
-            ],
-        ];
-
-        return view('pages.home', compact('devotion', 'departments', 'programs', 'news'));
+        // --- Pass all variables to the homepage view ---
+        return view('pages.home', compact('devotions', 'departments', 'programs', 'news', 'contactInfo'));
     }
 }

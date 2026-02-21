@@ -11,12 +11,26 @@ class Department extends Model
 
     protected $fillable = [
         'name',
+        'overview',
+        'leadership',
+        'activities',
         'description',
+        'photo', // column for department photo
     ];
 
-    // A department can have many leaders
-    public function leaders()
+    /**
+     * Relationship: Department has many documents
+     */
+    public function documents()
     {
-        return $this->hasMany(Leader::class);
+        return $this->hasMany(DepartmentDocument::class); // <-- existing
+    }
+
+    /**
+     * Relationship: Department has many achievements
+     */
+    public function achievements()
+    {
+        return $this->hasMany(DepartmentAchievement::class);
     }
 }
