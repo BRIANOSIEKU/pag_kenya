@@ -90,21 +90,18 @@
             </div>
         </div>
 
-  {{-- Chat With Us Widget --}}
-{{-- Chat With Us Widget --}}
+{{-- ================= AI CHAT WIDGET ================= --}}
 <div id="chat-widget">
     <div class="chat-header" onclick="toggleChat()">
-        <span>Chat With Us</span>
+        <span>Ask PAG Assistant</span>
         <span id="chat-toggle-icon">+</span>
     </div>
+
     <div class="chat-body" id="chat-body" style="display:none;">
-        <div id="chat-messages" class="chat-messages">
-            {{-- Messages will be loaded here dynamically --}}
-        </div>
+        <div id="chat-messages" class="chat-messages"></div>
+
         <form id="chat-form">
             @csrf
-            <input type="text" name="name" placeholder="Your Name" required>
-            <input type="email" name="email" placeholder="Your Email (optional)">
             <textarea name="message" placeholder="Type your message..." required></textarea>
             <button type="submit">Send</button>
         </form>
@@ -116,8 +113,8 @@
     position: fixed;
     bottom: 30px;
     right: 30px;
-    width: 320px;
-    max-width: 90%;
+    width: 340px;
+    max-width: 95%;
     font-family: 'Inter', sans-serif;
     z-index: 9999;
 }
@@ -125,50 +122,50 @@
     background-color: #0F3C78;
     color: #fff;
     padding: 12px;
-    border-radius: 8px 8px 0 0;
+    border-radius: 12px 12px 0 0;
     cursor: pointer;
     font-weight: bold;
     display: flex;
     justify-content: space-between;
-    align-items: center;
 }
 .chat-body {
     background: #fff;
     border: 1px solid #0F3C78;
-    border-radius: 0 0 8px 8px;
-    max-height: 400px;
+    border-radius: 0 0 12px 12px;
+    max-height: 420px;
     display: flex;
     flex-direction: column;
 }
 .chat-messages {
-    padding: 10px;
+    padding: 12px;
     flex: 1;
     overflow-y: auto;
 }
-.chat-messages .user-msg {
+.user-msg {
     background: #e0edf1;
-    padding: 6px 10px;
+    padding: 8px 12px;
     margin-bottom: 8px;
-    border-radius: 6px;
+    border-radius: 12px;
     font-size: 0.9rem;
 }
-.chat-messages .admin-reply {
+.ai-msg {
     background: #0F3C78;
     color: #fff;
-    padding: 6px 10px;
+    padding: 8px 12px;
     margin-bottom: 8px;
-    border-radius: 6px;
+    border-radius: 12px;
     font-size: 0.9rem;
 }
 #chat-form {
     display: flex;
-    flex-direction: column;
     padding: 10px;
     gap: 8px;
 }
-#chat-form input, #chat-form textarea {
+#chat-form textarea {
+    flex: 1;
+    resize: none;
     padding: 8px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 0.9rem;
 }
@@ -176,8 +173,8 @@
     background-color: #0F3C78;
     color: #fff;
     border: none;
-    padding: 8px;
-    border-radius: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
     cursor: pointer;
 }
 #chat-form button:hover {
@@ -186,67 +183,77 @@
 </style>
 
 <script>
-let chatInterval;
-
+// Toggle chat open/close
 function toggleChat() {
     const body = document.getElementById('chat-body');
     const icon = document.getElementById('chat-toggle-icon');
-
-    if(body.style.display === 'none') {
+    if(body.style.display === 'none'){
         body.style.display = 'flex';
         icon.textContent = '-';
-        fetchMessages();
-        chatInterval = setInterval(fetchMessages, 3000); // fetch every 3 seconds
     } else {
         body.style.display = 'none';
         icon.textContent = '+';
-        clearInterval(chatInterval);
     }
 }
 
-function fetchMessages() {
-    fetch('{{ route("chat.fetch") }}')
-        .then(res => res.json())
-        .then(data => {
-            const messagesDiv = document.getElementById('chat-messages');
-            messagesDiv.innerHTML = '';
-            data.forEach(msg => {
-                // Admin reply
-                if(msg.admin_reply) {
-                    messagesDiv.innerHTML += `<div class="admin-reply"><strong>Admin:</strong> ${msg.admin_reply}</div>`;
-                }
-                // User message
-                messagesDiv.innerHTML += `<div class="user-msg"><strong>${msg.name}:</strong> ${msg.message}</div>`;
-            });
-            messagesDiv.scrollTop = messagesDiv.scrollHeight; // scroll to bottom
-        })
-        .catch(err => console.error('Error fetching chat messages:', err));
+// DOM elements
+const chatForm = document.getElementById('chat-form');
+const chatMessages = document.getElementById('chat-messages');
+const messageInput = chatForm.querySelector('textarea');
+
+// Append messages
+function appendUserMessage(message){
+    const div = document.createElement('div');
+    div.className = 'user-msg';
+    div.innerHTML = `<strong>You:</strong> ${message}`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Send new message
-document.getElementById('chat-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const form = this;
-    const formData = new FormData(form);
+function appendBotMessage(message){
+    const div = document.createElement('div');
+    div.className = 'ai-msg';
+    div.innerHTML = `<strong>PAG Assistant:</strong> ${message}`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
-    fetch('{{ route("chat.send") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) {
-            form.reset();
-            fetchMessages(); // refresh immediately after sending
-        }
-    })
-    .catch(err => console.error('Error sending chat message:', err));
+chatForm.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const userMessage = messageInput.value.trim();
+    if(!userMessage) return;
+
+    appendUserMessage(userMessage);
+    messageInput.value = '';
+
+    // Typing placeholder
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'ai-msg';
+    typingDiv.innerHTML = `<strong>PAG Assistant:</strong> Typing...`;
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    try {
+        const res = await fetch('/ai-chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            },
+            body: JSON.stringify({ message: userMessage })
+        });
+
+        const data = await res.json();
+
+        // Replace typing placeholder with real response
+        typingDiv.innerHTML = `<strong>PAG Assistant:</strong> ${data.reply}`;
+
+    } catch(err){
+        typingDiv.innerHTML = `<strong>PAG Assistant:</strong> Sorry, something went wrong.`;
+        console.error(err);
+    }
 });
 </script>
-
         <!-- Google Map -->
         @if($contact->google_map_embed)
             <div class="map-container">

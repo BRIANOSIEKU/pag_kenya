@@ -27,7 +27,16 @@
     <div id="history" class="profile-card">
         <h2>Brief Church History</h2>
         <div class="gold-line"></div>
-        <p>{{ optional($profile)->history }}</p>
+
+        @php
+            $historyParagraphs = explode("\n", optional($profile)->history);
+        @endphp
+
+        @foreach($historyParagraphs as $paragraph)
+            @if(trim($paragraph) != '')
+                <p>{{ $paragraph }}</p>
+            @endif
+        @endforeach
     </div>
 
     <!-- Vision -->

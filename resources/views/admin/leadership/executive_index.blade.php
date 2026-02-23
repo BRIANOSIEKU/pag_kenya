@@ -9,7 +9,10 @@ $typeLabel = [
     'hq' => 'PAG Kenya HQ Staff'
 ][$type] ?? ucfirst($type);
 @endphp
-
+<!-- Back to Dashboard -->
+<a href="{{ route('admin.dashboard') }}" style="padding:8px 12px; background:#2196F3; color:#fff; border-radius:6px; text-decoration:none; margin-bottom:15px; display:inline-block;">
+    &larr; Back to Dashboard
+</a>
 <h2>{{ $typeLabel }}</h2>
 <a href="{{ route('admin.leadership.create', $type) }}" 
    style="background:#4CAF50; color:#fff; padding:8px 16px; border-radius:6px; text-decoration:none;">

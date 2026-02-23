@@ -5,7 +5,12 @@
 use App\Models\Department;
 $departments = Department::all();
 @endphp
+@php
+use App\Models\ContactInfo;
 
+// Fetch the first row (assuming you have only one contact info record)
+$contact = ContactInfo::first();
+@endphp
 <header id="mainHeader" class="header">
 
   <div class="header-inner">
@@ -26,10 +31,21 @@ $departments = Department::all();
       <button id="mobileMenuBtn" class="mobile-menu-btn"></button>
 
       <!-- Contact Info -->
-      <div class="contact-info">
-        <span><svg width="16" height="16" fill="none" stroke="white" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><polyline points="22,6 12,13 2,6"/></svg> info@pagkenya.org</span>
-        <span><svg width="16" height="16" fill="none" stroke="white" stroke-width="1.6" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.89.32 1.76.59 2.59a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.49-1.16a2 2 0 0 1 2.11-.45c.83.27 1.7.47 2.59.59A2 2 0 0 1 22 16.92z"/></svg> +254 700 000 000</span>
-      </div>
+<div class="contact-info">
+    <span>
+        <svg width="16" height="16" fill="none" stroke="white" stroke-width="1.6" viewBox="0 0 24 24">
+            <path d="M4 4h16v16H4z"/>
+            <polyline points="22,6 12,13 2,6"/>
+        </svg> 
+        {{ $contact->official_email ?? 'info@pagkenya.org' }}
+    </span>
+    <span>
+        <svg width="16" height="16" fill="none" stroke="white" stroke-width="1.6" viewBox="0 0 24 24">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.89.32 1.76.59 2.59a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.49-1.16a2 2 0 0 1 2.11-.45c.83.27 1.7.47 2.59.59A2 2 0 0 1 22 16.92z"/>
+        </svg> 
+        {{ $contact->customer_care_number ?? '+254 700 000 000' }}
+    </span>
+</div>
 
     </div>
 
@@ -43,10 +59,11 @@ $departments = Department::all();
       <div class="nav-dropdown"><a href="{{ route('church.profile') }}" class="nav-link">Church Profile</a></div>
 
       <div class="nav-dropdown">
-        <button type="button" class="nav-link dropdown-toggle-btn">Leadership <span class="arrow">▾</span></button>
+        <button type="button" class="nav-link dropdown-toggle-btn">Administrative Structure <span class="arrow">▾</span></button>
         <div class="dropdown-menu">
           <a href="{{ route('leadership.public', 'executive-committee') }}">Executive Committee</a>
           <a href="{{ route('leadership.public', 'church-council') }}">Church Council</a>
+          <a href="{{ route('church.overseers') }}">Church Overseers</a>
           <a href="{{ route('hq.staff.public') }}">PAG Kenya HQ Staff</a>
         </div>
       </div>

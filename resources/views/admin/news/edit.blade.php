@@ -3,7 +3,7 @@
 @section('content')
 <div style="max-width:800px; margin:auto;">
 
-    <h1>Edit News</h1>
+    <h1>Edit Church Overseer</h1>
 
     {{-- Flash Message --}}
     @if(session('success'))
@@ -23,63 +23,85 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.news.update', $news->id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('admin.overseers.update', $overseer->id) }}" 
+          method="POST" 
+          enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
-        {{-- Title --}}
+        {{-- Full Name --}}
         <div style="margin-bottom:10px;">
-            <label for="title"><strong>Title:</strong></label><br>
-            <input type="text" id="title" name="title" 
-                   value="{{ old('title', $news->title) }}" 
-                   required style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+            <label for="name"><strong>Full Name *</strong></label><br>
+            <input type="text" id="name" name="name"
+                   value="{{ old('name', $overseer->name) }}"
+                   required
+                   style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
         </div>
 
-        {{-- Content --}}
+        {{-- District --}}
         <div style="margin-bottom:10px;">
-            <label for="content"><strong>Content:</strong></label><br>
-            <textarea id="content" name="content" rows="6" required
-                style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">{{ old('content', $news->content) }}</textarea>
+            <label for="district_name"><strong>District Name *</strong></label><br>
+            <input type="text" id="district_name" name="district_name"
+                   value="{{ old('district_name', $overseer->district_name) }}"
+                   required
+                   style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
         </div>
 
-        {{-- Upload New Images --}}
+        {{-- Email --}}
+        <div style="margin-bottom:10px;">
+            <label for="email"><strong>Email Address</strong></label><br>
+            <input type="email" id="email" name="email"
+                   value="{{ old('email', $overseer->email) }}"
+                   style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+        </div>
+
+        {{-- Phone --}}
+        <div style="margin-bottom:10px;">
+            <label for="phone"><strong>Phone Number</strong></label><br>
+            <input type="text" id="phone" name="phone"
+                   value="{{ old('phone', $overseer->phone) }}"
+                   style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+        </div>
+
+        {{-- Gender --}}
+        <div style="margin-bottom:10px;">
+            <label for="gender"><strong>Gender</strong></label><br>
+            <select id="gender" name="gender" 
+                    style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+                <option value="">Select Gender</option>
+                <option value="Male" {{ old('gender', $overseer->gender) == 'Male' ? 'selected' : '' }}>Male</option>
+                <option value="Female" {{ old('gender', $overseer->gender) == 'Female' ? 'selected' : '' }}>Female</option>
+            </select>
+        </div>
+
+        {{-- Photo --}}
         <div style="margin-bottom:15px;">
-            <label for="images"><strong>Upload New Images:</strong></label><br>
-            <input type="file" name="images[]" id="images" multiple accept="image/*">
-            <p style="font-size:0.9em; color:#555;">You can select multiple images. Existing images are displayed below.</p>
+            <label for="photo"><strong>Photo</strong></label><br>
+
+            @if($overseer->photo)
+                <div style="margin-bottom:10px;">
+                    <img src="{{ asset('storage/'.$overseer->photo) }}" 
+                         alt="Overseer Photo" 
+                         width="120" 
+                         style="border:1px solid #ccc; padding:3px; border-radius:4px; display:block;">
+                </div>
+            @endif
+
+            <input type="file" name="photo" id="photo">
+            <p style="font-size:0.9em; color:#555;">Leave blank if you don’t want to change the photo.</p>
         </div>
 
-        {{-- Existing Images --}}
-        @if($news->photos->count() > 0)
-            <div style="margin-bottom:15px;">
-                <h4>Existing Images:</h4>
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    @foreach($news->photos as $photo)
-                        <div style="position:relative; display:inline-block;">
-                            <img src="{{ asset('uploads/news/'.$photo->image) }}" 
-                                 alt="News Image" 
-                                 width="120" 
-                                 style="border:1px solid #ccc; padding:3px; border-radius:4px; display:block;">
-
-                            {{-- Delete Photo Button --}}
-                            <form action="{{ route('admin.news.photo.destroy', $photo->id) }}" method="POST" 
-                                  style="position:absolute; top:0; right:0;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" 
-                                        style="background:red; color:white; border:none; border-radius:50%; width:22px; height:22px; cursor:pointer; font-weight:bold;">×</button>
-                            </form>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
-        {{-- Submit Button --}}
-        <button type="submit" 
-                style="padding:10px 20px; background:#007BFF; color:white; border:none; border-radius:4px; cursor:pointer;">
-            Update News
-        </button>
+        {{-- Form Actions --}}
+        <div style="display:flex; justify-content:space-between; margin-top:20px;">
+            <a href="{{ route('admin.overseers.index') }}" 
+               style="padding:10px 20px; background:#6c757d; color:white; border-radius:4px; text-decoration:none;">
+               Cancel
+            </a>
+            <button type="submit" 
+                    style="padding:10px 20px; background:#007BFF; color:white; border:none; border-radius:4px; cursor:pointer;">
+                Update Overseer
+            </button>
+        </div>
 
     </form>
 </div>

@@ -22,8 +22,31 @@ use App\Http\Controllers\Admin\AdminCommentController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Admin\AdminChatController;
 use App\Http\Controllers\Admin\LiveStreamController;
+use App\Http\Controllers\Admin\AdminAnnouncementController;
+use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\Admin\HeroSlideController;
+use App\Http\Controllers\Admin\HeroController;
+use App\Http\Controllers\Admin\OverseerController;
+use App\Http\Controllers\PublicOverseerController;
+use App\Http\Controllers\AIChatController;
+use App\Http\Controllers\Admin\PastoralTeamController;
+use App\Http\Controllers\PublicPastoralTeamController;
+
 
 // -------------------- PUBLIC ROUTES --------------------
+
+//PUBLIC ROUTE FOR OVERSEERS
+Route::get('/church-overseers', [PublicOverseerController::class, 'index'])
+     ->name('church.overseers');
+     Route::prefix('pastoral-teams')->name('public.pastoral-teams.')->group(function () {
+    Route::get('/district/{district}', [PublicPastoralTeamController::class, 'byDistrict'])
+         ->name('by-district');
+});
+
+// --- Announcements Section ---
+Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+Route::get('/announcements/{announcement}', [AnnouncementController::class, 'show'])->name('announcements.show');
+//public livestream
 // Floating / public chat
 Route::prefix('chat')->name('chat.')->group(function () {
     Route::get('/fetch', [ChatController::class, 'fetch'])->name('fetch'); // fetch messages
@@ -65,20 +88,39 @@ Route::get('/contact', [PublicContactController::class, 'index'])->name('contact
 Route::get('login/google', [GoogleController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('login/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
+//AI CHATBOX
+Route::post('/ai-chat', [AIChatController::class, 'chat']);
 // -------------------- ADMIN ROUTES --------------------
 Route::prefix('admin')->name('admin.')->group(function () {
 
-    // ---------------- Login & Logout ----------------
+    // Login & logout
     Route::get('/login', [AdminController::class, 'showLogin'])->name('login');
     Route::post('/login', [AdminController::class, 'login'])->name('login.post');
-    Route::post('/logout', [AdminController::class, 'logout'])->name('logout'); // POST-only logout
+    Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
 
-    // ---------------- Protected Admin Routes ----------------
+    // Protected admin routes
     Route::middleware(['auth', 'is_admin'])->group(function () {
 
-        // Dashboard
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        // Dashboard route
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard'); 
+      
+     // ---------------- Hero Theme & Scripture ----------------
+    Route::get('hero', [HeroController::class, 'index'])->name('hero.index');
+    Route::get('hero/create', [HeroController::class, 'create'])->name('hero.create');
+    Route::post('hero', [HeroController::class, 'store'])->name('hero.store');
+    Route::get('hero/{id}/edit', [HeroController::class, 'edit'])->name('hero.edit');
+    Route::put('hero/{id}', [HeroController::class, 'update'])->name('hero.update');
 
+    // ---------------- Hero Slides ----------------
+    Route::get('hero-slides/create', [HeroSlideController::class, 'create'])->name('hero-slides.create');
+    Route::post('hero-slides', [HeroSlideController::class, 'store'])->name('hero-slides.store');
+    Route::get('hero-slides/{id}/edit', [HeroSlideController::class, 'edit'])->name('hero-slides.edit');
+    Route::put('hero-slides/{id}', [HeroSlideController::class, 'update'])->name('hero-slides.update');
+    Route::delete('hero-slides/{id}', [HeroSlideController::class, 'destroy'])->name('hero-slides.destroy');
+
+    // ... other admin routes ...
+
+        
         // ... other admin routes ...
     });
 
@@ -216,5 +258,70 @@ Route::prefix('comments')->name('comments.')->group(function () {
         // optional show route (details page)
         Route::get('/{livestream}', [LiveStreamController::class, 'show'])->name('show');
     });
+
+    // Announcements CRUD like devotions
+    Route::prefix('announcements')->name('announcements.')->group(function () {
+        Route::get('/', [AdminAnnouncementController::class, 'index'])->name('index');
+        Route::get('/create', [AdminAnnouncementController::class, 'create'])->name('create');
+        Route::post('/', [AdminAnnouncementController::class, 'store'])->name('store');
+        Route::get('/{announcement}', [AdminAnnouncementController::class, 'show'])->name('show');
+        Route::get('/{announcement}/edit', [AdminAnnouncementController::class, 'edit'])->name('edit');
+        Route::put('/{announcement}', [AdminAnnouncementController::class, 'update'])->name('update');
+        Route::delete('/{announcement}', [AdminAnnouncementController::class, 'destroy'])->name('destroy');
+    });
+
+// Overseers CRUD like Announcements
+Route::prefix('overseers')->name('overseers.')->group(function () {
+    Route::get('/', [OverseerController::class, 'index'])->name('index');
+    Route::get('/create', [OverseerController::class, 'create'])->name('create');
+    Route::post('/', [OverseerController::class, 'store'])->name('store');
+    Route::get('/{overseer}', [OverseerController::class, 'show'])->name('show');
+    Route::get('/{overseer}/edit', [OverseerController::class, 'edit'])->name('edit');
+    Route::put('/{overseer}', [OverseerController::class, 'update'])->name('update');
+    Route::delete('/{overseer}', [OverseerController::class, 'destroy'])->name('destroy');
+
 });
+
+// Super admin:
+Route::prefix('admins')->middleware(['auth', 'super_admin'])->name('admins.')->group(function () {
+
+    // List admins
+    Route::get('/', [AdminController::class, 'listAdmins'])->name('list');
+
+    // Create admin
+    Route::get('/create', [AdminController::class, 'createAdmin'])->name('create');
+    Route::post('/', [AdminController::class, 'storeAdmin'])->name('store');
+
+    // Show form to reset a regular admin's password
+    Route::get('{admin}/reset-password', [AdminController::class, 'showResetPasswordForm'])->name('reset_password.form');
+
+    // Submit new password for a regular admin
+    Route::post('{admin}/reset-password', [AdminController::class, 'updateAdminPassword'])->name('reset_password.update');
+
+    // Reset super admin's own password (show form + submit)
+    Route::get('/reset-my-password', [AdminController::class, 'showResetMyPasswordForm'])->name('reset_my_password.form');
+    Route::post('/reset-my-password', [AdminController::class, 'resetMyPassword'])->name('reset_my_password.submit');
+});
+
+// APastoral Team CRUD
+Route::prefix('pastoral-teams')->name('pastoral-teams.')->group(function () {
+
+    Route::get('/', [PastoralTeamController::class, 'index'])->name('index');
+
+    Route::get('/create', [PastoralTeamController::class, 'create'])->name('create');
+
+    Route::post('/', [PastoralTeamController::class, 'store'])->name('store');
+
+    Route::get('/{pastoral_team}', [PastoralTeamController::class, 'show'])->name('show');
+
+    Route::get('/{pastoral_team}/edit', [PastoralTeamController::class, 'edit'])->name('edit');
+
+    Route::put('/{pastoral_team}', [PastoralTeamController::class, 'update'])->name('update');
+
+    Route::delete('/{pastoral_team}', [PastoralTeamController::class, 'destroy'])->name('destroy');
+
+});
+
+});
+
 

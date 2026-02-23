@@ -3,7 +3,10 @@
 @section('title', 'Church Profile')
 
 @section('content')
-
+<!-- Back to Dashboard -->
+<a href="{{ route('admin.dashboard') }}" style="padding:8px 12px; background:#2196F3; color:#fff; border-radius:6px; text-decoration:none; margin-bottom:15px; display:inline-block;">
+    &larr; Back to Dashboard
+</a>
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h1>Church Profile Overview</h1>
     <a href="{{ route('admin.church-profile.edit') }}" class="btn btn-primary">

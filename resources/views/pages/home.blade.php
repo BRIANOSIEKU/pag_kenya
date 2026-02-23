@@ -30,7 +30,7 @@ body {
     justify-content: center;
     align-items: center;
     text-align: center;
-    background-image: url('{{ asset("images/background.png") }}');
+    background-image:;
     background-size: cover;
     background-position: center;
     position: relative;
@@ -39,13 +39,7 @@ body {
     padding: 40px 20px;
     min-height: 70vh; /* desktop visibility */
 }
-.hero::after {
-    content: '';
-    position: absolute;
-    top:0; left:0; width:100%; height:100%;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 0;
-}
+
 .hero-content {
     position: relative;
     z-index: 1;
@@ -261,18 +255,614 @@ body {
 </style>
 
 <!-- Hero Section -->
+<!-- ================= HERO SECTION ================= -->
 <section class="hero">
-    <div class="hero-ticker" id="hero-ticker">
-        <span>Theme of the Year: MOUNTING UP!</span>
-        <span>Scripture of the Year: Isaiah 40:31</span>
+
+    <!-- Slider Wrapper -->
+    <div class="hero-slider-wrapper">
+        <div class="hero-slider" id="hero-slider">
+            @foreach($heroSlides as $slide)
+                <div class="slide" style="background-image: url('{{ asset('storage/' . $slide->image) }}');">
+                    <div class="overlay"></div>
+
+                    <!-- Hero Content -->
+                    <div class="hero-content">
+
+                        <!-- Desktop Ticker -->
+                        <div class="hero-ticker desktop-ticker">
+                            <span>
+                                Theme of the Year: {{ $homeSetting->theme ?? 'MOUNTING UP!' }}
+                            </span>
+                            <span>
+                                Scripture of the Year: {{ $homeSetting->scripture ?? 'ISAIAH 40:31' }}
+                            </span>
+                        </div>
+
+                        <!-- Slide Title -->
+                        <h1 class="slide-title">{{ $homeSetting->hero_heading ?? 'WELCOME TO PAG - K' }}</h1>
+
+                        <!-- Slide Caption -->
+                        <p class="slide-caption">{{ $homeSetting->hero_subtext ?? 'The Home of Pentecostalism' }}</p>
+
+                        <!-- Scroll Down Indicator -->
+                        <div class="scroll-down">&#x25BC;</div>
+
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- Navigation Arrows -->
+        <button class="slider-arrow prev" id="prev-slide">&#10094;</button>
+        <button class="slider-arrow next" id="next-slide">&#10095;</button>
+
+        <!-- Slide Indicators (Dots) -->
+        <div class="slider-dots" id="slider-dots">
+            @foreach($heroSlides as $slide)
+                <span class="dot @if($loop->first) active @endif"></span>
+            @endforeach
+        </div>
     </div>
 
-    <div class="hero-content">
-        <h1 id="hero-heading">WELCOME TO PAG - K</h1>
-        <p>The Home of Pentecostalism</p>
-        <div class="scroll-down">&#x25BC;</div>
+    <!-- Mobile Ticker (Static, below slider) -->
+    <div class="hero-ticker mobile-ticker">
+        <span>Theme of the Year: {{ $homeSetting->theme ?? 'MOUNTING UP!' }}</span>
+        <span>Scripture of the Year: {{ $homeSetting->scripture ?? 'ISAIAH 40:31' }}</span>
+    </div>
+
+</section>
+
+<style>
+/* --- Hero Slider --- */
+.hero-slider-wrapper {
+    width: 100%;
+    height: 90vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.hero-slider {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.7s ease-in-out;
+}
+
+.hero-slider .slide {
+    min-width: 100%;
+    height: 100%;
+    position: relative;
+    background-size: cover;
+    background-position: center 35%;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+
+.hero-slider .slide .overlay {
+    position: absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.75) 0%,
+        rgba(0,0,0,0.45) 40%,
+        rgba(0,0,0,0.6) 100%
+    );
+    z-index: 0;
+}
+
+.hero-slider .slide .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    text-align: center;
+    margin: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    padding: 0 20px;
+}
+
+/* Fade-in animation for text */
+.slide-title {
+    font-size: 3rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInText 1s forwards;
+}
+
+.slide-caption {
+    font-size: 1.2rem;
+    margin-top: 10px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInText 1s forwards;
+    animation-delay: 0.5s;
+}
+
+@keyframes fadeInText {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Arrows */
+.slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.4);
+    border: none;
+    color: #fff;
+    font-size: 2rem;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index: 5;
+    transition: background 0.3s;
+}
+.slider-arrow:hover { background: rgba(0,0,0,0.7); }
+.slider-arrow.prev { left: 20px; }
+.slider-arrow.next { right: 20px; }
+
+/* Dots */
+.slider-dots {
+    position: absolute;
+    bottom: 15px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    z-index: 5;
+}
+
+.slider-dots .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(2, 60, 114, 0.5);
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.slider-dots .dot.active { background: #FFD700; }
+
+/* ===== Ticker Style ===== */
+.hero-ticker {
+    width: 90%;
+    max-width: 900px;
+    margin: 15px auto;
+    border-radius: 50px;
+    background: linear-gradient(90deg, #075b8b, #8B4513);
+    box-shadow: 0 5px 20px rgba(4, 80, 116, 0.3);
+    padding: 8px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #FFD700;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+/* Static ticker spans (no scroll) */
+.hero-ticker span {
+    display: inline-block;
+    padding: 0 15px;
+}
+
+/* Desktop ticker spacing */
+.desktop-ticker { margin-bottom: 25px; }
+
+/* Hide mobile ticker on desktop */
+.mobile-ticker { display: none; }
+
+/* ===== Desktop View ===== */
+@media (min-width: 1025px) {
+    .desktop-ticker { display: block; }
+    .mobile-ticker { display: none; }
+}
+
+/* ===== Mobile View ===== */
+@media (max-width: 1024px) {
+    .desktop-ticker { display: none; }
+    .mobile-ticker { display: block; }
+
+    .hero-slider-wrapper { height: 75vw; width:110%; }
+
+    .slide-title { font-size: 2rem; }
+    .slide-caption { font-size: 1rem; }
+
+    /* Keep hero content centered */
+    .hero-slider .slide .hero-content {
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* Add spacing below slider for mobile ticker */
+    .mobile-ticker { margin-top: 15px; }
+}
+</style>
+
+<script>
+// ================== Hero Slider JS ==================
+const slides = document.querySelectorAll('#hero-slider .slide');
+const prevBtn = document.getElementById('prev-slide');
+const nextBtn = document.getElementById('next-slide');
+const dots = document.querySelectorAll('#slider-dots .dot');
+
+let currentIndex = 0;
+let slideInterval = setInterval(nextSlide, 5000);
+
+function showSlide(index) {
+    const slider = document.getElementById('hero-slider');
+
+    if(index >= slides.length) index = 0;
+    if(index < 0) index = slides.length - 1;
+
+    slider.style.transform = `translateX(-${index * 100}%)`;
+    currentIndex = index;
+    updateDots();
+}
+
+function nextSlide() { showSlide(currentIndex + 1); }
+function prevSlide() { showSlide(currentIndex - 1); }
+
+function updateDots() {
+    dots.forEach(dot => dot.classList.remove('active'));
+    dots[currentIndex].classList.add('active');
+}
+
+nextBtn.addEventListener('click', () => { nextSlide(); resetInterval(); });
+prevBtn.addEventListener('click', () => { prevSlide(); resetInterval(); });
+
+dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+        showSlide(i);
+        resetInterval();
+    });
+});
+
+function resetInterval() {
+    clearInterval(slideInterval);
+    slideInterval = setInterval(nextSlide, 5000);
+}
+
+showSlide(0);
+</script>
+<!-- Latest Announcements Section -->
+<section class="section">
+    <h2>Latest Announcements</h2>
+
+    @if($announcements->isEmpty())
+        <p>No announcements available at the moment. Check back later!</p>
+    @else
+        <div class="news-grid">
+            @foreach($announcements as $announcement)
+                <a href="{{ route('announcements.show', $announcement->id) }}" style="text-decoration:none; color:inherit;">
+                    <div class="card">
+                        @if($announcement->photo_path)
+                            <img src="{{ asset('storage/announcements/photos/' . $announcement->photo_path) }}" 
+                                 alt="{{ $announcement->title }}"
+                                 style="height: 180px; object-fit: cover; object-position: top; width: 100%;">
+                        @else
+                            <img src="{{ asset('images/announcement-placeholder.jpg') }}" 
+                                 alt="No Image"
+                                 style="height: 180px; object-fit: cover; object-position: top; width: 100%;">
+                        @endif
+                        <div class="p-4">
+                            <h3 style="margin-bottom: 8px;">{{ $announcement->title }}</h3>
+                            <p style="margin-bottom: 8px;"><em>Click below to read announcement</em></p>
+                            <small>{{ $announcement->created_at->format('F j, Y') }}</small>
+                        </div>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+
+        <div style="margin-top:30px; text-align:center;">
+            <a href="{{ route('announcements.index') }}" 
+               style="padding:10px 20px; background: var(--main-blue); color:#fff; border-radius:6px; text-decoration:none;">
+                More Announcements
+            </a>
+        </div>
+    @endif
+</section>
+
+<!-- Responsive Styles -->
+<style>
+.news-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    justify-items: center;
+}
+
+@media (min-width: 480px) {
+    .news-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 768px) {
+    .news-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1024px) {
+    .news-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.card {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.card img {
+    border-bottom: 1px solid #ddd;
+    display: block;
+}
+</style>
+{{-- ================= PREMIUM LIVE STREAM SECTION ================= --}}
+@if($liveStream)
+
+@php
+    $videoId = null;
+
+    if($liveStream->type === 'youtube') {
+        if(str_contains($liveStream->url, 'watch?v=')) {
+            $videoId = explode('watch?v=', $liveStream->url)[1];
+        } elseif(str_contains($liveStream->url, 'youtu.be/')) {
+            $videoId = explode('youtu.be/', $liveStream->url)[1];
+        }
+    }
+@endphp
+
+<section id="live-section" class="live-section">
+
+    <div class="live-container">
+
+        <div class="live-header">
+            <span class="live-dot"></span>
+            <h2>We Are Live Now</h2>
+        </div>
+
+        <div class="live-card">
+
+            @if($liveStream->logo)
+                <img src="{{ asset('storage/' . $liveStream->logo) }}"
+                     class="live-logo"
+                     alt="{{ $liveStream->title }}">
+            @endif
+
+            <h3>{{ $liveStream->title }}</h3>
+
+            @if($liveStream->description)
+                <p class="live-description">
+                    {{ $liveStream->description }}
+                </p>
+            @endif
+
+            {{-- Viewer Counter (YouTube only) --}}
+            @if($liveStream->type === 'youtube' && $videoId)
+                <p id="viewer-count" class="viewer-count">
+                    Checking live viewers...
+                </p>
+            @endif
+
+            <div class="live-player">
+
+                {{-- YouTube --}}
+                @if($liveStream->type === 'youtube' && $videoId)
+                    <iframe width="100%" height="450"
+                        src="https://www.youtube.com/embed/{{ $videoId }}"
+                        frameborder="0"
+                        allow="autoplay; encrypted-media"
+                        allowfullscreen>
+                    </iframe>
+
+                {{-- Facebook --}}
+                @elseif($liveStream->type === 'facebook')
+                    <iframe
+                        src="https://www.facebook.com/plugins/video.php?href={{ urlencode($liveStream->url) }}"
+                        width="100%" height="450"
+                        style="border:none;overflow:hidden"
+                        scrolling="no"
+                        frameborder="0"
+                        allowfullscreen>
+                    </iframe>
+
+                {{-- Radio --}}
+                @elseif($liveStream->type === 'radio')
+                    <audio controls  style="width:100%;">
+                        <source src="{{ $liveStream->url }}">
+                        Your browser does not support the audio element.
+                    </audio>
+
+                {{-- Fallback --}}
+                @else
+                    <a href="{{ $liveStream->url }}" target="_blank" class="live-btn">
+                        Watch Live
+                    </a>
+                @endif
+
+            </div>
+
+        </div>
     </div>
 </section>
+
+{{-- Floating LIVE Button --}}
+<a href="#live-section" class="floating-live-btn">
+    <span class="pulse-dot"></span>
+    LIVE
+</a>
+
+{{-- ================= STYLES ================= --}}
+<style>
+
+.live-section {
+    background: linear-gradient(135deg, #ffffff, #ffffff);
+    padding: 80px 20px;
+    text-align: center;
+    color: #010369;
+}
+
+.live-container {
+    max-width: 1000px;
+    margin: auto;
+}
+
+.live-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.live-dot {
+    width: 14px;
+    height: 14px;
+    background: red;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,0,0,0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(255,0,0,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,0,0,0); }
+}
+
+.live-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.4);
+}
+
+.live-logo {
+    width: 120px;
+    margin-bottom: 15px;
+    border-radius: 12px;
+}
+
+.live-card h3 {
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+}
+
+.live-description {
+    color: #032a4e;
+    margin-bottom: 15px;
+}
+
+.viewer-count {
+    color: #FFD700;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.live-player iframe,
+.live-player audio {
+    border-radius: 12px;
+}
+
+.live-btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background: #FFD700;
+    color: black;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+/* Floating Button */
+.floating-live-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 30px;
+    background: red;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    z-index: 999;
+    animation: floatGlow 2s infinite;
+}
+
+.pulse-dot {
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+}
+
+@keyframes floatGlow {
+    0% { box-shadow: 0 0 0 0 rgba(255,0,0,0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(255,0,0,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,0,0,0); }
+}
+
+@media (max-width: 768px) {
+    .live-player iframe {
+        height: 300px;
+    }
+}
+
+</style>
+
+{{-- ================= SCRIPTS ================= --}}
+<script>
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    // Auto-scroll
+
+
+    @if($liveStream->type === 'youtube' && $videoId)
+        // YouTube Viewer Counter
+        async function fetchViewerCount() {
+            const apiKey = "{{ config('services.youtube.key') }}";
+            const videoId = "{{ $videoId }}";
+
+            try {
+                const response = await fetch(
+                    `https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${videoId}&key=${apiKey}`
+                );
+
+                const data = await response.json();
+
+                if(data.items.length > 0) {
+                    const viewers = data.items[0].liveStreamingDetails?.concurrentViewers;
+                    document.getElementById("viewer-count").innerText =
+                        viewers ? viewers + " people watching live" : "Live Now";
+                }
+            } catch (error) {
+                console.log("Viewer count error", error);
+            }
+        }
+
+        fetchViewerCount();
+        setInterval(fetchViewerCount, 30000);
+    @endif
+
+});
+
+</script>
+
+@endif
+{{-- ================= END LIVE STREAM SECTION ================= --}}
 
 <!-- News Section -->
 <section class="section">
@@ -304,27 +894,36 @@ body {
 </section>
 
 <!-- Key Departments -->
-<section class="section" id="departments" style="background:#f9f9f9;">
-    <h2>Key Church Departments</h2>
+<!-- Key Departments -->
+<section class="section" id="departments" style="background:#f9f9f9; padding:40px 20px;">
+    <h2 style="text-align:center; margin-bottom:30px;">Key Church Departments</h2>
 
     @if($departments->isEmpty())
-        <p>No departments available at the moment.</p>
+        <p style="text-align:center;">No departments available at the moment.</p>
     @else
-        <div class="department-grid">
+        <div class="department-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px;">
             @foreach($departments as $department)
-                <div class="department-card">
+                <div class="department-card" style="background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1); transition: transform 0.2s;">
+                    
                     @if($department->photo)
-                        <img src="{{ asset('storage/departments_photos/' . $department->photo) }}" alt="{{ $department->name }}">
+                        <div style="padding:10px; background:#f5f5f5; display:flex; justify-content:center; align-items:center;">
+                            <img src="{{ asset('storage/departments_photos/' . $department->photo) }}" 
+                                 alt="{{ $department->name }}" 
+                                 style="width:100%; max-height:200px; object-fit:contain; border-radius:16px; border:3px solid #e0e0e0; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                        </div>
                     @else
-                        <div style="width:100%; height:180px; background:#ccc; display:flex; align-items:center; justify-content:center; color:#555;">No Image</div>
+                        <div style="width:100%; height:180px; background:#ccc; display:flex; align-items:center; justify-content:center; color:#555; border-radius:16px; border:3px solid #e0e0e0;">
+                            No Image
+                        </div>
                     @endif
-                    <div style="padding:10px;">
-                        <h3>{{ $department->name }}</h3>
+
+                    <div style="padding:12px;">
+                        <h3 style="margin:5px 0;">{{ $department->name }}</h3>
                         @if($department->leadership)
-                            <p><strong>Leadership:</strong> {{ $department->leadership }}</p>
+                            <p style="margin:3px 0; font-size:0.95rem;"><strong>Leadership:</strong> {{ $department->leadership }}</p>
                         @endif
                         @if($department->description)
-                            <p>{{ \Illuminate\Support\Str::limit($department->description,120) }}</p>
+                            <p style="margin:5px 0; font-size:0.9rem;">{{ \Illuminate\Support\Str::limit($department->description,120) }}</p>
                         @endif
                     </div>
                 </div>
@@ -332,8 +931,6 @@ body {
         </div>
     @endif
 </section>
-
-<!-- Contact Us Section -->
 <!-- Contact Us Section -->
 @if($contactInfo)
 <section class="section" id="contact" style="background:#fff;">

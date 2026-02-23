@@ -9,7 +9,10 @@
             {{ session('success') }}
         </div>
     @endif
-
+<!-- Back to Dashboard -->
+<a href="{{ route('admin.dashboard') }}" style="padding:8px 12px; background:#2196F3; color:#fff; border-radius:6px; text-decoration:none; margin-bottom:15px; display:inline-block;">
+    &larr; Back to Dashboard
+</a>
     <a href="{{ route('admin.leadership.create', 'hq') }}" 
        style="display:inline-block; margin-bottom:15px; background-color:#FF9800; color:#fff; padding:10px 20px; border-radius:5px; text-decoration:none;">
        Add New HQ Staff

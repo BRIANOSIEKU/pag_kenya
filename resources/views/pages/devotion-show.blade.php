@@ -58,7 +58,7 @@
             @else
                 <p>
                     <a href="{{ route('login.google') }}" style="color:#2196F3; text-decoration:underline;">
-                        Login with Google
+                        CLICK HERE
                     </a> to post a comment.
                 </p>
             @endauth
