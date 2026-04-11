@@ -91,22 +91,22 @@ body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-c
 
 <!-- ================= SIDEBAR ================= -->
 <div class="sidebar mobile-hidden" id="sidebar">
-    <h2>PAG KENYA Admin</h2>
+    <h2>PAG - K ADMIN</h2>
     <ul>
-        <li><a href="{{ route('admin.dashboard') }}" onclick="closeMobileMenu()">🏠 Dashboard</a></li>
-        <li><a href="{{ route('admin.church-profile.index') }}" onclick="closeMobileMenu()">⛪ Church Profile</a></li>
-        <li><a href="{{ route('admin.leadership.index', ['type'=>'executive']) }}" onclick="closeMobileMenu()">👥 Leadership</a></li>
-        <li><a href="{{ route('admin.departments.index') }}" onclick="closeMobileMenu()">📂 Departments</a></li>
-        <li><a href="{{ route('admin.news.index') }}" onclick="closeMobileMenu()">📰 News & Updates</a></li>
-        <li><a href="{{ route('admin.devotions.index') }}" onclick="closeMobileMenu()">📖 Daily Devotions</a></li>
-        <li><a href="{{ route('admin.livestreams.index') }}" onclick="closeMobileMenu()">📺 Live Streaming</a></li>
-        <li><a href="{{ route('admin.comments.index') }}" onclick="closeMobileMenu()">💬 Comments</a></li>
-        <li><a href="{{ route('admin.contact.index') }}" onclick="closeMobileMenu()">📩 Contact US</a></li>
-        <li><a href="{{ route('admin.donations.index') }}" onclick="closeMobileMenu()">💰 Donations</a></li>
-        <li><a href="{{ route('admin.projects.index') }}" onclick="closeMobileMenu()">📊 Projects</a></li>
-        <li><a href="{{ route('admin.partners.index') }}" onclick="closeMobileMenu()">🤝 Partners</a></li>
-        <li><a href="{{ route('admin.announcements.index') }}" onclick="closeMobileMenu()">📢 Announcements</a></li>
-        <li><a href="{{ route('admin.hero.index') }}" class="highlight" onclick="closeMobileMenu()">🖼 Hero Slides & Theme</a></li>
+        <li><a href="{{ route('admin.dashboard') }}" onclick="closeMobileMenu()">Dashboard</a></li>
+        <li><a href="{{ route('admin.church-profile.index') }}" onclick="closeMobileMenu()"> Church Profile</a></li>
+        <li><a href="{{ route('admin.leadership.index', ['type'=>'executive']) }}" onclick="closeMobileMenu()"> Leadership</a></li>
+        <li><a href="{{ route('admin.departments.index') }}" onclick="closeMobileMenu()"> Departments</a></li>
+        <li><a href="{{ route('admin.news.index') }}" onclick="closeMobileMenu()"> News & Updates</a></li>
+        <li><a href="{{ route('admin.devotions.index') }}" onclick="closeMobileMenu()"> Daily Devotions</a></li>
+        <li><a href="{{ route('admin.livestreams.index') }}" onclick="closeMobileMenu()"> Live Streaming</a></li>
+        <li><a href="{{ route('admin.comments.index') }}" onclick="closeMobileMenu()"> Comments</a></li>
+        <li><a href="{{ route('admin.contact.index') }}" onclick="closeMobileMenu()"> Contact US</a></li>
+        <li><a href="{{ route('admin.donations.index') }}" onclick="closeMobileMenu()"> Donations</a></li>
+        <li><a href="{{ route('admin.projects.index') }}" onclick="closeMobileMenu()"> Projects</a></li>
+        <li><a href="{{ route('admin.partners.index') }}" onclick="closeMobileMenu()"> Partners</a></li>
+        <li><a href="{{ route('admin.announcements.index') }}" onclick="closeMobileMenu()"> Announcements</a></li>
+        <li><a href="{{ route('admin.hero.index') }}" class="highlight" onclick="closeMobileMenu()"> Hero Slides & Theme</a></li>
 
         <li>
             <form action="{{ route('admin.logout') }}" method="POST">

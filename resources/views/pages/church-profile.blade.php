@@ -2,16 +2,11 @@
 
 @section('content')
 
-<!-- HERO SECTION -->
-<section class="profile-hero">
-    <div class="hero-content">
-        <h1>THE PAG (K) CHURCH PROFILE</h1>
-        <p>
-            {{ optional($profile)->motto ?? 'Empowering communities through faith and service' }}
-        </p>
-    </div>
-</section>
-
+<!-- MAIN HEADING -->
+<div class="main-heading">
+    <h1>The Church Profile</h1>
+    <div class="gold-line-center"></div>
+</div>
 
 <!-- MAIN CONTENT -->
 <section class="profile-container">
@@ -85,37 +80,30 @@
 
 <style>
 
-/* ================= HERO SECTION ================= */
-.profile-hero {
-    position: relative;
-    height: 350px;
-    background: linear-gradient(rgba(6, 95, 131, 0.9), rgba(5, 94, 121, 0.9)),
-                url('{{ asset('images/church-bg.jpg') }}');
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* ================= MAIN HEADING ================= */
+.main-heading {
     text-align: center;
-    color: #fff;
+    margin-top: 60px;
+    margin-bottom: 40px;
 }
 
-.hero-content h1 {
+.main-heading h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 3rem;
-    margin-bottom: 10px;
+    font-size: 2.8rem;
+    color: #0f3c78;
 }
 
-.hero-content p {
-    font-family: 'Inter', sans-serif;
-    font-size: 1.1rem;
-    color: #d4af37;
+.gold-line-center {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #d4af37, #b8860b);
+    margin: 15px auto 0;
 }
 
 /* ================= MAIN CONTAINER ================= */
 .profile-container {
     max-width: 1100px;
-    margin: 80px auto;
+    margin: 40px auto 80px;
     padding: 0 20px;
 }
 
@@ -193,7 +181,7 @@
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
-    .hero-content h1 {
+    .main-heading h1 {
         font-size: 2rem;
     }
 

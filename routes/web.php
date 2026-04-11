@@ -29,12 +29,28 @@ use App\Http\Controllers\Admin\HeroController;
 use App\Http\Controllers\Admin\OverseerController;
 use App\Http\Controllers\PublicOverseerController;
 use App\Http\Controllers\AIChatController;
-use App\Http\Controllers\Admin\PastoralTeamController;
 use App\Http\Controllers\PublicPastoralTeamController;
-
+use App\Http\Controllers\Admin\CommitteeController;
+use App\Http\Controllers\Admin\CommitteeReportController;
+use App\Http\Controllers\PublicCommitteeController;
+use App\Http\Controllers\Admin\DistrictController;
+use App\Http\Controllers\Admin\DistrictLeaderController;
+use App\Http\Controllers\Admin\DistrictAdminController;
+use App\Http\Controllers\Auth\DistrictAdminAuthController;
+use App\Http\Controllers\DistrictAdmin\DashboardController;
+use App\Http\Controllers\District\DistrictAssemblyController;
+use App\Http\Controllers\AssemblyLeaderController;
+use App\Http\Controllers\AssemblyMemberController;
+use App\Http\Controllers\DistrictAdmin\PastoralTeamController;
+use App\Http\Controllers\Admin\AssemblyApprovalController;
+use App\Http\Controllers\DistrictAdmin\TitheReportController;
 
 // -------------------- PUBLIC ROUTES --------------------
+//Public for Committees
+Route::get('/committees/{committee}', [PublicCommitteeController::class, 'show'])
+    ->name('public.committees.show');
 
+    
 //PUBLIC ROUTE FOR OVERSEERS
 Route::get('/church-overseers', [PublicOverseerController::class, 'index'])
      ->name('church.overseers');
@@ -90,6 +106,21 @@ Route::get('login/google/callback', [GoogleController::class, 'handleGoogleCallb
 
 //AI CHATBOX
 Route::post('/ai-chat', [AIChatController::class, 'chat']);
+
+//========District Admin Authentication Routes======
+// Show login page
+Route::get('/district-admin/login', [DistrictAdminAuthController::class, 'showLoginForm'])
+    ->name('district.admin.login');
+
+// Process login
+Route::post('/district-admin/login', [DistrictAdminAuthController::class, 'login'])
+    ->name('district.admin.login.submit');
+
+// Logout
+Route::get('/district-admin/logout', [DistrictAdminAuthController::class, 'logout'])
+    ->name('district.admin.logout');
+
+//DISTRICT DASHBOARD
 // -------------------- ADMIN ROUTES --------------------
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -100,6 +131,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Protected admin routes
     Route::middleware(['auth', 'is_admin'])->group(function () {
+
+
+
+//DISTRICT DASHBOARD
+Route::get('/district-admin/dashboard', [DashboardController::class, 'index'])
+    ->name('district.admin.dashboard');
+
 
         // Dashboard route
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard'); 
@@ -123,6 +161,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         // ... other admin routes ...
     });
+
 
         // Church Profile CRUD
         Route::prefix('church-profile')->name('church-profile.')->group(function () {
@@ -224,6 +263,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/{donation}/edit', [DonationController::class, 'edit'])->name('edit');
             Route::put('/{donation}', [DonationController::class, 'update'])->name('update');
             Route::delete('/{donation}', [DonationController::class, 'destroy'])->name('destroy');
+            // STK Push endpoint
+Route::post('/giving/stk-push', [PublicDonationController::class, 'initiateStkPush'])
+    ->name('giving.stk-push');
+
+// M-Pesa callback endpoint (Daraja will call this)
+Route::post('/mpesa/callback', [PublicDonationController::class, 'mpesaCallback'])
+    ->name('mpesa.callback');
         });
 
         // Contact Info
@@ -343,4 +389,230 @@ Route::delete('/admin/departments/gallery/{image}', [DepartmentController::class
      ->name('admin.departments.deleteGallery');
 });
 
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])->group(function () {
 
+    Route::prefix('committees')->name('committees.')->group(function () {
+
+        // ---------------- Committees CRUD ----------------
+        Route::get('/', [CommitteeController::class, 'index'])->name('index');
+        Route::get('/create', [CommitteeController::class, 'create'])->name('create');
+        Route::post('/', [CommitteeController::class, 'store'])->name('store');
+        Route::get('/{committee}/edit', [CommitteeController::class, 'edit'])->name('edit');
+        Route::put('/{committee}', [CommitteeController::class, 'update'])->name('update');
+        Route::delete('/{committee}', [CommitteeController::class, 'destroy'])->name('destroy');
+
+        // ---------------- Committee Leadership ----------------
+        Route::prefix('{committee}/leadership')->name('leadership')->group(function () {
+            Route::get('/', [CommitteeController::class, 'leadership']);                // list all leaders
+            Route::get('/create', [CommitteeController::class, 'leadershipCreate'])->name('.create');  // add new leader
+            Route::post('/', [CommitteeController::class, 'storeLeadership'])->name('.store');         // store leader
+            Route::get('/{leader}/edit', [CommitteeController::class, 'editLeadership'])->name('.edit'); // edit leader
+            Route::put('/{leader}', [CommitteeController::class, 'updateLeadership'])->name('.update'); // update leader
+            Route::delete('/{leader}', [CommitteeController::class, 'destroyLeadership'])->name('.destroy'); // delete leader
+        });
+
+        // ---------------- Committee Members ----------------
+        Route::prefix('{committee}/members')->name('members.')->group(function () {
+            Route::get('/', [CommitteeController::class, 'members'])->name('index');      
+            Route::get('/create', [CommitteeController::class, 'createMember'])->name('create'); 
+            Route::post('/', [CommitteeController::class, 'addMember'])->name('store');        
+            Route::get('/{member}/edit', [CommitteeController::class, 'editMember'])->name('edit'); 
+            Route::put('/{member}', [CommitteeController::class, 'updateMember'])->name('update'); 
+            Route::delete('/{member}', [CommitteeController::class, 'removeMember'])->name('destroy'); 
+        });
+
+        // ---------------- Committee Duties ----------------
+        Route::get('{committee}/duties', [CommitteeController::class, 'duties'])->name('duties');
+
+        // ---------------- Committee Reports ----------------
+        Route::prefix('{committee}/reports')->name('reports.')->group(function () {
+            Route::get('/', [CommitteeReportController::class, 'index'])->name('index'); 
+            Route::get('/create', [CommitteeReportController::class, 'create'])->name('create'); 
+            Route::post('/', [CommitteeReportController::class, 'store'])->name('store'); 
+            Route::get('/{report}/edit', [CommitteeReportController::class, 'edit'])->name('edit'); 
+            Route::put('/{report}', [CommitteeReportController::class, 'update'])->name('update'); 
+            Route::delete('/{report}', [CommitteeReportController::class, 'destroy'])->name('destroy'); 
+        });
+
+    });
+ // ================= DISTRICTS =================
+       // EXPORT ROUTES (FIXED LOCATION)
+    Route::get('districts/export', [DistrictLeaderController::class, 'exportForm'])
+        ->name('districts.export.form');
+
+    Route::post('districts/export', [DistrictLeaderController::class, 'exportPdf'])
+        ->name('districts.export.pdf');
+ Route::prefix('districts')->name('districts.')->group(function () {
+        Route::get('/', [DistrictController::class, 'index'])->name('index');
+        Route::get('/create', [DistrictController::class, 'create'])->name('create');
+        Route::post('/', [DistrictController::class, 'store'])->name('store');
+
+        Route::get('/{district}/edit', [DistrictController::class, 'edit'])->name('edit');
+        Route::put('/{district}', [DistrictController::class, 'update'])->name('update');
+        Route::delete('/{district}', [DistrictController::class, 'destroy'])->name('destroy');
+
+        // DISTRICT LEADERSHIP
+        Route::get('/dashboard', [DistrictController::class, 'dashboard'])
+    ->name('dashboard');
+        Route::prefix('{district}/leadership')->name('leadership.')->group(function () {
+
+            Route::get('/', [DistrictLeaderController::class, 'index'])->name('index');
+            Route::get('/create', [DistrictLeaderController::class, 'create'])->name('create');
+            Route::post('/', [DistrictLeaderController::class, 'store'])->name('store');
+
+            Route::get('/{leader}/edit', [DistrictLeaderController::class, 'edit'])->name('edit');
+            Route::put('/{leader}', [DistrictLeaderController::class, 'update'])->name('update');
+            Route::delete('/{leader}', [DistrictLeaderController::class, 'destroy'])->name('destroy');
+
+            Route::get('/{leader}', [DistrictLeaderController::class, 'show'])->name('show');
+        });
+
+    });
+
+});
+//======DISTRICT ADMINS======
+Route::get('/admin/district-admins/secretaries/{districtId}', 
+    [DistrictAdminController::class, 'getSecretaries']
+)->name('admin.district_admins.secretaries');
+
+Route::get('/admin/district-admins/secretaries/{id}', [DistrictAdminController::class, 'getSecretaries']);
+Route::get('/admin/district-admins/check/{id}', [DistrictAdminController::class, 'check']);
+Route::resource('/admin/district-admins', DistrictAdminController::class);
+
+Route::prefix('admin/district-admins')->name('admin.district_admins.')->group(function () {
+    Route::get('/', [DistrictAdminController::class, 'index'])->name('index');
+    Route::get('/create', [DistrictAdminController::class, 'create'])->name('create');
+    Route::post('/store', [DistrictAdminController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [DistrictAdminController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [DistrictAdminController::class, 'update'])->name('update');
+    Route::delete('/{id}', [DistrictAdminController::class, 'destroy'])->name('destroy');
+    Route::post('/{id}/reset-password', [DistrictAdminController::class, 'reset.password'])->name('reset.password');
+});
+
+// ======= ASSEMBLY MANAGEMENT ROUTES ========
+Route::prefix('district-admin')
+    ->name('district.admin.')
+    ->middleware(['district_auth'])
+    ->group(function () {
+
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::prefix('assemblies')->name('assemblies.')->group(function () {
+
+            Route::get('/', [DistrictAssemblyController::class, 'index'])
+                ->name('index');
+
+            Route::get('/create', [DistrictAssemblyController::class, 'create'])
+                ->name('create');
+
+            Route::post('/', [DistrictAssemblyController::class, 'store'])
+                ->name('store');
+                            Route::delete('/{id}', [DistrictAssemblyController::class, 'destroy'])
+                ->name('destroy');
+        });
+});
+
+//=========ASSEMBLY LEADER ROUTES========
+Route::prefix('district/assemblies')->group(function () {
+
+    Route::get('{assembly}/leaders', [AssemblyLeaderController::class, 'index'])
+        ->name('district.assemblies.leaders.index');
+
+    Route::get('{assembly}/leaders/create', [AssemblyLeaderController::class, 'create'])
+        ->name('district.assemblies.leaders.create');
+
+    Route::post('{assembly}/leaders', [AssemblyLeaderController::class, 'store'])
+        ->name('district.assemblies.leaders.store');
+
+    Route::get('{assembly}/leaders/{leader}', [AssemblyLeaderController::class, 'show'])
+        ->name('district.assemblies.leaders.show');
+
+    Route::get('{assembly}/leaders/{leader}/edit', [AssemblyLeaderController::class, 'edit'])
+        ->name('district.assemblies.leaders.edit');
+
+    Route::put('{assembly}/leaders/{leader}', [AssemblyLeaderController::class, 'update'])
+        ->name('district.assemblies.leaders.update');
+
+    Route::delete('{assembly}/leaders/{leader}', [AssemblyLeaderController::class, 'destroy'])
+        ->name('district.assemblies.leaders.destroy');
+
+});
+
+
+//=======Assembly members=====
+Route::prefix('district/assemblies')->group(function () {
+
+    Route::get('{assembly}/members', [AssemblyMemberController::class, 'index'])
+        ->name('district.assemblies.members.index');
+
+    Route::get('{assembly}/members/create', [AssemblyMemberController::class, 'create'])
+        ->name('district.assemblies.members.create');
+
+    Route::post('{assembly}/members', [AssemblyMemberController::class, 'store'])
+        ->name('district.assemblies.members.store');
+
+    Route::get('{assembly}/members/{member}', [AssemblyMemberController::class, 'show'])
+        ->name('district.assemblies.members.show');
+
+    Route::get('{assembly}/members/{member}/edit', [AssemblyMemberController::class, 'edit'])
+        ->name('district.assemblies.members.edit');
+
+    Route::put('{assembly}/members/{member}', [AssemblyMemberController::class, 'update'])
+        ->name('district.assemblies.members.update');
+
+    Route::delete('{assembly}/members/{member}', [AssemblyMemberController::class, 'destroy'])
+        ->name('district.assemblies.members.destroy');
+
+});
+
+Route::prefix('district-admin')->name('district.admin.')->group(function () {
+
+    // ================= PASTORAL TEAM =================
+    Route::get('/pastoral-team', [PastoralTeamController::class, 'index'])
+        ->name('pastoral.index');
+
+    Route::get('/pastoral-team/create', [PastoralTeamController::class, 'create'])
+        ->name('pastoral.create');
+
+    Route::post('/pastoral-team/store', [PastoralTeamController::class, 'store'])
+        ->name('pastoral.store');
+            // ✅ EDIT
+    Route::get('/pastoral-team/{id}/edit', [PastoralTeamController::class, 'edit'])
+        ->name('pastoral.edit');
+
+    // ✅ UPDATE
+    Route::put('/pastoral-team/{id}/update', [PastoralTeamController::class, 'update'])
+        ->name('pastoral.update');
+
+    // ✅ DELETE
+    Route::delete('/pastoral-team/{id}/delete', [PastoralTeamController::class, 'destroy'])
+        ->name('pastoral.delete');
+
+});
+
+//========ASSEMBLY APPROVALS====
+Route::get('/admin/assembly-requests', [AssemblyApprovalController::class, 'index'])
+    ->name('admin.assembly.requests');
+
+Route::post('/admin/assembly-requests/{id}/approve', [AssemblyApprovalController::class, 'approve'])
+    ->name('admin.assembly.approve');
+
+Route::post('/admin/assembly-requests/{id}/reject', [AssemblyApprovalController::class, 'reject'])
+    ->name('admin.assembly.reject');
+    Route::get('/district/pastoral/{id}', [\App\Http\Controllers\DistrictAdmin\PastoralTeamController::class, 'show'])
+    ->name('district.admin.pastoral.show');
+
+    //====TITHE REPORTS ROUTES=====
+    Route::prefix('district/tithes')->name('district.admin.tithes.')->group(function () {
+
+    Route::get('/', [TitheReportController::class, 'index'])->name('index');
+
+    Route::get('/create', [TitheReportController::class, 'create'])->name('create');
+
+    Route::post('/store', [TitheReportController::class, 'store'])->name('store');
+       Route::get('/{id}/edit', [TitheReportController::class, 'edit'])->name('edit');
+    Route::put('/{id}/update', [TitheReportController::class, 'update'])->name('update');
+Route::get('/{id}/export', [TitheReportController::class, 'export'])
+    ->name('export');
+});

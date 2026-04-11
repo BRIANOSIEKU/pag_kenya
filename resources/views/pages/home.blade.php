@@ -464,18 +464,44 @@ body {
     .desktop-ticker { display: none; }
     .mobile-ticker { display: block; }
 
-    .hero-slider-wrapper { height: 75vw; width:110%; }
+    .hero-slider-wrapper { height: 90vw; width:115%; overflow: hidden; }
 
-    .slide-title { font-size: 2rem; }
-    .slide-caption { font-size: 1rem; }
+   /* Hero slider: flex layout */
+    .hero-slider {
+        display: flex;
+        width: 110%;
+        transition: transform 0.7s ease-in-out;
+    }
 
-    /* Keep hero content centered */
+    /* Each slide exactly 100% width */
+    .hero-slider .slide {
+        flex: 0 0 100%; /* forces one slide per screen */
+        max-width: 110%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+    }
+
+    /* Hero content centered */
     .hero-slider .slide .hero-content {
         top: 50%;
         transform: translateY(-50%);
+        max-width: 110%;
+        padding: 0 35px;
     }
 
-    /* Add spacing below slider for mobile ticker */
+.hero-slider .slide .hero-content .slide-title {
+    font-size: 1rem !important; /* Forces it to stay small on mobile */
+    white-space: normal;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    display: block;
+}
+    .slide-caption {
+        font-size: 0.5rem;
+    }
+
+    /* Ticker spacing below slider */
     .mobile-ticker { margin-top: 15px; }
 }
 </style>

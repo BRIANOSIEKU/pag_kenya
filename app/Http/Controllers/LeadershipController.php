@@ -58,7 +58,7 @@ class LeadershipController extends Controller
 
         switch ($type) {
             case 'executive':
-                $view = 'admin.leadership.executive_create';
+                $view = 'admin.leadership.create';
                 break;
             case 'council':
                 $view = 'admin.leadership.council_create';

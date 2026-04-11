@@ -114,7 +114,20 @@
 <!-- ================= WEBSITE CONTENT ================= -->
 <h2>Website Management</h2>
 <div class="dashboard-grid">
+<!-- ================= DISTRICT MANAGEMENT ================= -->
+<div class="dashboard-grid">
+    <div class="card">
+        <h3>District Management</h3>
+        <p>
+            Manage all district-level operations including assemblies, pastoral teams,
+            members, finance reports, transfers, and approvals.
+        </p>
 
+        <a href="{{ route('admin.districts.dashboard') }}" class="btn-gold">
+             District Module
+        </a>
+    </div>
+</div>
     <!-- Church Profile -->
     <div class="card">
         <h3>Church Profile</h3>
@@ -198,9 +211,9 @@
     </div>
 
     <div class="card">
-        <h3>Chat Messages</h3>
-        <p>Respond to live chat inquiries</p>
-        <a href="#" class="btn-teal">View Messages</a>
+        <h3>Standing Commitees</h3>
+        <p>Manage and promote upcoming Committes</p>
+        <a href="{{ route('admin.committees.index') }}" class="btn-teal">View Standing Committes</a>
     </div>
 </div>
 

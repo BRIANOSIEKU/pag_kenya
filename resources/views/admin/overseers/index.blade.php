@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<h1>Church Overseers</h1>
+<h1>District Overseers</h1>
 
 <a href="{{ route('admin.overseers.create') }}" 
    style="padding:8px 12px; background:#4CAF50; color:#fff; border-radius:6px; text-decoration:none; margin-bottom:15px; display:inline-block;">

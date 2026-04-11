@@ -7,7 +7,8 @@ $departments = Department::all();
 @endphp
 @php
 use App\Models\ContactInfo;
-
+use App\Models\Committee;
+$committees = Committee::all();
 // Fetch the first row (assuming you have only one contact info record)
 $contact = ContactInfo::first();
 @endphp
@@ -54,7 +55,7 @@ $contact = ContactInfo::first();
 
       <!-- Mobile Close Button -->
       <button id="mobileCloseBtn" class="mobile-close-btn">✕</button>
-
+      
       <div class="nav-dropdown"><a href="{{ url('/') }}" class="nav-link">Home</a></div>
       <div class="nav-dropdown"><a href="{{ route('church.profile') }}" class="nav-link">Church Profile</a></div>
 
@@ -63,10 +64,12 @@ $contact = ContactInfo::first();
         <div class="dropdown-menu">
           <a href="{{ route('leadership.public', 'executive-committee') }}">Executive Committee</a>
           <a href="{{ route('leadership.public', 'church-council') }}">Church Council</a>
-          <a href="{{ route('church.overseers') }}">Church Overseers</a>
+          <a href="{{ route('church.overseers') }}">District Overseers</a>
           <a href="{{ route('hq.staff.public') }}">PAG Kenya HQ Staff</a>
         </div>
       </div>
+
+      
 
       <div class="nav-dropdown">
         <button type="button" class="nav-link dropdown-toggle-btn">Departments <span class="arrow">▾</span></button>
@@ -77,11 +80,23 @@ $contact = ContactInfo::first();
         </div>
       </div>
 
+      <div class="nav-dropdown">
+    <button type="button" class="nav-link dropdown-toggle-btn">Standing Committees <span class="arrow">▾</span></button>
+    <div class="dropdown-menu">
+        @foreach($committees as $committee)
+            <a href="{{ route('public.committees.show', $committee->id) }}">{{ $committee->name }}</a>
+        @endforeach
+    </div>
+</div>
+
       <div class="nav-dropdown"><a href="{{ route('news.index') }}" class="nav-link">News</a></div>
       <div class="nav-dropdown"><a href="{{ route('projects.public.index') }}" class="nav-link">Projects</a></div>
-      <div class="nav-dropdown"><a href="{{ route('devotions.public.index') }}" class="nav-link">Daily Devotions</a></div>
-      <div class="nav-dropdown"><a href="{{ route('giving.public') }}" class="nav-link">Giving / Donations</a></div>
+      <div class="nav-dropdown"><a href="{{ route('devotions.public.index') }}" class="nav-link">Devotions</a></div>
+      <div class="nav-dropdown"><a href="{{ route('giving.public') }}" class="nav-link">Donations</a></div>
       <div class="nav-dropdown"><a href="{{ route('partners.index') }}" class="nav-link">Partners</a></div>
+      <div class="nav-dropdown">
+    <a href="{{ route('district.admin.login') }}" class="nav-link">Login</a>
+</div>
       <div class="nav-dropdown"><a href="{{ route('contact.public') }}" class="nav-link">Contact</a></div>
 
     </div>
@@ -97,15 +112,21 @@ $contact = ContactInfo::first();
 .top-row { display: flex; align-items: center; justify-content: space-between; }
 .logo-title-wrapper { display: flex; align-items: center; gap:15px; }
 .header-logo { height: 80px; transition: all 0.3s ease; }
-.header-title-wrapper { 
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
+.header-title-wrapper {
+        /* This is the magic part: */
+        position: absolute;    /* Removes it from the "Logo --- Contact" row */
+        left: 50%;             /* Moves the left edge to the center of the screen */
+        top: 30%;              /* Moves the top edge to the vertical center */
+        transform: translate(-50%, -50%); /* Shifts it back by exactly half its own width/height */
+        
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: auto;
+        white-space: nowrap;   /* Keeps the title on one or two lines as you defined with <br> */
+        z-index: 5;            /* Ensures it stays visible */
+    }
 .header-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.6rem; color: #fff; }
 .header-slogan { font-family: 'Inter', sans-serif; font-style: italic; font-size: 0.95rem; color: gold; }
 .contact-info { display: flex; flex-direction: column; font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #fff; gap:4px; align-items: flex-end; }
@@ -124,10 +145,29 @@ $contact = ContactInfo::first();
 
 /* ================= MOBILE ONLY ================= */
 @media (max-width: 992px) {
-  .top-row { flex-direction: column; align-items: center; gap:5px; }
-  .logo-title-wrapper { flex-direction: column; align-items: center; text-align: center; margin-left: 20px; }
-  .header-logo { height: 150px; }
-  .header-title { font-size: 1.2rem; line-height: 1.2; }
+.top-row {
+        flex-direction: column;
+        align-items: center;
+        padding-top: 80px;
+        padding-bottom: 20px;
+        min-height: auto; 
+    }
+  .logo-title-wrapper { 
+        flex-direction: column; 
+        align-items: center; 
+        text-align: center;
+        margin-left: 0; 
+        gap: 10px;
+    }
+ .header-logo {
+    height: 80px;      /* smaller for mobile */
+    width: auto;
+    margin-bottom: 5px;
+}
+  .header-title {
+    font-size: 1rem;   /* slightly smaller for mobile */
+    line-height: 1.2;
+}
   .header-slogan { font-size: 0.85rem; margin-bottom:5px; }
   .contact-info { flex-direction: row; gap:20px; justify-content:center; margin-bottom:5px; }
 
@@ -135,18 +175,24 @@ $contact = ContactInfo::first();
   .mobile-menu-btn::before { content: "\2630"; font-size: 1.6rem; color: #000; }
 
   /* Mobile Close Button */
-  .mobile-close-btn {
-    display: none;
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: #fff;
-    cursor: pointer;
-    z-index: 2100;
-  }
+.mobile-close-btn {
+  display: none;            /* hidden by default */
+  position: fixed;          /* fixed to viewport */
+  top: 45px;
+  right: 45px;
+  background: #ffffff;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #000;
+  cursor: pointer;
+  z-index: 2100;
+  border-radius: 4px;
+  width: 40px;
+  height: 40px;
+  line-height: 35px;
+  text-align: center;
+}
 
   /* Only show X when menu is open */
   .nav-row.show .mobile-close-btn { display: block; }
@@ -179,7 +225,9 @@ $contact = ContactInfo::first();
     overflow: hidden; 
     background: #065f92; 
     flex-direction: column; 
-    transition: max-height 0.3s ease; 
+     transition: transform 0.4s ease, opacity 0.4s ease
+     transform: translateX(100%);
+     
   }
   .dropdown-menu a { padding-left: 30px; padding-top: 8px; padding-bottom: 8px; }
   .dropdown-menu a:hover { background: #d4af37; color: #000; }
