@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Assembly;
 use App\Models\TitheReport;
 use App\Models\TitheReportItem;
+use App\Models\TitheReportHistory;
+use App\Models\TitheReportItemHistory;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class TitheReportController extends Controller
@@ -14,13 +16,32 @@ class TitheReportController extends Controller
     // =========================
     // LIST REPORTS
     // =========================
-    public function index()
+    public function index(Request $request)
     {
         $districtId = session('district_admin_district_id');
 
-        $reports = TitheReport::where('district_id', $districtId)
-            ->latest()
-            ->get();
+        $query = TitheReport::where('district_id', $districtId);
+
+        if ($request->filled('year')) {
+            $query->where('year', $request->year);
+        }
+
+        if ($request->filled('month')) {
+            $query->where('month', 'like', '%' . $request->month . '%');
+        }
+
+        $query->orderByDesc('year')
+              ->orderByRaw("
+                FIELD(month,
+                'December','November','October','September','August','July',
+                'June','May','April','March','February','January')
+              ");
+
+        if (!$request->filled('year') && !$request->filled('month')) {
+            $query->limit(12);
+        }
+
+        $reports = $query->get();
 
         return view('district_admin.tithes.index', compact('reports'));
     }
@@ -55,40 +76,32 @@ class TitheReportController extends Controller
             'amounts' => 'required|array',
         ]);
 
-        try {
+        $receiptPath = $request->file('receipt')->store('tithes/receipts', 'public');
 
-            $receiptPath = $request->file('receipt')->store('tithes/receipts', 'public');
+        $total = collect($request->amounts)->sum(fn ($a) => (float) $a);
 
-            $total = collect($request->amounts)->sum(fn ($a) => (float) $a);
+        $report = TitheReport::create([
+            'district_id'  => $districtId,
+            'year'         => $request->year,
+            'month'        => $request->month,
+            'payment_code' => $request->payment_code,
+            'total_amount' => $total,
+            'receipt'      => $receiptPath,
+            'status'       => 'pending',
+            'rejection_reason' => null,
+        ]);
 
-            $report = TitheReport::create([
-                'district_id'  => $districtId,
-                'year'         => $request->year,
-                'month'        => $request->month,
-                'payment_code' => $request->payment_code,
-                'total_amount' => $total,
-                'receipt'      => $receiptPath,
-                'status'       => 'pending',
+        foreach ($request->amounts as $assemblyId => $amount) {
+            TitheReportItem::create([
+                'tithe_report_id' => $report->id,
+                'assembly_id'     => $assemblyId,
+                'amount'          => (float) $amount,
             ]);
-
-            foreach ($request->amounts as $assemblyId => $amount) {
-                TitheReportItem::create([
-                    'tithe_report_id' => $report->id,
-                    'assembly_id'     => $assemblyId,
-                    'amount'          => (float) $amount,
-                ]);
-            }
-
-            return redirect()
-                ->route('district.admin.tithes.index')
-                ->with('success', 'Tithe report submitted successfully!');
-
-        } catch (\Exception $e) {
-
-            return back()
-                ->withInput()
-                ->with('error', 'Submission failed: ' . $e->getMessage());
         }
+
+        return redirect()
+            ->route('district.admin.tithes.index')
+            ->with('success', 'Tithe report submitted successfully!');
     }
 
     // =========================
@@ -102,10 +115,10 @@ class TitheReportController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
-        if ($report->status !== 'pending') {
+        if (!in_array($report->status, ['pending', 'rejected'])) {
             return redirect()
                 ->route('district.admin.tithes.index')
-                ->with('error', 'Only pending reports can be edited.');
+                ->with('error', 'Only pending or rejected reports can be edited.');
         }
 
         $assemblies = Assembly::where('district_id', $districtId)
@@ -121,7 +134,7 @@ class TitheReportController extends Controller
     }
 
     // =========================
-    // UPDATE REPORT
+    // UPDATE REPORT (WITH HISTORY)
     // =========================
     public function update(Request $request, $id)
     {
@@ -131,10 +144,10 @@ class TitheReportController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
-        if ($report->status !== 'pending') {
+        if (!in_array($report->status, ['pending', 'rejected'])) {
             return redirect()
                 ->route('district.admin.tithes.index')
-                ->with('error', 'Only pending reports can be updated.');
+                ->with('error', 'Only pending or rejected reports can be updated.');
         }
 
         $request->validate([
@@ -144,43 +157,59 @@ class TitheReportController extends Controller
             'amounts' => 'required|array',
         ]);
 
-        try {
+        // =========================
+        // 🔥 SAVE HISTORY FIRST
+        // =========================
+        TitheReportHistory::create([
+            'tithe_report_id'  => $report->id,
+            'year'             => $report->year,
+            'month'            => $report->month,
+            'payment_code'     => $report->payment_code,
+            'total_amount'     => $report->total_amount,
+            'status'           => $report->status,
+            'rejection_reason' => $report->rejection_reason,
+            'archived_at'      => now(),
+        ]);
 
-            if ($request->hasFile('receipt')) {
-                $report->receipt = $request->file('receipt')
-                    ->store('tithes/receipts', 'public');
-            }
+        $oldItems = TitheReportItem::where('tithe_report_id', $report->id)->get();
 
-            $total = collect($request->amounts)
-                ->sum(fn ($a) => (float) $a);
-
-            $report->update([
-                'year'         => $request->year,
-                'month'        => $request->month,
-                'payment_code' => $request->payment_code,
-                'total_amount' => $total,
+        foreach ($oldItems as $item) {
+            TitheReportItemHistory::create([
+                'tithe_report_id' => $item->tithe_report_id,
+                'assembly_id'     => $item->assembly_id,
+                'amount'          => $item->amount,
             ]);
-
-            TitheReportItem::where('tithe_report_id', $id)->delete();
-
-            foreach ($request->amounts as $assemblyId => $amount) {
-                TitheReportItem::create([
-                    'tithe_report_id' => $report->id,
-                    'assembly_id'     => $assemblyId,
-                    'amount'          => (float) $amount,
-                ]);
-            }
-
-            return redirect()
-                ->route('district.admin.tithes.index')
-                ->with('success', 'Tithe report updated successfully!');
-
-        } catch (\Exception $e) {
-
-            return back()
-                ->withInput()
-                ->with('error', 'Update failed: ' . $e->getMessage());
         }
+
+        // =========================
+        // UPDATE REPORT
+        // =========================
+        $total = collect($request->amounts)
+            ->sum(fn ($a) => (float) $a);
+
+        $report->update([
+            'year'             => $request->year,
+            'month'            => $request->month,
+            'payment_code'     => $request->payment_code,
+            'total_amount'     => $total,
+            'status'           => 'pending',
+            'rejection_reason' => null,
+        ]);
+
+        // replace items
+        TitheReportItem::where('tithe_report_id', $id)->delete();
+
+        foreach ($request->amounts as $assemblyId => $amount) {
+            TitheReportItem::create([
+                'tithe_report_id' => $report->id,
+                'assembly_id'     => $assemblyId,
+                'amount'          => (float) $amount,
+            ]);
+        }
+
+        return redirect()
+            ->route('district.admin.tithes.index')
+            ->with('success', 'Report updated and resubmitted successfully!');
     }
 
     // =========================

@@ -3,14 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class DistrictAdmin extends Model
+class DistrictAdmin extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     /**
-     * Table name (IMPORTANT since it's not 'district_admins' default guess-safe)
+     * Table name
      */
     protected $table = 'district_admins';
 
@@ -24,17 +25,40 @@ class DistrictAdmin extends Model
     ];
 
     /**
-     * Hide sensitive fields when returning JSON / arrays
+     * Hide sensitive fields
      */
     protected $hidden = [
         'password',
+        'remember_token',
     ];
 
     /**
-     * Relationship: DistrictAdmin belongs to a District
+     * Casts
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    /**
+     * =========================
+     * RELATIONSHIP
+     * =========================
      */
     public function district()
     {
         return $this->belongsTo(District::class);
+    }
+
+    /**
+     * =========================
+     * NOTIFICATIONS (Laravel built-in)
+     * =========================
+     */
+
+    // optional helper (Laravel already provides unreadNotifications)
+    public function unreadCount()
+    {
+        return $this->unreadNotifications()->count();
     }
 }

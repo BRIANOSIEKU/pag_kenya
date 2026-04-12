@@ -30,24 +30,57 @@ class District extends Model
     }
 
     /**
-     * District has many Pastoral Team members
+     * 🔥 FIXED: Pastoral Team (CURRENT ASSIGNMENT)
+     * This is IMPORTANT because your table has:
+     * current_district_id
      */
     public function pastoralTeam()
     {
-        return $this->hasMany(PastoralTeam::class);
+        return $this->hasMany(
+            PastoralTeam::class,
+            'current_district_id'
+        );
     }
 
     /**
-     * 🔥 NEW: District has many Tithe Reports
+     * Optional: legacy relationship (if still using old field)
+     */
+    public function pastoralTeamLegacy()
+    {
+        return $this->hasMany(
+            PastoralTeam::class,
+            'district_id'
+        );
+    }
+
+    /**
+     * District has many Tithe Reports
      */
     public function titheReports()
     {
         return $this->hasMany(TitheReport::class);
     }
 
+    /**
+     * District leaders (Overseer, Secretary, etc.)
+     */
+    public function leaders()
+    {
+        return $this->hasMany(DistrictLeader::class);
+    }
+
+    /**
+     * Direct access to Overseer only
+     */
+    public function overseer()
+    {
+        return $this->hasOne(DistrictLeader::class)
+            ->where('position', 'Overseer');
+    }
+
     /*
     |----------------------------------------------------------------------
-    | HELPERS (OPTIONAL BUT POWERFUL)
+    | HELPERS
     |----------------------------------------------------------------------
     */
 
@@ -57,5 +90,25 @@ class District extends Model
     public function approvedAssemblies()
     {
         return $this->assemblies()->where('status', 'approved');
+    }
+
+    /**
+     * Total tithe amount
+     */
+    public function totalTithe()
+    {
+        return $this->titheReports()
+            ->where('status', 'approved')
+            ->sum('total_amount');
+    }
+
+    /**
+     * Pending reports count
+     */
+    public function pendingReportsCount()
+    {
+        return $this->titheReports()
+            ->where('status', 'pending')
+            ->count();
     }
 }

@@ -95,20 +95,20 @@ h2 {
     <div class="card">
         <h3>Tithe Reports</h3>
         <p>View financial tithe reports per district</p>
-        <a href="" class="btn-purple">
+        <a href="{{ route('admin.tithe_review.index') }}" class="btn-purple">
             View Reports
         </a>
     </div>
 
     <div class="card">
-        <h3>Transfers</h3>
+        <h3>Pastoral Transfers</h3>
         <p>Manage member transfers between districts</p>
-        <a href="" class="btn-orange">
+        <a href="{{ route('admin.transfers') }}" class="btn-orange">
             View Transfers
         </a>
     </div>
 
-        <div class="card">
+    <div class="card">
         <h3>NEW ASSEMBLY APPROVAL</h3>
         <p>Approve New Assembly Requests</p>
         <a href="{{ route('admin.assembly.requests') }}" class="btn-blue">
@@ -116,5 +116,15 @@ h2 {
         </a>
     </div>
 
+    <!-- ================= NEW DOWNLOADS CARD ================= -->
+    <div class="card">
+        <h3>Downloads</h3>
+        <p>Upload and manage attachments for district admins</p>
+        <a href="{{ route('admin.downloads.index') }}" class="btn-gold">
+            Manage Downloads
+        </a>
+    </div>
+
 </div>
+
 @endsection

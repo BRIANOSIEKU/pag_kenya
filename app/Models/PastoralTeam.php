@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Assembly;
+use App\Models\District;
 
 class PastoralTeam extends Model
 {
@@ -12,12 +13,13 @@ class PastoralTeam extends Model
 
     protected $table = 'pastoral_teams';
 
+    // ✅ FIXED: match database column names
     protected $fillable = [
         'name',
         'national_id',
         'gender',
         'contact',
-        'graduation_year',
+        'graduation_year', // ✅ FIXED (was year_of_graduation)
         'date_of_birth',
         'photo',
         'attachments',
@@ -25,25 +27,61 @@ class PastoralTeam extends Model
         'assembly_id',
     ];
 
-    // =========================
-    // CASTS
-    // =========================
     protected $casts = [
         'attachments' => 'array',
         'date_of_birth' => 'date',
+        'graduation_year' => 'integer',
     ];
 
     // =========================
-    // RELATIONSHIP (THIS FIXES YOUR ERROR)
+    // PHOTO URL
+    // =========================
+    public function getPhotoUrlAttribute()
+    {
+        return $this->photo
+            ? asset('storage/' . $this->photo)
+            : asset('images/default-user.png');
+    }
+
+    // =========================
+    // AGE (from DOB)
+    // =========================
+    public function getAgeAttribute()
+    {
+        return $this->date_of_birth
+            ? $this->date_of_birth->age
+            : null;
+    }
+
+    // =========================
+    // YEAR OF BIRTH (from DOB)
+    // =========================
+    public function getYearOfBirthAttribute()
+    {
+        return $this->date_of_birth
+            ? $this->date_of_birth->format('Y')
+            : null;
+    }
+
+    // =========================
+    // RELATIONSHIPS
     // =========================
     public function assembly()
     {
-        return $this->belongsTo(Assembly::class, 'assembly_id');
+        return $this->belongsTo(Assembly::class);
     }
 
-    // (OPTIONAL BUT USEFUL)
     public function district()
     {
-        return $this->belongsTo(District::class, 'district_id');
+        return $this->belongsTo(District::class);
+    }
+
+    // =========================
+    // OPTIONAL: FRIENDLY ACCESSOR
+    // (so old code still works if needed)
+    // =========================
+    public function getYearOfGraduationAttribute()
+    {
+        return $this->graduation_year;
     }
 }

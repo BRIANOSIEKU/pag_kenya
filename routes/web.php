@@ -44,6 +44,11 @@ use App\Http\Controllers\AssemblyMemberController;
 use App\Http\Controllers\DistrictAdmin\PastoralTeamController;
 use App\Http\Controllers\Admin\AssemblyApprovalController;
 use App\Http\Controllers\DistrictAdmin\TitheReportController;
+use App\Http\Controllers\Admin\TitheReportReviewController;
+use App\Http\Controllers\DistrictAdmin\PastoralTransferController;
+use App\Http\Controllers\DistrictAdmin\NotificationController;
+use App\Http\Controllers\Admin\TransferApprovalController;
+use App\Http\Controllers\Admin\DownloadController;
 
 // -------------------- PUBLIC ROUTES --------------------
 //Public for Committees
@@ -436,6 +441,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])->group(
 
     });
  // ================= DISTRICTS =================
+ // EXPORT ALL PASTORS
+// =====================
+Route::get('/pastors/export', 
+    [App\Http\Controllers\Admin\PastoralTeamController::class, 'exportAllPastors']
+)->name('pastors.export');
+
        // EXPORT ROUTES (FIXED LOCATION)
     Route::get('districts/export', [DistrictLeaderController::class, 'exportForm'])
         ->name('districts.export.form');
@@ -615,4 +626,171 @@ Route::post('/admin/assembly-requests/{id}/reject', [AssemblyApprovalController:
     Route::put('/{id}/update', [TitheReportController::class, 'update'])->name('update');
 Route::get('/{id}/export', [TitheReportController::class, 'export'])
     ->name('export');
+});
+
+Route::prefix('admin')->name('admin.')->group(function () {
+
+    Route::get('/tithe-reports-review', [App\Http\Controllers\Admin\TitheReportReviewController::class, 'index'])
+        ->name('tithe_review.index');
+
+    Route::get('/tithe-reports-review/{id}', [App\Http\Controllers\Admin\TitheReportReviewController::class, 'show'])
+        ->name('tithe_review.show');
+
+    Route::post('/tithe-reports-review/{id}/approve', [App\Http\Controllers\Admin\TitheReportReviewController::class, 'approve'])
+        ->name('tithe_review.approve');
+
+    Route::post('/tithe-reports-review/{id}/reject', [App\Http\Controllers\Admin\TitheReportReviewController::class, 'reject'])
+        ->name('tithe_review.reject');
+Route::get('/tithe-reports/export', [App\Http\Controllers\Admin\TitheReportReviewController::class, 'export'])
+    ->name('tithe_reports.export');
+});
+
+// ======== PASTORAL TRANSFERS ========
+Route::prefix('district-admin')->name('district.admin.')->group(function () {
+
+    // =========================
+    // LIST
+    // =========================
+    Route::get('/pastoral-transfers', [PastoralTransferController::class, 'index'])
+        ->name('pastoral.transfers.index');
+
+    // =========================
+    // CREATE FORM
+    // =========================
+    Route::get('/pastoral-transfers/create', [PastoralTransferController::class, 'create'])
+        ->name('pastoral.transfers.create');
+
+    // =========================
+    // STORE
+    // =========================
+    Route::post('/pastoral-transfers', [PastoralTransferController::class, 'store'])
+        ->name('pastoral.transfers.store');
+
+    // =========================
+    // EDIT
+    // =========================
+    Route::get('/pastoral-transfers/{id}/edit', [PastoralTransferController::class, 'edit'])
+        ->name('pastoral.transfers.edit');
+
+    // =========================
+    // UPDATE (IMPORTANT - WAS MISSING)
+    // =========================
+    Route::put('/pastoral-transfers/{id}', [PastoralTransferController::class, 'update'])
+        ->name('pastoral.transfers.update');
+
+    // =========================
+    // DELETE
+    // =========================
+    Route::delete('/pastoral-transfers/{id}', [PastoralTransferController::class, 'destroy'])
+        ->name('pastoral.transfers.destroy');
+
+    // =========================
+    // APPROVE
+    // =========================
+    Route::post('/pastoral-transfers/{id}/approve', [PastoralTransferController::class, 'approve'])
+        ->name('pastoral.transfers.approve');
+
+    // =========================
+    // REJECT
+    // =========================
+    Route::post('/pastoral-transfers/{id}/reject', [PastoralTransferController::class, 'reject'])
+        ->name('pastoral.transfers.reject');
+
+    // =========================
+    // AJAX: GET ASSEMBLIES BY DISTRICT
+    // =========================
+    Route::get('/get-assemblies/{district_id}', function ($district_id) {
+        return response()->json(
+            \App\Models\Assembly::where('district_id', $district_id)->get()
+        );
+    })->name('assemblies.by.district');
+
+});
+
+// =========================
+// NOTIFICATIONS
+// =========================
+Route::prefix('district-admin')->name('district.admin.')->group(function () {
+
+    Route::get('/notifications', [NotificationController::class, 'index'])
+        ->name('notifications.index');
+
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
+
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])
+        ->name('notifications.read.all');
+        Route::get('/pastoral-transfers/incoming', [PastoralTransferController::class, 'incoming'])
+    ->name('pastoral.transfers.incoming');
+});
+
+//====== ADMIN TRANSFER APPROVALS ======
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])->group(function () {
+
+    // LIST ALL PENDING HQ APPROVALS
+    Route::get('/transfers', [TransferApprovalController::class, 'index'])
+        ->name('transfers');
+
+    // APPROVE TRANSFER (HQ)
+    Route::post('/transfers/{id}/approve', [TransferApprovalController::class, 'approve'])
+        ->name('transfers.approve');
+
+    // REJECT TRANSFER (HQ) ✅ FIXED
+    Route::post('/transfers/{id}/reject', [TransferApprovalController::class, 'reject'])
+        ->name('transfers.reject');
+
+});
+
+
+// ======== DISTRICT PASTORAL TEAM (ADMIN SIDE) ========
+Route::prefix('admin')->name('admin.')->group(function () {
+
+    // LIST pastors in a district
+    Route::get('districts/{district}/pastoral-teams',
+        [App\Http\Controllers\Admin\PastoralTeamController::class, 'index']
+    )->name('districts.pastoral-teams.index');
+
+    // SHOW pastor profile (IMPORTANT FIX: name matches view usage)
+    Route::get('districts/pastoral-teams/{id}',
+        [App\Http\Controllers\Admin\PastoralTeamController::class, 'show']
+    )->name('districts.pastoral-teams.show');
+    Route::get('districts/{district}/pastoral-teams/export', 
+    [App\Http\Controllers\Admin\PastoralTeamController::class, 'exportPdf']
+)->name('districts.pastoral-teams.export');
+});
+
+//=========DOWNLOAD ROUTES====
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+
+    Route::get('/downloads', [DownloadController::class, 'index'])
+        ->name('admin.downloads.index');
+
+    Route::get('/downloads/create', [DownloadController::class, 'create'])
+        ->name('admin.downloads.create');
+
+    Route::post('/downloads', [DownloadController::class, 'store'])
+        ->name('admin.downloads.store');
+
+    // VIEW
+    Route::get('/downloads/{id}', [DownloadController::class, 'show'])
+        ->name('admin.downloads.show');
+
+    // EDIT
+    Route::get('/downloads/{id}/edit', [DownloadController::class, 'edit'])
+        ->name('admin.downloads.edit');
+
+    Route::put('/downloads/{id}', [DownloadController::class, 'update'])
+        ->name('admin.downloads.update');
+
+    // DELETE
+    Route::delete('/downloads/{id}', [DownloadController::class, 'destroy'])
+        ->name('admin.downloads.destroy');
+});
+
+//------DISTRICT ADMIN DOWNLOADS------
+Route::prefix('district/admin')->group(function () {
+
+    Route::get('/downloads', [\App\Http\Controllers\Admin\DownloadController::class, 'districtIndex'])
+        ->name('district.admin.downloads.index');
+
 });

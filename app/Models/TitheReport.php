@@ -19,6 +19,7 @@ class TitheReport extends Model
         'total_amount',
         'receipt',
         'status',
+        'rejection_reason', // ✅ ADDED THIS
     ];
 
     // =========================

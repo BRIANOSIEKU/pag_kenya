@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\District;
 use Illuminate\Http\Request;
+use PDF;
 
 class DistrictController extends Controller
 {
     /**
-     * Display District Dashboard
+     * Dashboard
      */
     public function dashboard()
     {
@@ -17,16 +18,23 @@ class DistrictController extends Controller
     }
 
     /**
-     * Display a listing of districts
+     * LIST DISTRICTS + LOAD PASTORAL TEAM
      */
-    public function index()
+    public function index(Request $request)
     {
-        $districts = District::latest()->get();
+        $query = District::with('pastoralTeam');
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $districts = $query->latest()->get();
+
         return view('admin.districts.index', compact('districts'));
     }
 
     /**
-     * Show form to create a district
+     * CREATE FORM
      */
     public function create()
     {
@@ -34,7 +42,7 @@ class DistrictController extends Controller
     }
 
     /**
-     * Store a new district
+     * STORE DISTRICT
      */
     public function store(Request $request)
     {
@@ -46,12 +54,13 @@ class DistrictController extends Controller
             'name' => $request->name,
         ]);
 
-        return redirect()->route('admin.districts.index')
+        return redirect()
+            ->route('admin.districts.index')
             ->with('success', 'District created successfully.');
     }
 
     /**
-     * Show form to edit a district
+     * EDIT FORM
      */
     public function edit(District $district)
     {
@@ -59,7 +68,7 @@ class DistrictController extends Controller
     }
 
     /**
-     * Update a district
+     * UPDATE DISTRICT
      */
     public function update(Request $request, District $district)
     {
@@ -71,18 +80,37 @@ class DistrictController extends Controller
             'name' => $request->name,
         ]);
 
-        return redirect()->route('admin.districts.index')
+        return redirect()
+            ->route('admin.districts.index')
             ->with('success', 'District updated successfully.');
     }
 
     /**
-     * Delete a district
+     * DELETE DISTRICT
      */
     public function destroy(District $district)
     {
         $district->delete();
 
-        return redirect()->route('admin.districts.index')
+        return redirect()
+            ->route('admin.districts.index')
             ->with('success', 'District deleted successfully.');
+    }
+
+    /**
+     * ============================
+     * EXPORT ALL PASTORS (NEW)
+     * ============================
+     */
+    public function exportPastors()
+    {
+        $districts = District::with(['pastoralTeam'])->get();
+
+        $pdf = PDF::loadView(
+            'admin.districts.exports.all_pastors',
+            compact('districts')
+        )->setPaper('a4', 'portrait');
+
+        return $pdf->download('all_pastors_by_district.pdf');
     }
 }

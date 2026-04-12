@@ -19,7 +19,7 @@
 
         /* ===== SIDEBAR ===== */
         .sidebar {
-            width: 240px;
+            width: 250px;
             background: #1e3c72;
             color: #fff;
             min-height: 100vh;
@@ -27,7 +27,7 @@
         }
 
         .sidebar img {
-            width: 120px;
+            width: 110px;
             display: block;
             margin: 0 auto 10px;
         }
@@ -35,7 +35,18 @@
         .sidebar h3 {
             text-align: center;
             font-size: 1rem;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+        }
+
+        .menu-section {
+            margin-bottom: 15px;
+        }
+
+        .menu-title {
+            font-size: 12px;
+            opacity: 0.7;
+            margin: 10px 0 5px;
+            text-transform: uppercase;
         }
 
         .sidebar a {
@@ -44,11 +55,16 @@
             color: #fff;
             text-decoration: none;
             border-radius: 6px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             transition: 0.3s;
+            font-size: 14px;
         }
 
         .sidebar a:hover {
+            background: #4CAF50;
+        }
+
+        .sidebar a.active {
             background: #4CAF50;
         }
 
@@ -80,6 +96,16 @@
             color: #fff;
         }
 
+        /* badge (future notifications) */
+        .badge {
+            background: red;
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 50%;
+            float: right;
+        }
+
     </style>
 </head>
 
@@ -89,16 +115,48 @@
 
     <!-- ===== SIDEBAR ===== -->
     <div class="sidebar">
+
         <img src="{{ asset('images/pagk_logo.png') }}" alt="Logo">
 
         <h3>District Panel</h3>
 
-        <a href="{{ route('district.admin.dashboard') }}">Dashboard</a>
-        <a href="#">Assemblies</a>
-        <a href="#">Members</a>
-        <a href="#">Pastoral Team</a>
-        <a href="#">Tithe Reports</a>
-        <a href="#">Transfers</a>
+        <!-- MAIN -->
+        <div class="menu-section">
+            <div class="menu-title">Main</div>
+            <a href="{{ route('district.admin.dashboard') }}">Dashboard</a>
+        </div>
+
+        <!-- CHURCH STRUCTURE -->
+        <div class="menu-section">
+            <div class="menu-title">Church Structure</div>
+            <a href="#">Assemblies</a>
+            <a href="#">Members</a>
+            <a href="#">Pastoral Team</a>
+        </div>
+
+        <!-- FINANCE -->
+        <div class="menu-section">
+            <div class="menu-title">Finance</div>
+            <a href="#">Tithe Reports</a>
+        </div>
+
+        <!-- TRANSFERS -->
+        <div class="menu-section">
+            <div class="menu-title">Transfers</div>
+
+            <a href="{{ route('district.admin.pastoral.transfers.incoming') }}"
+               class="{{ request()->routeIs('district.admin.pastoral.transfers.*') ? 'active' : '' }}">
+                Pastoral Transfers
+                <span class="badge">!</span>
+            </a>
+        </div>
+
+        <!-- AUTH -->
+        <div class="menu-section">
+            <div class="menu-title">Account</div>
+            <a href="{{ route('district.admin.logout') }}">Logout</a>
+        </div>
+
     </div>
 
     <!-- ===== MAIN CONTENT ===== -->

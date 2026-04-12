@@ -77,7 +77,9 @@
             roles, contacts, and membership records.
         </p>
 
-        <a href="{{ route('district.admin.assemblies.index') }}" class="btn-green">Manage Assemblies</a>
+        <a href="{{ route('district.admin.assemblies.index') }}" class="btn-green">
+            Manage Assemblies
+        </a>
     </div>
 
     <!-- Pastoral Team -->
@@ -87,7 +89,9 @@
             Register pastors, upload documents, and manage pastoral records.
         </p>
 
-        <a href="{{ route('district.admin.pastoral.index') }}" class="btn-orange">Manage Pastoral Team</a>
+        <a href="{{ route('district.admin.pastoral.index') }}" class="btn-orange">
+            Manage Pastoral Team
+        </a>
     </div>
 
 </div>
@@ -103,17 +107,33 @@
             and track approval status.
         </p>
 
-        <a href="{{ route('district.admin.tithes.index') }}" class="btn-purple" class="btn-purple">View Reports</a>
+        <a href="{{ route('district.admin.tithes.index') }}" class="btn-purple">
+            View Reports
+        </a>
     </div>
 
-    <!-- Transfers -->
+    <!-- Pastoral Transfers -->
     <div class="card">
         <h3>Pastoral Transfers</h3>
         <p>
             Initiate transfers within or across districts and track approvals.
         </p>
 
-        <a href="#" class="btn-red">Manage Transfers</a>
+        <a href="{{ route('district.admin.pastoral.transfers.index') }}" class="btn-red">
+            Manage Transfers
+        </a>
+    </div>
+
+    <!-- Downloads -->
+    <div class="card">
+        <h3>Downloads</h3>
+        <p>
+            Access official documents, circulars, reports, and attachments uploaded by the District Office.
+        </p>
+
+        <a href="{{ route('district.admin.downloads.index') }}" class="btn-blue">
+            View Downloads
+        </a>
     </div>
 
 </div>
