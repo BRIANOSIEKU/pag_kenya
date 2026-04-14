@@ -9,161 +9,173 @@ use App\Models\User;
 
 class AdminController extends Controller
 {
-    /**
-     * Show the admin login page
-     */
+    // ======================
+    // ALLOWED ROLES (CENTRALIZED FIX)
+    // ======================
+    private array $adminRoles = [
+        'admin',
+        'super-admin',
+        'general-secretary',
+        'general-treasurer',
+        'general-superintendent',
+    ];
+
+    // ======================
+    // LOGIN PAGE
+    // ======================
     public function showLogin()
     {
-        if (Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin'])) {
-            return redirect()->route('admin.dashboard');
+        if (Auth::check()) {
+
+            if (Auth::user()->hasAnyRole($this->adminRoles)) {
+                return redirect()->route('admin.dashboard');
+            }
+
+            Auth::logout();
         }
 
-        return view('admin.login'); // your login Blade
+        return view('admin.login');
     }
 
-    /**
-     * Handle admin login form submission
-     */
+    // ======================
+    // LOGIN PROCESS
+    // ======================
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email'    => ['required', 'email'],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
         if (Auth::attempt($credentials)) {
+
             $request->session()->regenerate();
 
-            if (in_array(Auth::user()->role, ['admin', 'super_admin'])) {
+            $user = Auth::user();
+
+            // ✅ STRICT ROLE CHECK
+            if ($user && $user->hasAnyRole($this->adminRoles)) {
                 return redirect()->route('admin.dashboard');
-            } else {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'You do not have admin access.',
-                ])->withInput();
             }
+
+            Auth::logout();
+
+            return back()->withErrors([
+                'email' => 'You do not have admin access.',
+            ]);
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->withInput();
+            'email' => 'Invalid credentials.',
+        ]);
     }
 
-    /**
-     * Admin dashboard
-     */
+    // ======================
+    // DASHBOARD
+    // ======================
     public function dashboard()
     {
-        return view('admin.dashboard'); // your dashboard Blade
+        if (!Auth::check() || !Auth::user()->hasAnyRole($this->adminRoles)) {
+            abort(403);
+        }
+
+        return view('admin.dashboard');
     }
 
-    /**
-     * Logout admin
-     */
+    // ======================
+    // LOGOUT
+    // ======================
     public function logout(Request $request)
     {
         Auth::logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login');
     }
 
-    //===================== SUPER ADMIN FUNCTIONALITY ======================//
-
-    /**
-     * List all admins
-     */
+    // ======================
+    // LIST ADMINS
+    // ======================
     public function listAdmins()
     {
-        $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
+        $admins = User::role($this->adminRoles)->get();
+
         return view('admin.admins.list', compact('admins'));
     }
 
-    /**
-     * Show form to create new admin
-     */
+    // ======================
+    // CREATE FORM
+    // ======================
     public function createAdmin()
     {
-        return view('admin.admins.create'); // Blade form
+        return view('admin.admins.create');
     }
 
-    /**
-     * Store new admin
-     */
+    // ======================
+    // STORE ADMIN
+    // ======================
     public function storeAdmin(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
-            'role' => 'nullable|in:admin,super_admin' // optional, default to admin
+            'role' => 'required|in:' . implode(',', $this->adminRoles),
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role ?? 'admin'
         ]);
 
-        return redirect()->route('admin.admins.list')->with('success', 'Admin added successfully.');
+        // ✅ CLEAN ROLE ASSIGNMENT
+        $user->syncRoles([$request->role]);
+
+        return redirect()->route('admin.admins.list')
+            ->with('success', 'User created successfully.');
     }
 
-    /**
-     * Show form to reset a regular admin's password (super admin only)
-     */
+    // ======================
+    // RESET PASSWORD (ADMIN)
+    // ======================
     public function showResetPasswordForm(User $admin)
     {
-        $currentUser = auth()->user();
-
-        if ($currentUser->role !== 'super_admin') {
-            abort(403, 'Unauthorized action.');
-        }
-
-        if ($admin->role !== 'admin') {
-            abort(403, 'You can only reset password for regular admins.');
+        if (!Auth::user()->hasRole('super-admin')) {
+            abort(403);
         }
 
         return view('admin.admins.reset_password', compact('admin'));
     }
 
-    /**
-     * Update regular admin's password (super admin only)
-     */
     public function updateAdminPassword(Request $request, User $admin)
     {
-        $currentUser = auth()->user();
-
-        if ($currentUser->role !== 'super_admin') {
-            abort(403, 'Unauthorized action.');
-        }
-
-        if ($admin->role !== 'admin') {
-            abort(403, 'You can only reset password for regular admins.');
+        if (!Auth::user()->hasRole('super-admin')) {
+            abort(403);
         }
 
         $request->validate([
             'new_password' => 'required|string|min:6|confirmed',
         ]);
 
-        $admin->password = Hash::make($request->new_password);
-        $admin->save();
+        $admin->update([
+            'password' => Hash::make($request->new_password),
+        ]);
 
-        return redirect()->route('admin.admins.list')->with('success', "Password for {$admin->name} has been updated successfully.");
+        return redirect()->route('admin.admins.list')
+            ->with('success', 'Password updated successfully.');
     }
 
-    /**
-     * Show form to reset super admin's own password
-     */
+    // ======================
+    // RESET OWN PASSWORD
+    // ======================
     public function showResetMyPasswordForm()
     {
-        return view('admin.admins.reset_my_password'); // Blade form
+        return view('admin.admins.reset_my_password');
     }
 
-    /**
-     * Handle updating super admin's own password
-     */
     public function resetMyPassword(Request $request)
     {
         $request->validate([
@@ -171,16 +183,18 @@ class AdminController extends Controller
             'new_password' => 'required|string|min:6|confirmed',
         ]);
 
-        $user = auth()->user();
+        $user = Auth::user();
 
-        // Check current password
         if (!Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+            return back()->withErrors([
+                'current_password' => 'Incorrect password'
+            ]);
         }
 
-        $user->password = Hash::make($request->new_password);
-        $user->save();
+        $user->update([
+            'password' => Hash::make($request->new_password),
+        ]);
 
-        return back()->with('success', 'Your password has been updated successfully.');
+        return back()->with('success', 'Password updated successfully.');
     }
 }

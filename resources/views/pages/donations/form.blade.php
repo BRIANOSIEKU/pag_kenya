@@ -172,7 +172,7 @@
             <!-- Name -->
             <div class="space-y-1">
                 <label>Full Name</label>
-                <input type="text" name="name" required placeholder="John Doe">
+                <input type="text" name="name" required placeholder="John Mark">
             </div>
 
             <!-- Amount -->

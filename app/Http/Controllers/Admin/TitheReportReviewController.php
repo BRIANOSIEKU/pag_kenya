@@ -6,9 +6,18 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\TitheReport;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 
 class TitheReportReviewController extends Controller
 {
+    /**
+     * Ensure only authenticated users can access this controller
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     // =========================
     // LIST ALL PENDING REPORTS
     // =========================
@@ -42,11 +51,16 @@ class TitheReportReviewController extends Controller
     }
 
     // =========================
-    // APPROVE REPORT
+    // APPROVE REPORT (SECURED)
     // =========================
     public function approve($id)
     {
         $report = TitheReport::findOrFail($id);
+
+        // 🔐 ROLE CHECK (TREASURER + SUPER ADMIN ONLY)
+        if (!auth()->user()->hasRole(['super-admin', 'general-treasurer'])) {
+            abort(403, 'You are not authorized to approve this report.');
+        }
 
         if ($report->status !== 'pending') {
             return redirect()
@@ -56,7 +70,7 @@ class TitheReportReviewController extends Controller
 
         $report->update([
             'status' => 'approved',
-            'rejection_reason' => null
+            'rejection_reason' => null,
         ]);
 
         return redirect()
@@ -65,7 +79,7 @@ class TitheReportReviewController extends Controller
     }
 
     // =========================
-    // REJECT REPORT (WITH REASON)
+    // REJECT REPORT (SECURED)
     // =========================
     public function reject(Request $request, $id)
     {
@@ -75,6 +89,11 @@ class TitheReportReviewController extends Controller
 
         $report = TitheReport::findOrFail($id);
 
+        // 🔐 ROLE CHECK (TREASURER + SUPER ADMIN ONLY)
+        if (!auth()->user()->hasRole(['super-admin', 'general-treasurer'])) {
+            abort(403, 'You are not authorized to reject this report.');
+        }
+
         if ($report->status !== 'pending') {
             return redirect()
                 ->route('admin.tithe_review.index')
@@ -83,7 +102,7 @@ class TitheReportReviewController extends Controller
 
         $report->update([
             'status' => 'rejected',
-            'rejection_reason' => $request->rejection_reason
+            'rejection_reason' => $request->rejection_reason,
         ]);
 
         return redirect()

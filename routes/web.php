@@ -445,7 +445,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])->group(
 
         // ---------------- Committee Reports ----------------
         Route::prefix('{committee}/reports')->name('reports.')->group(function () {
-            Route::get('/', [CommitteeReportController::class, 'index'])->name('index'); 
+            Route::get('/', [CommitteeReportController::class, 'index'])->name('list'); 
+            Route::get('/', [CommitteeReportController::class, 'index'])->name('index');
             Route::get('/create', [CommitteeReportController::class, 'create'])->name('create'); 
             Route::post('/', [CommitteeReportController::class, 'store'])->name('store'); 
             Route::get('/{report}/edit', [CommitteeReportController::class, 'edit'])->name('edit'); 

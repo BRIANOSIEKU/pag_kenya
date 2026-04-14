@@ -20,20 +20,23 @@ body {
     line-height: 1.6;
 }
 
+/* CONTAINER */
 .citam-container {
     max-width: 1000px;
     margin: 0 auto;
-    padding: 80px 20px;
+    padding: 70px 20px;
 }
 
 /* TITLE */
 .citam-title {
-    font-size: 42px;
-    font-weight: 800;
+    font-size: 44px;
+    font-weight: 900;
     text-align: center;
     margin-bottom: 50px;
     position: relative;
     padding-bottom: 15px;
+    color: var(--citam-blue);
+    letter-spacing: -1px;
 }
 
 .citam-title::after {
@@ -47,26 +50,15 @@ body {
     background-color: var(--citam-blue);
 }
 
-/* OVERVIEW */
-.citam-overview {
-    font-size: 18px;
-    color: var(--citam-gray);
-    margin-bottom: 60px;
-    padding: 20px 40px;
-    border-left: 5px solid var(--citam-gold);
-    background: #fdfdfd;
-}
-
-/* SECTION TITLE */
+/* SECTION HEAD */
 .citam-section-head {
     font-size: 26px;
     font-weight: 700;
-    margin: 80px 0 30px;
+    margin: 60px 0 25px;
     color: var(--citam-dark);
+    text-transform: uppercase;
     position: relative;
     padding-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .citam-section-head::after {
@@ -79,67 +71,64 @@ body {
     background-color: var(--citam-blue);
 }
 
-/* LEADERS */
+/* OVERVIEW */
+.citam-overview {
+    font-size: 17px;
+    color: var(--citam-gray);
+    margin-bottom: 60px;
+    padding: 25px 35px;
+    border-left: 5px solid var(--citam-gold);
+    background: #fdfdfd;
+}
+
+/* =========================
+   LEADERSHIP FIXED SECTION
+========================= */
+
 .leadership-row {
     display: flex;
     flex-wrap: wrap;
     gap: 30px;
+    justify-content: center;
 }
 
+/* CARD */
 .leader-item {
     flex: 1;
-    min-width: 280px;
-    max-width: 310px;
-    margin-bottom: 40px;
+    min-width: 220px;
+    max-width: 240px;
     text-align: center;
+    padding: 15px;
 }
 
-/* ✅ MODERN PHOTO STYLE */
+/* ✅ UNIFORM IMAGE SIZE FIX */
 .leader-photo-citam {
-    width: 100%;
-    height: auto;
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(255,255,255,0.2), 0 10px 20px rgba(0,0,0,0.15);
-    transition: transform 0.3s ease;
-    margin-bottom: 15px;
-}
-
-.leader-photo-citam:hover {
-    transform: scale(1.03);
-}
-
-.leader-role-citam {
-    font-size: 13px;
-    color: var(--citam-gold);
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-}
-
-.leader-name-citam {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0;
+    width: 160px;
+    height: 160px;       /* FIXED HEIGHT */
+    object-fit: cover;   /* CROPS IMAGE UNIFORMLY */
+    border-radius: 50%;  /* MAKES IT CIRCULAR (cleaner look) */
+    margin-bottom: 12px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    border: 4px solid #fff;
 }
 
 /* MEMBERS */
 .member-row-citam {
     display: flex;
     justify-content: space-between;
-    padding: 15px 0;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 14px 0;
+    border-bottom: 1px solid #eee;
 }
 
 /* REPORTS */
 .report-card {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    padding: 25px;
+    align-items: center;
+    padding: 20px;
     border: 1px solid #eee;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     border-radius: 6px;
-    transition: all 0.3s ease;
 }
 
 .report-card:hover {
@@ -151,28 +140,13 @@ body {
     display: none;
 }
 
-.report-date {
-    font-size: 12px;
-    color: var(--citam-gold);
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.report-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin: 5px 0;
-}
-
 .btn-download {
-    padding: 10px 22px;
     background: var(--citam-dark);
     color: #fff;
+    padding: 10px 18px;
+    border-radius: 5px;
     text-decoration: none;
     font-size: 13px;
-    font-weight: 600;
-    border-radius: 4px;
-    text-transform: uppercase;
 }
 
 .btn-download:hover {
@@ -182,125 +156,123 @@ body {
 .btn-show-more {
     display: block;
     margin: 30px auto;
-    padding: 12px 30px;
-    background: white;
+    padding: 12px 25px;
     border: 2px solid var(--citam-blue);
+    background: white;
     color: var(--citam-blue);
-    font-weight: 700;
+    font-weight: bold;
     cursor: pointer;
-    border-radius: 4px;
 }
 
 .btn-show-more:hover {
     background: var(--citam-blue);
     color: white;
 }
-
-/* MOBILE */
-@media (max-width: 768px) {
-    .report-card {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .btn-download {
-        margin-top: 15px;
-        width: 100%;
-    }
-}
 </style>
 
 <div class="citam-container">
 
+    <!-- TITLE -->
     <h1 class="citam-title">{{ $committee->name }}</h1>
 
-    {{-- OVERVIEW --}}
-    @if($committee->overview)
-        <div class="citam-overview">
-            {!! nl2br(e($committee->overview)) !!}
-        </div>
-    @endif
-
     {{-- LEADERS --}}
-    @if($committee->leaders && $committee->leaders->count() > 0)
+    @if($committee->leaders && $committee->leaders->count())
         <h2 class="citam-section-head">Leadership</h2>
+
         <div class="leadership-row">
             @foreach($committee->leaders as $leader)
+
+                @php
+                    $photo = $leader->pivot->photo
+                        ? asset('storage/leaders_photos/'.$leader->pivot->photo)
+                        : asset('images/default-profile.png');
+                @endphp
+
                 <div class="leader-item">
-                    @php
-                        $photo = $leader->pivot->photo 
-                            ? asset('storage/leaders_photos/'.$leader->pivot->photo) 
-                            : asset('images/default-profile.png');
-                    @endphp
+                    <img src="{{ $photo }}" class="leader-photo-citam">
 
-                    <img src="{{ $photo }}" 
-                         class="leader-photo-citam"
-                         alt="{{ $leader->name }}"
-                         onerror="this.src='{{ asset('images/default-profile.png') }}';">
-
-                    <div class="leader-role-citam">
+                    <div style="color:var(--citam-gold);font-size:12px;font-weight:700;">
                         {{ $leader->pivot->role ?? 'Officer' }}
                     </div>
 
-                    <h3 class="leader-name-citam">{{ $leader->name }}</h3>
+                    <div style="font-size:18px;font-weight:700;">
+                        {{ $leader->name }}
+                    </div>
                 </div>
+
             @endforeach
         </div>
     @endif
 
     {{-- MEMBERS --}}
-    @if($committee->members && $committee->members->count() > 0)
+    @if($committee->members && $committee->members->count())
         <h2 class="citam-section-head">Committee Members</h2>
+
         @foreach($committee->members as $index => $member)
             <div class="member-row-citam">
                 <div>
-                    <span style="color: var(--citam-gold); margin-right: 15px; font-weight: 700;">
+                    <strong style="color:var(--citam-gold);margin-right:10px;">
                         {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
-                    </span>
+                    </strong>
                     {{ $member->member_name }}
                 </div>
-                <div style="font-size: 12px; color: #999; text-transform: uppercase; font-weight: 600;">
+
+                <div style="font-size:12px;color:#888;text-transform:uppercase;">
                     {{ $member->member_gender }}
                 </div>
             </div>
         @endforeach
     @endif
 
+    {{-- OVERVIEW --}}
+    @if(!empty($committee->overview))
+        <h2 class="citam-section-head">Overview</h2>
+
+        <div class="citam-overview">
+            {!! $committee->overview !!}
+        </div>
+    @endif
+
     {{-- REPORTS --}}
-    @if($committee->reports && $committee->reports->count() > 0)
-        <h2 class="citam-section-head">Committee Reports</h2>
+    @if($committee->reports && $committee->reports->count())
+        <h2 class="citam-section-head">Reports</h2>
 
         <div id="reports-list">
             @foreach($committee->reports as $index => $report)
                 <div class="report-wrapper {{ $index >= 5 ? 'hidden-report' : '' }}">
+
                     <div class="report-card">
                         <div>
-                            <div class="report-date">
+                            <div style="font-size:12px;color:var(--citam-gold);font-weight:700;">
                                 {{ \Carbon\Carbon::parse($report->report_date)->format('M d, Y') }}
                             </div>
-                            <h4 class="report-title">{{ $report->title }}</h4>
+
+                            <div style="font-size:18px;font-weight:700;">
+                                {{ $report->title }}
+                            </div>
 
                             @if($report->description)
-                                <p style="font-size: 14px; color: var(--citam-gray); margin: 0;">
+                                <div style="font-size:14px;color:#666;">
                                     {{ $report->description }}
-                                </p>
+                                </div>
                             @endif
                         </div>
 
                         @if($report->attachment)
-                            <a href="{{ asset('storage/'.$report->attachment) }}" 
+                            <a href="{{ asset('storage/'.$report->attachment) }}"
                                class="btn-download" target="_blank">
-                                View Report
+                                View
                             </a>
                         @endif
                     </div>
+
                 </div>
             @endforeach
         </div>
 
         @if($committee->reports->count() > 5)
             <button id="btn-load-more" class="btn-show-more">
-                Show More Reports
+                Show More
             </button>
         @endif
     @endif
@@ -308,11 +280,11 @@ body {
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const btn = document.getElementById('btn-load-more');
 
     if (btn) {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             document.querySelectorAll('.hidden-report')
                 .forEach(el => el.style.display = 'block');
 

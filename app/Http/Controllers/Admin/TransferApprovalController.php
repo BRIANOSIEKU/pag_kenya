@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\DB;
 
 class TransferApprovalController extends Controller
 {
+    /**
+     * Only authenticated users
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     // =========================
     // LIST (HQ PENDING APPROVALS)
     // =========================
@@ -27,14 +35,9 @@ class TransferApprovalController extends Controller
             ->latest()
             ->get();
 
-        // =========================
-        // ADD PERFORMANCE DATA (CURRENT + TARGET)
-        // =========================
         foreach ($transfers as $transfer) {
 
-            // =========================
-            // 1. CURRENT ASSEMBLY PERFORMANCE
-            // =========================
+            // CURRENT PERFORMANCE
             if ($transfer->from_assembly_id) {
 
                 $transfer->currentAssemblyPerformance = DB::table('tithe_report_items')
@@ -54,9 +57,7 @@ class TransferApprovalController extends Controller
                 $transfer->currentAssemblyPerformance = collect();
             }
 
-            // =========================
-            // 2. TARGET ASSEMBLY PERFORMANCE
-            // =========================
+            // TARGET PERFORMANCE
             if ($transfer->to_assembly_id) {
 
                 $transfer->targetAssemblyPerformance = DB::table('tithe_report_items')
@@ -81,10 +82,15 @@ class TransferApprovalController extends Controller
     }
 
     // =========================
-    // APPROVE (HQ FINAL STEP)
+    // APPROVE (SECURED)
     // =========================
     public function approve($id)
     {
+        // 🔐 ROLE CHECK (FIXED)
+        if (!auth()->user()->hasRole(['super-admin', 'general-superintendent'])) {
+            abort(403, 'You are not authorized to approve transfers.');
+        }
+
         $transfer = PastoralTransfer::findOrFail($id);
 
         if ($transfer->main_admin_approved == 1 || $transfer->status == 'approved') {
@@ -111,13 +117,18 @@ class TransferApprovalController extends Controller
     }
 
     // =========================
-    // REJECT (HQ FINAL STEP)
+    // REJECT (SECURED)
     // =========================
     public function reject(Request $request, $id)
     {
         $request->validate([
             'rejection_reason' => 'required|string|max:255'
         ]);
+
+        // 🔐 ROLE CHECK (FIXED)
+        if (!auth()->user()->hasRole(['super-admin', 'general-superintendent'])) {
+            abort(403, 'You are not authorized to reject transfers.');
+        }
 
         $transfer = PastoralTransfer::findOrFail($id);
 

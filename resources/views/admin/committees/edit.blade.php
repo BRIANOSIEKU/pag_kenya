@@ -1,17 +1,86 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="p-6">
-<h2 class="text-xl font-bold mb-4">Edit Committee</h2>
 
-<form method="POST" action="{{ route('admin.committees.update', $committee->id) }}">
-    @csrf
-    @method('PUT')
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
-    <input type="text" name="name" value="{{ $committee->name }}" class="w-full mb-3 p-2 border" required>
-    <textarea name="overview" class="w-full mb-3 p-2 border">{{ $committee->overview }}</textarea>
+<div style="max-width:900px;margin:40px auto;background:#fff;padding:30px;border-radius:10px;">
 
-    <button class="bg-blue-600 text-white px-4 py-2">Update</button>
-</form>
+    <h2>Edit Committee</h2>
+
+    <form method="POST" action="{{ route('admin.committees.update', $committee->id) }}" id="form">
+        @csrf
+        @method('PUT')
+
+        <!-- NAME -->
+        <div style="margin-bottom:20px;">
+            <label>Committee Name</label>
+            <input type="text" name="name"
+                   value="{{ $committee->name }}"
+                   style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;"
+                   required>
+        </div>
+
+        <!-- EDITOR -->
+        <div style="margin-bottom:20px;">
+            <label>Overview</label>
+
+            <!-- QUILL EDITOR -->
+            <div id="editor"
+                 style="height:400px;background:white;border:1px solid #ccc;">
+            </div>
+
+            <input type="hidden" name="overview" id="overview">
+        </div>
+
+        <button type="submit"
+                style="background:black;color:white;padding:10px 18px;border:none;border-radius:6px;">
+            Update
+        </button>
+
+    </form>
+
 </div>
+
+<!-- QUILL JS -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+<script>
+window.onload = function () {
+
+    const editor = document.getElementById("editor");
+
+    if (!editor) {
+        alert("Editor container missing!");
+        return;
+    }
+
+    // INIT QUILL
+    const quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: 'Edit overview...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ header: [1, 2, 3, false] }],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                [{ color: [] }, { background: [] }],
+                ['clean']
+            ]
+        }
+    });
+
+    // LOAD EXISTING CONTENT INTO EDITOR
+    quill.root.innerHTML = `{!! addslashes($committee->overview) !!}`;
+
+    quill.focus();
+
+    // SUBMIT FORM
+    document.getElementById('form').onsubmit = function () {
+        document.getElementById('overview').value = quill.root.innerHTML;
+    };
+
+};
+</script>
+
 @endsection

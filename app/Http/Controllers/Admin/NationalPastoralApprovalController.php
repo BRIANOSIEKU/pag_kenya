@@ -8,6 +8,14 @@ use Illuminate\Http\Request;
 
 class NationalPastoralApprovalController extends Controller
 {
+    /**
+     * Only authenticated users
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     // =========================
     // LIST
     // =========================
@@ -29,7 +37,7 @@ class NationalPastoralApprovalController extends Controller
     }
 
     // =========================
-    // VIEW (ROBUST ATTACHMENT FIX)
+    // VIEW
     // =========================
     public function view($id)
     {
@@ -51,14 +59,13 @@ class NationalPastoralApprovalController extends Controller
         }
 
         // =========================
-        // 🔥 ATTACHMENT NORMALIZER (UNCHANGED)
+        // ATTACHMENT NORMALIZER
         // =========================
         $attachments = $pastor->attachments;
 
         if (empty($attachments)) {
             $attachments = [];
         } elseif (is_string($attachments)) {
-
             $decoded = json_decode($attachments, true);
 
             if (is_string($decoded)) {
@@ -68,24 +75,27 @@ class NationalPastoralApprovalController extends Controller
             $attachments = is_array($decoded) ? $decoded : [];
         }
 
-        $attachments = array_values(array_filter($attachments));
-
-        $pastor->attachments = $attachments;
+        $pastor->attachments = array_values(array_filter($attachments));
 
         return view('admin.national_pastoral_approvals.view', compact('pastor'));
     }
 
     // =========================
-    // APPROVE
+    // APPROVE (SECURED)
     // =========================
     public function approve($id)
     {
+        // 🔐 ROLE CHECK (UPDATED CORRECTLY)
+        if (!auth()->user()->hasRole(['super-admin', 'general-secretary'])) {
+            abort(403, 'You are not authorized to approve pastoral transfers.');
+        }
+
         $updated = DB::table('pastoral_teams')
             ->where('id', $id)
             ->where('status', 'pending')
             ->update([
                 'status' => 'approved',
-                'rejection_reason' => null, // clear old reason if exists
+                'rejection_reason' => null,
                 'updated_at' => now()
             ]);
 
@@ -96,13 +106,18 @@ class NationalPastoralApprovalController extends Controller
     }
 
     // =========================
-    // REJECT (NEW WITH REASON)
+    // REJECT (SECURED)
     // =========================
     public function reject(Request $request, $id)
     {
         $request->validate([
             'rejection_reason' => 'required|string|max:1000'
         ]);
+
+        // 🔐 ROLE CHECK (UPDATED CORRECTLY)
+        if (!auth()->user()->hasRole(['super-admin', 'general-secretary'])) {
+            abort(403, 'You are not authorized to reject pastoral transfers.');
+        }
 
         $updated = DB::table('pastoral_teams')
             ->where('id', $id)
