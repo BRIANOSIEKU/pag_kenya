@@ -9,6 +9,27 @@
         District Admins
     </h1>
 
+    <style>
+    .btn-back {
+    background: #607D8B;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.btn-back:hover {
+    opacity: 0.85;
+}
+</style>
+
+   <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
+            ← Back to District Module Dashboard
+        </a>
+
+
     <div style="width:120px; height:4px; background:#4CAF50; margin:0 auto 20px auto; border-radius:2px;"></div>
 
     {{-- ================= SUCCESS ================= --}}

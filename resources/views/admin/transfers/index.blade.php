@@ -2,7 +2,28 @@
 
 @section('content')
 
-<h2 style="margin-bottom:15px;">Pending Transfer Requests (HQ Approval)</h2>
+<style>
+    .btn-back {
+    background: #607D8B;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.btn-back:hover {
+    opacity: 0.85;
+}
+</style>
+
+   <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
+            ← Back to District Dashboard
+        </a>
+
+
+<h2 style="margin-bottom:15px;">Pending Transfer Requests (HQ Comparison View)</h2>
 
 @if(session('success'))
     <div style="background:#d4edda;padding:10px;color:#155724;margin-bottom:10px;border-radius:6px;">
@@ -19,19 +40,11 @@
 
 @forelse($transfers as $transfer)
 
-<div style="
-    background:#fff;
-    border:1px solid #e5e5e5;
-    border-radius:10px;
-    padding:18px;
-    margin-bottom:18px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.05);
-">
+<div style="background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:18px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
 
-    {{-- TOP SECTION --}}
+    {{-- ================= PASTOR HEADER ================= --}}
     <div style="display:flex;gap:18px;align-items:center;border-bottom:1px solid #eee;padding-bottom:15px;margin-bottom:15px;">
 
-        {{-- PHOTO --}}
         <div>
             @if($transfer->pastor->photo)
                 <img src="{{ asset('storage/' . $transfer->pastor->photo) }}"
@@ -41,81 +54,108 @@
             @endif
         </div>
 
-        {{-- NAME + BASIC INFO --}}
         <div style="flex:1;">
             <h3 style="margin:0;font-size:18px;">
                 {{ $transfer->pastor->name ?? 'N/A' }}
             </h3>
 
-            <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;color:#444;">
-                <div><b>Gender:</b> {{ $transfer->pastor->gender }}</div>
-                <div><b>Phone:</b> {{ $transfer->pastor->contact }}</div>
-                <div><b>Date of Birth:</b> {{ $transfer->pastor->date_of_birth }}</div>
-                <div><b>Graduation Year:</b> {{ $transfer->pastor->graduation_year }}</div>
+            {{-- ================= DISTRICT + ASSEMBLY INFO ================= --}}
+            <div style="font-size:13px;color:#444;margin-top:6px;line-height:1.6;">
+
+                <div>
+                    <b>Current:</b>
+                    {{ $transfer->fromDistrict->name ?? 'N/A' }} /
+                    {{ $transfer->fromAssembly->name ?? 'N/A' }}
+                </div>
+
+                <div>
+                    <b>Target:</b>
+                    {{ $transfer->toDistrict->name ?? 'N/A' }} /
+                    {{ $transfer->toAssembly->name ?? 'N/A' }}
+                </div>
+
             </div>
         </div>
 
     </div>
 
 
-    {{-- TRANSFER INFO --}}
+    {{-- ================= CURRENT ASSEMBLY ================= --}}
     <div style="margin-bottom:15px;">
-        <h4 style="margin-bottom:6px;font-size:14px;">Transfer Details</h4>
+        <h4 style="font-size:14px;margin-bottom:8px;color:#2c3e50;">
+            Current Assembly Performance (Last 4 Months)
+        </h4>
 
-        <div style="font-size:13px;line-height:1.6;color:#333;">
-            <b>From:</b> {{ $transfer->fromDistrict->name ?? '' }} /
-            {{ $transfer->fromAssembly->name ?? '' }} <br>
+        @if(isset($transfer->currentAssemblyPerformance) && $transfer->currentAssemblyPerformance->count())
 
-            <b>To:</b> {{ $transfer->toDistrict->name ?? '' }} /
-            {{ $transfer->toAssembly->name ?? '' }}
-        </div>
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                    <tr style="background:#f1f1f1;">
+                        <th style="padding:8px;border:1px solid #ddd;text-align:left;">Month</th>
+                        <th style="padding:8px;border:1px solid #ddd;text-align:left;">Tithe (KES)</th>
+                    </tr>
+                </thead>
 
-        <div style="margin-top:8px;">
-            <b>Reason:</b>
-            <div style="margin-top:3px;color:#555;">
-                {{ $transfer->reason }}
-            </div>
-        </div>
-    </div>
-
-
-    {{-- ATTACHMENTS --}}
-    <div style="margin-bottom:15px;">
-        <h4 style="margin-bottom:6px;font-size:14px;">Credentials</h4>
-
-        @if($transfer->pastor->attachments)
-            @php
-                $files = json_decode($transfer->pastor->attachments, true);
-            @endphp
-
-            <div style="font-size:13px;">
-                @if(is_array($files))
-                    @foreach($files as $file)
-                        <div style="margin-bottom:4px;">
-                            📎 <a href="{{ asset('storage/' . $file) }}" target="_blank">
-                                View Credentials
-                            </a>
-                        </div>
+                <tbody>
+                    @foreach($transfer->currentAssemblyPerformance as $perf)
+                        <tr>
+                            <td style="padding:8px;border:1px solid #ddd;">
+                                {{ $perf->month ?? '' }} {{ $perf->year ?? '' }}
+                            </td>
+                            <td style="padding:8px;border:1px solid #ddd;">
+                                {{ number_format($perf->total ?? 0) }}
+                            </td>
+                        </tr>
                     @endforeach
-                @else
-                    📎 <a href="{{ asset('storage/' . $transfer->pastor->attachments) }}" target="_blank">
-                        View Document
-                    </a>
-                @endif
-            </div>
+                </tbody>
+            </table>
 
         @else
-            <span style="color:#888;font-size:13px;">No credentials uploaded</span>
+            <span style="color:#888;font-size:13px;">No current assembly performance data.</span>
         @endif
     </div>
 
 
-    {{-- ACTIONS (HQ ONLY) --}}
+    {{-- ================= TARGET ASSEMBLY ================= --}}
+    <div style="margin-bottom:15px;">
+        <h4 style="font-size:14px;margin-bottom:8px;color:#27ae60;">
+            Target Assembly Performance (Last 4 Months)
+        </h4>
+
+        @if(isset($transfer->targetAssemblyPerformance) && $transfer->targetAssemblyPerformance->count())
+
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                    <tr style="background:#f1f1f1;">
+                        <th style="padding:8px;border:1px solid #ddd;text-align:left;">Month</th>
+                        <th style="padding:8px;border:1px solid #ddd;text-align:left;">Tithe (KES)</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach($transfer->targetAssemblyPerformance as $perf)
+                        <tr>
+                            <td style="padding:8px;border:1px solid #ddd;">
+                                {{ $perf->month ?? '' }} {{ $perf->year ?? '' }}
+                            </td>
+                            <td style="padding:8px;border:1px solid #ddd;">
+                                {{ number_format($perf->total ?? 0) }}
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+        @else
+            <span style="color:#888;font-size:13px;">No target assembly performance data.</span>
+        @endif
+    </div>
+
+
+    {{-- ================= ACTIONS ================= --}}
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:1px solid #eee;padding-top:12px;">
 
-        {{-- APPROVE --}}
-        <form method="POST"
-              action="{{ route('admin.transfers.approve', $transfer->id) }}">
+        <form method="POST" action="{{ route('admin.transfers.approve', $transfer->id) }}">
             @csrf
             <button type="submit"
                     style="background:#28a745;color:#fff;border:none;padding:10px 14px;border-radius:6px;font-weight:bold;">
@@ -123,7 +163,6 @@
             </button>
         </form>
 
-        {{-- REJECT --}}
         <form method="POST"
               action="{{ route('admin.transfers.reject', $transfer->id) }}"
               style="display:flex;gap:8px;align-items:center;">

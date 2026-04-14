@@ -34,6 +34,17 @@ class DistrictController extends Controller
     }
 
     /**
+     * SHOW SINGLE DISTRICT (PUBLIC VIEW FIXED)
+     */
+    public function show($id)
+    {
+        $district = District::with('pastoralTeam')->findOrFail($id);
+
+        // PUBLIC VIEW (NOT ADMIN)
+        return view('pages.districts.show', compact('district'));
+    }
+
+    /**
      * CREATE FORM
      */
     public function create()
@@ -99,7 +110,7 @@ class DistrictController extends Controller
 
     /**
      * ============================
-     * EXPORT ALL PASTORS (NEW)
+     * EXPORT ALL PASTORS
      * ============================
      */
     public function exportPastors()

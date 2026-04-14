@@ -193,7 +193,7 @@
         @endif
     </div>
 
-    {{-- CONTRIBUTIONS --}}
+    {{-- CONTRIBUTIONS (UPDATED WITH MUHTASARI COLUMN) --}}
     <div class="card">
         <h3 style="color:#1e3c72;">Assemblies Contributions</h3>
 
@@ -203,6 +203,7 @@
                     <th>#</th>
                     <th>Assembly</th>
                     <th>Amount</th>
+                    <th>Muhtasari</th>
                 </tr>
             </thead>
 
@@ -210,8 +211,30 @@
                 @foreach($report->items as $item)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
+
                     <td>{{ $item->assembly->name }}</td>
-                    <td><strong>KES {{ number_format($item->amount, 2) }}</strong></td>
+
+                    <td>
+                        <strong>KES {{ number_format($item->amount, 2) }}</strong>
+                    </td>
+
+                    <td>
+                        @if($item->assembly_muhtasari)
+                            <a href="{{ asset('storage/' . $item->assembly_muhtasari) }}"
+                               target="_blank"
+                               style="display:inline-block;
+                                      padding:6px 10px;
+                                      background:#2196f3;
+                                      color:#fff;
+                                      border-radius:6px;
+                                      text-decoration:none;">
+                                📷 Click to view Muhtasari
+                            </a>
+                        @else
+                            <span style="color:#999;">No image uploaded</span>
+                        @endif
+                    </td>
+
                 </tr>
                 @endforeach
             </tbody>
@@ -243,7 +266,7 @@
                 <button class="btn btn-approve">Approve Report</button>
             </form>
 
-            {{-- REJECT WITH REASON --}}
+            {{-- REJECT --}}
             <form method="POST" action="{{ route('admin.tithe_review.reject', $report->id) }}">
                 @csrf
 

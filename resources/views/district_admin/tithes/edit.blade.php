@@ -5,7 +5,7 @@
 <h2>Edit Tithe Report</h2>
 
 @if(session('error'))
-<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:6px;margin-bottom:15px;">
+<div style="background:#f8d7da;color:#721c24;padding:10px;">
     {{ session('error') }}
 </div>
 @endif
@@ -14,130 +14,132 @@
       action="{{ route('district.admin.tithes.update', $report->id) }}"
       enctype="multipart/form-data">
 
-    @csrf
-    @method('PUT')
+@csrf
+@method('PUT')
 
-    <!-- YEAR -->
-    <label>Year</label><br>
-    <input type="number"
-           name="year"
-           value="{{ old('year', $report->year) }}"
-           required>
-    <br><br>
+<label>Year</label><br>
+<input type="number" name="year" value="{{ $report->year }}" required><br><br>
 
-    <!-- MONTH -->
-    <label>Month</label><br>
-    <select name="month" required>
-        @foreach([
-            'January','February','March','April','May','June',
-            'July','August','September','October','November','December'
-        ] as $month)
-            <option value="{{ $month }}"
-                {{ old('month', $report->month) == $month ? 'selected' : '' }}>
-                {{ $month }}
-            </option>
-        @endforeach
-    </select>
+<label>Month</label><br>
+<select name="month" required>
+    @foreach([
+        'January','February','March','April','May','June',
+        'July','August','September','October','November','December'
+    ] as $month)
+        <option value="{{ $month }}" {{ $report->month == $month ? 'selected' : '' }}>
+            {{ $month }}
+        </option>
+    @endforeach
+</select>
 
-    <br><br>
+<br><br>
 
-    <!-- PAYMENT CODE -->
-    <label>Payment Code</label><br>
-    <input type="text"
-           name="payment_code"
-           value="{{ old('payment_code', $report->payment_code) }}"
-           required>
+<label>Payment Code</label><br>
+<input type="text" name="payment_code" value="{{ $report->payment_code }}" required>
 
-    <br><br>
+<br><br>
 
-    <h3>Update Assembly Contributions</h3>
+<h3>Update Assemblies</h3>
 
-    <table style="width:100%; border-collapse:collapse;">
-        <thead>
-            <tr style="background:#f5f5f5;">
-                <th style="padding:10px;border:1px solid #ddd;">Assembly</th>
-                <th style="padding:10px;border:1px solid #ddd;">Amount (KES)</th>
+<table style="width:100%; border-collapse:collapse;">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Assembly</th>
+            <th>Amount</th>
+            <th>Current File</th>
+            <th>Replace</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach($assemblies as $index => $assembly)
+
+            @php
+                $item = $items[$assembly->id] ?? null;
+                $existingAmount = $item->amount ?? 0;
+                $existingFile = $item->assembly_muhtasari ?? null;
+            @endphp
+
+            <tr>
+                <td>
+                    {{ $index + 1 }}
+                    <input type="hidden" name="assembly_ids[]" value="{{ $assembly->id }}">
+                </td>
+
+                <td>{{ $assembly->name }}</td>
+
+                <td>
+                    <input type="number"
+                           name="amounts[{{ $assembly->id }}]"
+                           class="amount"
+                           value="{{ $existingAmount }}"
+                           min="0"
+                           required>
+                </td>
+
+                <td>
+                    @if($existingFile)
+                        <a href="{{ asset('storage/' . $existingFile) }}" target="_blank">
+                            View
+                        </a>
+                    @else
+                        No file
+                    @endif
+                </td>
+
+                {{-- 🔥 MOBILE SAFE FILE INPUT --}}
+                <td>
+                    <input type="file"
+                           name="assembly_muhtasari[]"
+                           accept="image/*"
+                           capture="environment">
+                </td>
             </tr>
-        </thead>
 
-        <tbody>
-            @foreach($assemblies as $assembly)
+        @endforeach
+    </tbody>
+</table>
 
-                @php
-                    $existingAmount = $report->items
-                        ->where('assembly_id', $assembly->id)
-                        ->first()
-                        ->amount ?? 0;
-                @endphp
+<br>
 
-                <tr>
-                    <td style="padding:10px;border:1px solid #ddd;">
-                        {{ $assembly->name }}
-                    </td>
+<h3>Total: KES <span id="total">0.00</span></h3>
 
-                    <td style="padding:10px;border:1px solid #ddd;">
-                        <input type="number"
-                               name="amounts[{{ $assembly->id }}]"
-                               value="{{ old('amounts.' . $assembly->id, $existingAmount) }}"
-                               min="0"
-                               class="amount">
-                    </td>
-                </tr>
+<br>
 
-            @endforeach
-        </tbody>
-    </table>
+<p>
+    <strong>Current Receipt:</strong><br>
+    @if($report->receipt)
+        <a href="{{ asset('storage/' . $report->receipt) }}" target="_blank">View</a>
+    @else
+        None
+    @endif
+</p>
 
-    <br>
+<label>Replace Receipt (optional)</label><br>
+<input type="file" name="receipt" accept="image/*" capture="environment">
 
-    <h3>Total: KES <span id="total">0.00</span></h3>
+<br><br>
 
-    <br>
-
-    <!-- CURRENT RECEIPT -->
-    <p>
-        <strong>Current Receipt:</strong><br>
-        @if($report->receipt)
-            <a href="{{ asset('storage/' . $report->receipt) }}" target="_blank">
-                View Receipt
-            </a>
-        @else
-            No receipt uploaded
-        @endif
-    </p>
-
-    <br>
-
-    <!-- NEW RECEIPT -->
-    <label>Replace Receipt (Optional)</label><br>
-    <input type="file" name="receipt">
-
-    <br><br>
-
-    <button type="submit"
-            style="background:#2196F3;color:#fff;padding:10px 15px;border:none;border-radius:5px;">
-        Update Report
-    </button>
+<button type="submit" style="background:#2196F3;color:#fff;padding:10px;">
+    Update Report
+</button>
 
 </form>
 
-<!-- AUTO TOTAL SCRIPT -->
 <script>
 function calculateTotal() {
     let total = 0;
-
-    document.querySelectorAll('.amount').forEach(input => {
-        total += parseFloat(input.value) || 0;
+    document.querySelectorAll('.amount').forEach(i => {
+        total += parseFloat(i.value) || 0;
     });
-
     document.getElementById('total').innerText = total.toFixed(2);
 }
 
-document.querySelectorAll('.amount').forEach(input => {
-    input.addEventListener('input', calculateTotal);
-});
+document.querySelectorAll('.amount').forEach(i =>
+    i.addEventListener('input', calculateTotal)
+);
 
-// initial calculation on load
 calculateTotal();
 </script>
 

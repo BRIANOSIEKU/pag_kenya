@@ -15,6 +15,7 @@ class TitheReportItemHistory extends Model
         'tithe_report_id',
         'assembly_id',
         'amount',
+        'assembly_muhtasari', // ✅ ADDED
     ];
 
     /**

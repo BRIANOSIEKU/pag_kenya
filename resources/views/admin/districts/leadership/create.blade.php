@@ -27,8 +27,8 @@
 
 <label>Gender</label><br>
 <select name="gender" required>
-    <option>Male</option>
-    <option>Female</option>
+    <option value="Male">Male</option>
+    <option value="Female">Female</option>
 </select><br><br>
 
 <label>Contact</label><br>
@@ -39,6 +39,21 @@
 
 <label>Date of Birth</label><br>
 <input type="date" name="dob" required><br><br>
+
+{{-- ================= BANK DETAILS ================= --}}
+<h3 style="margin-top:20px;">Bank Details</h3>
+
+<label>Bank Name</label><br>
+<input type="text" name="bank_name" required><br><br>
+
+<label>Branch</label><br>
+<input type="text" name="bank_branch" required><br><br>
+
+<label>Account Number</label><br>
+<input type="text" name="account_number" required><br><br>
+
+{{-- ================= FILE UPLOADS ================= --}}
+<h3 style="margin-top:20px;">Uploads</h3>
 
 <label>Photo</label><br>
 <input type="file" name="photo"><br><br>

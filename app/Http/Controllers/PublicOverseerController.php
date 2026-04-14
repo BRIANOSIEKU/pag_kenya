@@ -3,19 +3,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Overseer;
+use App\Models\District;
 
 class PublicOverseerController extends Controller
 {
     /**
-     * Show the public church overseers page.
+     * Show the public church districts page.
      */
     public function index()
     {
-        // Get all overseers ordered by name
-        $overseers = Overseer::orderBy('name')->get();
+        // Get all districts ordered by name and include overseer relationship
+        $districts = District::with('overseer')
+            ->orderBy('name')
+            ->get();
 
-        // Return a dedicated public view
-        return view('pages.overseers', compact('overseers'));
+        // Return the updated districts view
+        return view('pages.districts', compact('districts'));
     }
 }

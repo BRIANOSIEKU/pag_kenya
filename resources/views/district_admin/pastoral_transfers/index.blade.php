@@ -2,6 +2,26 @@
 
 @section('content')
 
+<style>
+    .btn-back {
+    background: #607D8B;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.btn-back:hover {
+    opacity: 0.85;
+}
+</style>
+
+   <a href="{{ route('district.admin.dashboard') }}" class="btn-back">
+            ← Back to Dashboard
+        </a>
+
 <div style="max-width:1200px;margin:auto;">
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
@@ -45,6 +65,17 @@
 
             @php
                 $isSameDistrict = $transfer->from_district_id == $transfer->to_district_id;
+
+                $canDownloadLetter =
+                    (
+                        $isSameDistrict && $transfer->status === 'approved'
+                    )
+                    ||
+                    (
+                        !$isSameDistrict &&
+                        $transfer->to_district_approved &&
+                        $transfer->status === 'approved'
+                    );
             @endphp
 
             <tr style="border-bottom:1px solid #eee;">
@@ -69,7 +100,6 @@
                 {{-- APPROVAL STATUS --}}
                 <td style="font-size:12px;">
 
-                    {{-- ================= SAME DISTRICT ================= --}}
                     @if($isSameDistrict)
 
                         <div>
@@ -83,7 +113,6 @@
                             @endif
                         </div>
 
-                    {{-- ================= INTER DISTRICT ================= --}}
                     @else
 
                         <div>
@@ -120,6 +149,7 @@
                 {{-- ACTIONS --}}
                 <td>
 
+                    {{-- PENDING STATE --}}
                     @if($transfer->status == 'pending')
 
                         <a href="{{ route('district.admin.pastoral.transfers.edit', $transfer->id) }}"
@@ -142,7 +172,21 @@
                         </form>
 
                     @else
-                        <em style="color:#888;font-size:12px;">Locked</em>
+
+                        {{-- APPROVED → DOWNLOAD LETTER --}}
+                        @if($canDownloadLetter)
+
+                            <a href="{{ route('district.admin.pastoral.transfers.download', $transfer->id) }}"
+                               style="padding:5px 10px;background:#28a745;color:#fff;text-decoration:none;border-radius:4px;font-size:12px;">
+                                Download Letter
+                            </a>
+
+                        @else
+
+                            <em style="color:#888;font-size:12px;">Locked</em>
+
+                        @endif
+
                     @endif
 
                 </td>

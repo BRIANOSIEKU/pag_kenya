@@ -37,6 +37,12 @@ class DistrictLeaderController extends Controller
             'contact' => 'required',
             'national_id' => 'required',
             'dob' => 'required|date',
+
+            // BANK FIELDS
+            'bank_name' => 'required|string|max:255',
+            'bank_branch' => 'required|string|max:255',
+            'account_number' => 'required|string|max:255',
+
             'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'attachments.*' => 'nullable|file|max:5120',
         ]);
@@ -64,8 +70,14 @@ class DistrictLeaderController extends Controller
             'contact' => $request->contact,
             'national_id' => $request->national_id,
             'dob' => $request->dob,
+
+            // BANK FIELDS
+            'bank_name' => $request->bank_name,
+            'bank_branch' => $request->bank_branch,
+            'account_number' => $request->account_number,
+
             'photo' => $photoPath,
-            'attachments' => json_encode($attachments),
+            'attachments' => $attachments, // FIXED (no json_encode)
         ]);
 
         return redirect()
@@ -95,6 +107,12 @@ class DistrictLeaderController extends Controller
             'contact' => 'required',
             'national_id' => 'required',
             'dob' => 'required|date',
+
+            // BANK FIELDS
+            'bank_name' => 'required|string|max:255',
+            'bank_branch' => 'required|string|max:255',
+            'account_number' => 'required|string|max:255',
+
             'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'attachments.*' => 'nullable|file|max:5120',
         ]);
@@ -106,6 +124,11 @@ class DistrictLeaderController extends Controller
             'contact' => $request->contact,
             'national_id' => $request->national_id,
             'dob' => $request->dob,
+
+            // BANK FIELDS
+            'bank_name' => $request->bank_name,
+            'bank_branch' => $request->bank_branch,
+            'account_number' => $request->account_number,
         ];
 
         if ($request->hasFile('photo')) {
@@ -120,7 +143,7 @@ class DistrictLeaderController extends Controller
                 $attachments[] = $file->store('leaders/attachments', 'public');
             }
 
-            $data['attachments'] = json_encode($attachments);
+            $data['attachments'] = $attachments; // FIXED
         }
 
         $leader->update($data);

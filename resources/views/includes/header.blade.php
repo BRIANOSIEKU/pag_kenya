@@ -64,7 +64,7 @@ $contact = ContactInfo::first();
         <div class="dropdown-menu">
           <a href="{{ route('leadership.public', 'executive-committee') }}">Executive Committee</a>
           <a href="{{ route('leadership.public', 'church-council') }}">Church Council</a>
-          <a href="{{ route('church.overseers') }}">District Overseers</a>
+          <a href="{{ route('church.overseers') }}">Districts Leadership</a>
           <a href="{{ route('hq.staff.public') }}">PAG Kenya HQ Staff</a>
         </div>
       </div>

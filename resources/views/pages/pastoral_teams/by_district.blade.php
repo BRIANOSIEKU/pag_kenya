@@ -1,65 +1,125 @@
 @extends('layouts.app')
 
 @section('content')
-<div style="max-width:1000px; margin:auto; padding:20px;">
 
-    {{-- Back Button --}}
-    <div style="margin-bottom:20px;">
-        <a href="{{ url()->previous() }}" 
-           style="padding:8px 15px; background:#FF9800; color:#fff; border-radius:4px; text-decoration:none;">
-            ← Back
-        </a>
+<div style="max-width:1100px; margin:auto; padding:20px;">
+
+    {{-- TITLE --}}
+    <h1 style="text-align:center; color:#1e3c72; text-transform:uppercase;">
+        PASTORAL TEAM OF {{ $district->name }} DISTRICT
+    </h1>
+
+    <div style="width:160px; height:4px; background:#FF9800; margin:10px auto 25px;"></div>
+
+    {{-- DISTRICT INFO --}}
+    <div style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:25px;">
+        <p><strong>District:</strong> {{ $district->name }}</p>
+        <p><strong>Overseer:</strong> {{ $district->overseer_name ?? 'Not Assigned' }}</p>
     </div>
 
-    {{-- Page Title --}}
-    <h1 style="text-align:center; color:#1e3c72; margin-bottom:10px; font-size:2em;">
-        Pastoral Team in {{ $district }}
-    </h1>
-    <div style="width:120px; height:4px; background:#FF9800; margin:0 auto 30px auto; border-radius:2px;"></div>
-
+    {{-- TEAM --}}
     @if($teams->count() > 0)
-        <table style="width:100%; border-collapse:collapse; box-shadow:0 0 10px rgba(0,0,0,0.1);">
-            <thead>
-                <tr style="background:#f5f5f5; text-align:left;">
-                    <th style="padding:10px; border:1px solid #ddd; width:40px;">#</th>
-                    <th style="padding:10px; border:1px solid #ddd; width:80px;">Photo</th>
-                    <th style="padding:10px; border:1px solid #ddd;">Name</th>
-                    <th style="padding:10px; border:1px solid #ddd;">Assembly</th>
-                    <th style="padding:10px; border:1px solid #ddd;">Role</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($teams as $index => $team)
-                    <tr>
-                        <td style="padding:10px; border:1px solid #ddd; font-weight:bold;">
-                            {{ $index + 1 }}
-                        </td>
-                        <td style="padding:10px; border:1px solid #ddd; width:80px;">
-                            @if($team->photo)
-                                <img src="{{ asset('storage/'.$team->photo) }}" 
-                                     alt="{{ $team->name }}" 
-                                     width="60" height="60" 
-                                     style="object-fit:cover; border-radius:50%; border:1px solid #ccc;">
-                            @else
-                                <div style="width:60px; height:60px; background:#ccc; border-radius:50%;"></div>
-                            @endif
-                        </td>
-                        <td style="padding:10px; border:1px solid #ddd; font-weight:bold;">
-                            {{ $team->name }}
-                        </td>
-                        <td style="padding:10px; border:1px solid #ddd;">
-                            {{ $team->assembly_name }}
-                        </td>
-                        <td style="padding:10px; border:1px solid #ddd;">
-                            {{ $team->role ?? '-' }}
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+
+        <div style="
+            display:grid;
+            grid-template-columns:repeat(4, 1fr);
+            gap:15px;
+        ">
+
+            @foreach($teams as $member)
+                <div style="
+                    background:#fff;
+                    border:1px solid #ddd;
+                    border-radius:10px;
+                    padding:15px;
+                    text-align:center;
+                    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+                    transition:0.3s;
+                    position:relative;
+                "
+                onmouseover="this.style.transform='scale(1.03)'"
+                onmouseout="this.style.transform='scale(1)'">
+
+                    {{-- NUMBERING BADGE --}}
+                    <div style="
+                        position:absolute;
+                        top:10px;
+                        left:10px;
+                        background:#1e3c72;
+                        color:#fff;
+                        width:28px;
+                        height:28px;
+                        border-radius:50%;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        font-size:13px;
+                        font-weight:bold;
+                    ">
+                        {{ $loop->iteration }}
+                    </div>
+
+                    {{-- PHOTO --}}
+                    <div>
+                        @if($member->photo)
+                            <img src="{{ asset('storage/' . $member->photo) }}"
+                                 style="width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid #1e3c72;">
+                        @else
+                            <img src="https://via.placeholder.com/90"
+                                 style="width:90px; height:90px; border-radius:50%;">
+                        @endif
+                    </div>
+
+                    {{-- NAME --}}
+                    <h4 style="margin:10px 0 5px; color:#333;">
+                        {{ $member->name }}
+                    </h4>
+
+                    {{-- ASSEMBLY --}}
+                    <p style="margin:0; font-size:13px; color:#666;">
+                        <strong>Assembly:</strong>
+                        {{ $member->assembly->name ?? 'Not Assigned' }}
+                    </p>
+
+                    {{-- GENDER --}}
+                    <p style="margin:5px 0; font-size:13px; color:#666;">
+                        <strong>Gender:</strong>
+                        {{ $member->gender }}
+                    </p>
+
+                </div>
+            @endforeach
+
+        </div>
+
     @else
-        <p style="text-align:center; color:#777;">No pastoral team members found in this district.</p>
+        <p style="text-align:center; color:#777;">
+            No pastoral team members found for this district.
+        </p>
     @endif
 
+
 </div>
+
+{{-- RESPONSIVE --}}
+<style>
+@media (max-width: 1200px) {
+    div[style*="grid-template-columns"] {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    div[style*="grid-template-columns"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 500px) {
+    div[style*="grid-template-columns"] {
+        grid-template-columns: repeat(1, 1fr) !important;
+    }
+}
+</style>
+
 @endsection

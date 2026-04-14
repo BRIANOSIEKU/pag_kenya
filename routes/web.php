@@ -49,13 +49,27 @@ use App\Http\Controllers\DistrictAdmin\PastoralTransferController;
 use App\Http\Controllers\DistrictAdmin\NotificationController;
 use App\Http\Controllers\Admin\TransferApprovalController;
 use App\Http\Controllers\Admin\DownloadController;
+use App\Http\Controllers\Admin\OverseerReportController;
+use App\Http\Controllers\Admin\NationalOfficeShareController;
+use App\Http\Controllers\Admin\DistrictSummaryController;
+use App\Http\Controllers\DistrictAdmin\PastoralTransferLetterController;
+use App\Http\Controllers\Admin\NationalPastoralApprovalController;
 
 // -------------------- PUBLIC ROUTES --------------------
 //Public for Committees
 Route::get('/committees/{committee}', [PublicCommitteeController::class, 'show'])
     ->name('public.committees.show');
 
-    
+
+    //-----church districts------
+Route::get('/districts', [DistrictController::class, 'index'])
+    ->name('public.districts.index');
+
+Route::get('/districts/{id}', [DistrictController::class, 'show'])
+    ->name('public.districts.show');
+    Route::get('/districts/{id}/pastoral-team', [PublicPastoralTeamController::class, 'show'])
+    ->name('public.pastoral-teams.by-district');
+
 //PUBLIC ROUTE FOR OVERSEERS
 Route::get('/church-overseers', [PublicOverseerController::class, 'index'])
      ->name('church.overseers');
@@ -792,5 +806,75 @@ Route::prefix('district/admin')->group(function () {
 
     Route::get('/downloads', [\App\Http\Controllers\Admin\DownloadController::class, 'districtIndex'])
         ->name('district.admin.downloads.index');
+
+});
+
+//=====export reports routes=====
+Route::prefix('admin')->group(function () {
+
+    Route::get('/exports', [OverseerReportController::class, 'index'])
+        ->name('admin.exports.index');
+
+    Route::get('/export/overseer-reimbursement', [OverseerReportController::class, 'form'])
+        ->name('admin.export.overseer.form');
+
+    Route::post('/export/overseer-reimbursement', [OverseerReportController::class, 'export'])
+        ->name('admin.export.overseer.generate');
+
+});
+
+//-------NATIONAL OFFICE SHARE-------
+Route::get('/admin/export/national-office-share', 
+    [NationalOfficeShareController::class, 'form']
+)->name('admin.export.national.form');
+
+Route::post('/admin/export/national-office-share', 
+    [NationalOfficeShareController::class, 'export']
+)->name('admin.export.national.generate');
+
+//=====DISTRICT SHARE EXPORT=======
+Route::get('/admin/district-summary', [DistrictSummaryController::class, 'form'])
+    ->name('admin.export.district_summary.form');
+
+Route::post('/admin/district-summary/generate', [DistrictSummaryController::class, 'export'])
+    ->name('admin.export.district_summary.generate');
+
+
+    //======Download transfer letter=======
+Route::get(
+    '/district-admin/pastoral-transfers/{id}/download-letter',
+    [PastoralTransferLetterController::class, 'download']
+)->name('district.admin.pastoral.transfers.download');
+
+//=====live stats=======
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])->group(function () {
+
+    Route::get('/dashboard-stats', [DashboardStatsController::class, 'index'])
+        ->name('dashboard.stats');
+
+});
+
+//=====national pastor approval=======
+Route::prefix('admin')->name('admin.')->group(function () {
+
+    // LIST
+    Route::get('/national-pastoral-approvals',
+        [NationalPastoralApprovalController::class, 'index']
+    )->name('national.pastoral.approvals.index');
+
+    // VIEW (THIS IS WHAT YOU ARE MISSING)
+    Route::get('/national-pastoral-approvals/view/{id}',
+        [NationalPastoralApprovalController::class, 'view']
+    )->name('national.pastoral.approvals.view');
+
+    // APPROVE
+    Route::post('/national-pastoral-approvals/approve/{id}',
+        [NationalPastoralApprovalController::class, 'approve']
+    )->name('national.pastoral.approvals.approve');
+
+    // REJECT
+    Route::post('/national-pastoral-approvals/reject/{id}',
+        [NationalPastoralApprovalController::class, 'reject']
+    )->name('national.pastoral.approvals.reject');
 
 });

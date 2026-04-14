@@ -7,11 +7,9 @@
 <form method="POST" action="{{ route('district.admin.tithes.store') }}" enctype="multipart/form-data">
 @csrf
 
-<!-- YEAR -->
 <label>Year</label><br>
 <input type="number" name="year" required><br><br>
 
-<!-- MONTH -->
 <label>Month</label><br>
 <select name="month" required>
     @foreach([
@@ -24,9 +22,8 @@
 
 <br><br>
 
-<!-- PAYMENT CODE -->
 <label>Payment Code (Mpesa Transaction Code)</label><br>
-<input type="text" name="payment_code" required placeholder="e.g. QWE123ABC">
+<input type="text" name="payment_code" required>
 
 <br><br>
 
@@ -34,25 +31,39 @@
 
 <table style="width:100%; border-collapse:collapse;">
     <thead>
-        <tr style="background:#f5f5f5;">
-            <th style="padding:10px; border:1px solid #ddd;">Assembly</th>
-            <th style="padding:10px; border:1px solid #ddd;">Amount (KES)</th>
+        <tr>
+            <th>#</th>
+            <th>Assembly</th>
+            <th>Amount (KES)</th>
+            <th>Muhtasari</th>
         </tr>
     </thead>
 
     <tbody>
-        @foreach($assemblies as $assembly)
+        @foreach($assemblies as $index => $assembly)
         <tr>
-            <td style="padding:10px; border:1px solid #ddd;">
+            <td>{{ $index + 1 }}</td>
+
+            <td>
                 {{ $assembly->name }}
+                <input type="hidden" name="assembly_ids[]" value="{{ $assembly->id }}">
             </td>
 
-            <td style="padding:10px; border:1px solid #ddd;">
+            <td>
                 <input type="number"
                        name="amounts[{{ $assembly->id }}]"
                        class="amount"
                        value="0"
-                       min="0">
+                       min="0"
+                       required>
+            </td>
+
+            <td>
+                <input type="file"
+                       name="assembly_muhtasari[{{ $assembly->id }}]"
+                       accept="image/*"
+                       capture="environment"
+                       required>
             </td>
         </tr>
         @endforeach
@@ -65,19 +76,17 @@
 
 <br>
 
-<!-- RECEIPT -->
-<label>Upload Receipt / Mukhtasari</label><br>
+<label>Upload Overall Receipt</label><br>
 <input type="file" name="receipt" required>
 
 <br><br>
 
-<button type="submit" style="background:#9C27B0;color:#fff;padding:10px 15px;border:none;border-radius:5px;">
+<button type="submit" style="background:#9C27B0;color:#fff;padding:10px 15px;border:none;">
     Submit Report
 </button>
 
 </form>
 
-<!-- AUTO TOTAL SCRIPT -->
 <script>
 document.querySelectorAll('.amount').forEach(input => {
     input.addEventListener('input', calculateTotal);
@@ -85,11 +94,9 @@ document.querySelectorAll('.amount').forEach(input => {
 
 function calculateTotal() {
     let total = 0;
-
     document.querySelectorAll('.amount').forEach(input => {
         total += parseFloat(input.value) || 0;
     });
-
     document.getElementById('total').innerText = total.toFixed(2);
 }
 </script>

@@ -2,6 +2,27 @@
 
 @section('content')
 
+
+<style>
+    .btn-back {
+    background: #607D8B;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.btn-back:hover {
+    opacity: 0.85;
+}
+</style>
+
+   <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
+            ← Back to District Dashboard
+        </a>
+
 <h2>New Assembly Requests</h2>
 
 @if(session('success'))

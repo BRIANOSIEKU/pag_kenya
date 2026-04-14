@@ -21,6 +21,13 @@ class DistrictLeader extends Model
         'dob',
         'photo',
         'attachments',
+
+        // =========================
+        // BANK DETAILS (NEW FIELDS)
+        // =========================
+        'bank_name',
+        'bank_branch',
+        'account_number',
     ];
 
     protected $casts = [

@@ -19,7 +19,23 @@
     <p><strong>Gender:</strong> {{ $leader->gender }}</p>
     <p><strong>Contact:</strong> {{ $leader->contact }}</p>
     <p><strong>National ID:</strong> {{ $leader->national_id }}</p>
-    <p><strong>Date of Birth:</strong> {{ $leader->dob }}</p>
+
+    <p><strong>Date of Birth:</strong> {{ \Carbon\Carbon::parse($leader->dob)->format('d M Y') }}</p>
+
+    {{-- ================= AGE CALCULATION ================= --}}
+    <p>
+        <strong>Age:</strong>
+        {{ \Carbon\Carbon::parse($leader->dob)->age }} years
+    </p>
+
+    <hr style="margin: 20px 0;">
+
+    {{-- ================= BANK DETAILS ================= --}}
+    <h3>Bank Details</h3>
+
+    <p><strong>Bank Name:</strong> {{ $leader->bank_name ?? 'N/A' }}</p>
+    <p><strong>Branch:</strong> {{ $leader->bank_branch ?? 'N/A' }}</p>
+    <p><strong>Account Number:</strong> {{ $leader->account_number ?? 'N/A' }}</p>
 
     <hr style="margin: 20px 0;">
 
@@ -41,19 +57,15 @@
     <!-- ATTACHMENTS -->
     <h3>Attachments</h3>
 
-    @php
-        $attachments = is_array($leader->attachments) ? $leader->attachments : json_decode($leader->attachments, true);
-    @endphp
-
-    @if(!empty($attachments) && count($attachments) > 0)
+    @if(!empty($leader->attachments))
 
         <ul style="list-style: none; padding: 0;">
 
-            @foreach($attachments as $file)
+            @foreach($leader->attachments as $file)
                 <li style="margin-bottom: 10px; padding: 8px; border: 1px solid #eee; border-radius: 6px;">
 
                     <a href="{{ asset('storage/' . $file) }}" target="_blank" style="color: #1a73e8; font-weight: 500;">
-                        📎 View Credentials
+                        📎 View Credential
                     </a>
 
                     <div style="font-size: 12px; color: #666;">

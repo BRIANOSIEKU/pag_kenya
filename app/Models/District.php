@@ -16,9 +16,9 @@ class District extends Model
     ];
 
     /*
-    |----------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     | RELATIONSHIPS
-    |----------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     */
 
     /**
@@ -30,9 +30,7 @@ class District extends Model
     }
 
     /**
-     * 🔥 FIXED: Pastoral Team (CURRENT ASSIGNMENT)
-     * This is IMPORTANT because your table has:
-     * current_district_id
+     * Pastoral Team (current assignment)
      */
     public function pastoralTeam()
     {
@@ -43,7 +41,7 @@ class District extends Model
     }
 
     /**
-     * Optional: legacy relationship (if still using old field)
+     * Legacy pastoral team relationship (if still used)
      */
     public function pastoralTeamLegacy()
     {
@@ -62,7 +60,7 @@ class District extends Model
     }
 
     /**
-     * District leaders (Overseer, Secretary, etc.)
+     * District has many leaders (Overseer, Secretary, etc.)
      */
     public function leaders()
     {
@@ -70,7 +68,7 @@ class District extends Model
     }
 
     /**
-     * Direct access to Overseer only
+     * ✅ SINGLE Overseer (FIXED)
      */
     public function overseer()
     {
@@ -79,9 +77,31 @@ class District extends Model
     }
 
     /*
-    |----------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | ACCESSORS (CLEAN BLADE USAGE)
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Get Overseer name safely
+     */
+    public function getOverseerNameAttribute()
+    {
+        return $this->overseer->name ?? 'Not Assigned';
+    }
+
+    /**
+     * Get Overseer contact safely
+     */
+    public function getOverseerContactAttribute()
+    {
+        return $this->overseer->contact ?? 'N/A';
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | HELPERS
-    |----------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     */
 
     /**
@@ -93,7 +113,7 @@ class District extends Model
     }
 
     /**
-     * Total tithe amount
+     * Total tithe amount for district
      */
     public function totalTithe()
     {

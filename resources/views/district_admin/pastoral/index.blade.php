@@ -2,6 +2,27 @@
 
 @section('content')
 
+<style>
+    .btn-back {
+    background: #607D8B;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.btn-back:hover {
+    opacity: 0.85;
+}
+</style>
+
+   <a href="{{ route('district.admin.dashboard') }}" class="btn-back">
+            ← Back to Dashboard
+        </a>
+
+
 <h2>Pastoral Team</h2>
 
 <!-- ADD BUTTON -->
@@ -29,6 +50,7 @@
             <th style="padding:10px; border:1px solid #ddd;">Graduation Year</th>
             <th style="padding:10px; border:1px solid #ddd;">Contact</th>
             <th style="padding:10px; border:1px solid #ddd;">Gender</th>
+            <th style="padding:10px; border:1px solid #ddd;">Status</th>
             <th style="padding:10px; border:1px solid #ddd;">Actions</th>
         </tr>
     </thead>
@@ -63,7 +85,7 @@
                 {{ $pastor->assembly->name ?? 'N/A' }}
             </td>
 
-            <!-- GRADUATION YEAR (NEW) -->
+            <!-- GRADUATION YEAR -->
             <td style="padding:10px; border:1px solid #ddd;">
                 {{ $pastor->graduation_year ?? 'N/A' }}
             </td>
@@ -76,6 +98,35 @@
             <!-- GENDER -->
             <td style="padding:10px; border:1px solid #ddd;">
                 {{ $pastor->gender }}
+            </td>
+
+            <!-- STATUS + REASON -->
+            <td style="padding:10px; border:1px solid #ddd;">
+
+                @if($pastor->status == 'pending')
+                    <span style="padding:4px 8px; background:#ff9800; color:#fff; border-radius:4px; font-size:12px;">
+                        Pending
+                    </span>
+
+                @elseif($pastor->status == 'approved')
+                    <span style="padding:4px 8px; background:#4CAF50; color:#fff; border-radius:4px; font-size:12px;">
+                        Approved
+                    </span>
+
+                @elseif($pastor->status == 'rejected')
+                    <span style="padding:4px 8px; background:#9E9E9E; color:#fff; border-radius:4px; font-size:12px;">
+                        Rejected
+                    </span>
+
+                    <!-- REJECTION REASON -->
+                    @if(!empty($pastor->rejection_reason))
+                        <div style="margin-top:5px; font-size:12px; color:#b71c1c;">
+                            <strong>Reason:</strong><br>
+                            {{ $pastor->rejection_reason }}
+                        </div>
+                    @endif
+                @endif
+
             </td>
 
             <!-- ACTIONS -->
@@ -114,7 +165,7 @@
 
         @empty
         <tr>
-            <td colspan="8" style="padding:15px; text-align:center;">
+            <td colspan="9" style="padding:15px; text-align:center;">
                 No pastoral records found.
             </td>
         </tr>

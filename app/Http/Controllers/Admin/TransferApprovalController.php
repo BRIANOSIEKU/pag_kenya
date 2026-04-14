@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PastoralTransfer;
+use Illuminate\Support\Facades\DB;
 
 class TransferApprovalController extends Controller
 {
@@ -26,6 +27,56 @@ class TransferApprovalController extends Controller
             ->latest()
             ->get();
 
+        // =========================
+        // ADD PERFORMANCE DATA (CURRENT + TARGET)
+        // =========================
+        foreach ($transfers as $transfer) {
+
+            // =========================
+            // 1. CURRENT ASSEMBLY PERFORMANCE
+            // =========================
+            if ($transfer->from_assembly_id) {
+
+                $transfer->currentAssemblyPerformance = DB::table('tithe_report_items')
+                    ->join('tithe_reports', 'tithe_reports.id', '=', 'tithe_report_items.tithe_report_id')
+                    ->where('tithe_report_items.assembly_id', $transfer->from_assembly_id)
+                    ->select(
+                        'tithe_reports.month',
+                        'tithe_reports.year',
+                        DB::raw('SUM(tithe_report_items.amount) as total')
+                    )
+                    ->groupBy('tithe_reports.month', 'tithe_reports.year')
+                    ->orderByDesc('tithe_reports.year')
+                    ->orderByDesc('tithe_reports.id')
+                    ->limit(4)
+                    ->get();
+            } else {
+                $transfer->currentAssemblyPerformance = collect();
+            }
+
+            // =========================
+            // 2. TARGET ASSEMBLY PERFORMANCE
+            // =========================
+            if ($transfer->to_assembly_id) {
+
+                $transfer->targetAssemblyPerformance = DB::table('tithe_report_items')
+                    ->join('tithe_reports', 'tithe_reports.id', '=', 'tithe_report_items.tithe_report_id')
+                    ->where('tithe_report_items.assembly_id', $transfer->to_assembly_id)
+                    ->select(
+                        'tithe_reports.month',
+                        'tithe_reports.year',
+                        DB::raw('SUM(tithe_report_items.amount) as total')
+                    )
+                    ->groupBy('tithe_reports.month', 'tithe_reports.year')
+                    ->orderByDesc('tithe_reports.year')
+                    ->orderByDesc('tithe_reports.id')
+                    ->limit(4)
+                    ->get();
+            } else {
+                $transfer->targetAssemblyPerformance = collect();
+            }
+        }
+
         return view('admin.transfers.index', compact('transfers'));
     }
 
@@ -36,7 +87,6 @@ class TransferApprovalController extends Controller
     {
         $transfer = PastoralTransfer::findOrFail($id);
 
-        // prevent double processing
         if ($transfer->main_admin_approved == 1 || $transfer->status == 'approved') {
             return back()->with('error', 'This transfer has already been approved.');
         }
@@ -45,13 +95,11 @@ class TransferApprovalController extends Controller
             return back()->with('error', 'This transfer has already been rejected.');
         }
 
-        // HQ approval
         $transfer->update([
             'main_admin_approved' => 1,
             'status' => 'approved',
         ]);
 
-        // Move pastor to new district & assembly (FINAL STEP)
         if ($transfer->pastor) {
             $transfer->pastor->update([
                 'district_id' => $transfer->to_district_id,
@@ -73,7 +121,6 @@ class TransferApprovalController extends Controller
 
         $transfer = PastoralTransfer::findOrFail($id);
 
-        // prevent double processing
         if ($transfer->main_admin_approved == 1 || $transfer->status == 'approved') {
             return back()->with('error', 'This transfer has already been approved.');
         }

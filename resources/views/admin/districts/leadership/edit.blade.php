@@ -38,9 +38,9 @@
             CEYD
         </option>
 
-        <option value="Women Direc..."
-            {{ old('position', $leader->position) == 'Women Direc...' ? 'selected' : '' }}>
-            Women Direc...
+        <option value="Women Director"
+            {{ old('position', $leader->position) == 'Women Director' ? 'selected' : '' }}>
+            Women Director
         </option>
 
         <option value="LayPerson"
@@ -86,11 +86,32 @@
            name="national_id"
            value="{{ old('national_id', $leader->national_id) }}"><br><br>
 
-    <!-- DATE OF BIRTH (FIXED) -->
+    <!-- DATE OF BIRTH -->
     <label>Date of Birth</label><br>
     <input type="date"
            name="dob"
            value="{{ old('dob', \Carbon\Carbon::parse($leader->dob)->format('Y-m-d')) }}"><br><br>
+
+    {{-- ================= BANK DETAILS ================= --}}
+    <h3>Bank Details</h3>
+
+    <label>Bank Name</label><br>
+    <input type="text"
+           name="bank_name"
+           value="{{ old('bank_name', $leader->bank_name) }}"
+           required><br><br>
+
+    <label>Branch</label><br>
+    <input type="text"
+           name="bank_branch"
+           value="{{ old('bank_branch', $leader->bank_branch) }}"
+           required><br><br>
+
+    <label>Account Number</label><br>
+    <input type="text"
+           name="account_number"
+           value="{{ old('account_number', $leader->account_number) }}"
+           required><br><br>
 
     <!-- CURRENT PHOTO -->
     <label>Current Photo</label><br>
@@ -109,7 +130,7 @@
     @if($leader->attachments)
         <label>Existing Attachments</label><br>
 
-        @foreach(json_decode($leader->attachments, true) as $file)
+        @foreach($leader->attachments as $file)
             <a href="{{ asset('storage/'.$file) }}" target="_blank">
                 View File
             </a><br>

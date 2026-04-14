@@ -1,8 +1,29 @@
 @extends('layouts.district_admin')
 
 @section('content')
+<style>
+    .btn-back {
+    background: #607D8B;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.btn-back:hover {
+    opacity: 0.85;
+}
+</style>
+
+   <a href="{{ route('district.admin.dashboard') }}" class="btn-back">
+            ← Back to Dashboard
+        </a>
 
 <h1>Assemblies</h1>
+
+    
 
 <!-- ADD BUTTON -->
 <a href="{{ route('district.admin.assemblies.create') }}" 

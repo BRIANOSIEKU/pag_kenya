@@ -78,6 +78,26 @@
 }
 </style>
 
+<style>
+    .btn-back {
+    background: #607D8B;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.btn-back:hover {
+    opacity: 0.85;
+}
+</style>
+
+   <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
+            ← Back to District Dashboard
+        </a>
+
 <div class="container">
 
     {{-- HEADER --}}
