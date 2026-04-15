@@ -12,18 +12,35 @@
             background: #f4f6f9;
         }
 
-        /* ===== LAYOUT ===== */
+        /* ===== WRAPPER ===== */
         .wrapper {
             display: flex;
         }
 
-        /* ===== SIDEBAR ===== */
+        /* ===== OVERLAY ===== */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.45);
+            z-index: 900;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        /* ===== SIDEBAR (DESKTOP ONLY VISIBLE) ===== */
         .sidebar {
-            width: 250px;
+            width: 260px;
             background: #1e3c72;
             color: #fff;
             min-height: 100vh;
             padding: 20px;
+            transition: 0.3s ease;
         }
 
         .sidebar img {
@@ -72,14 +89,29 @@
         .main {
             flex: 1;
             padding: 25px;
+            width: 100%;
         }
 
-        /* ===== HEADER ===== */
+        /* ===== TOPBAR ===== */
         .topbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        /* ===== MENU BUTTON ===== */
+        .menu-toggle {
+            background: #1e3c72;
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
         }
 
         .logout-btn {
@@ -96,62 +128,82 @@
             color: #fff;
         }
 
-        /* badge (future notifications) */
-        .badge {
-            background: red;
-            color: #fff;
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 50%;
-            float: right;
+        /* ===== CLOSE BUTTON ===== */
+        .close-btn {
+            font-size: 26px;
+            cursor: pointer;
+            text-align: right;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
 
+        /* ===========================
+           🔥 MOBILE FIX (IMPORTANT)
+        =========================== */
+        @media (max-width: 768px) {
+
+            .wrapper {
+                display: block; /* 👈 removes side-by-side layout */
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -300px; /* 👈 COMPLETELY OFF SCREEN */
+                height: 100%;
+                width: 260px;
+                z-index: 1000;
+                padding-top: 15px;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 
 <body>
 
+<!-- OVERLAY -->
+<div class="overlay" onclick="closeSidebar()"></div>
+
 <div class="wrapper">
 
-    <!-- ===== SIDEBAR ===== -->
+    <!-- SIDEBAR -->
     <div class="sidebar">
+
+        <div class="close-btn" onclick="closeSidebar()">×</div>
 
         <img src="{{ asset('images/pagk_logo.png') }}" alt="Logo">
 
         <h3>District Panel</h3>
 
-        <!-- MAIN -->
         <div class="menu-section">
             <div class="menu-title">Main</div>
             <a href="{{ route('district.admin.dashboard') }}">Dashboard</a>
         </div>
 
-        <!-- CHURCH STRUCTURE -->
         <div class="menu-section">
             <div class="menu-title">Church Structure</div>
-            <a href="#">Assemblies</a>
-            <a href="#">Members</a>
-            <a href="#">Pastoral Team</a>
+            <a href="{{ route('district.admin.assemblies.index') }}">Assemblies</a>
+            <a href="{{ route('district.admin.pastoral.index') }}">Pastoral Team</a>
         </div>
 
-        <!-- FINANCE -->
         <div class="menu-section">
             <div class="menu-title">Finance</div>
-            <a href="#">Tithe Reports</a>
+            <a href="{{ route('district.admin.tithes.index') }}">Tithe Reports</a>
         </div>
 
-        <!-- TRANSFERS -->
         <div class="menu-section">
             <div class="menu-title">Transfers</div>
-
-            <a href="{{ route('district.admin.pastoral.transfers.incoming') }}"
-               class="{{ request()->routeIs('district.admin.pastoral.transfers.*') ? 'active' : '' }}">
-                Pastoral Transfers
-                <span class="badge">!</span>
-            </a>
+            <a href="{{ route('district.admin.pastoral.transfers.incoming') }}">Pastoral Transfers</a>
         </div>
 
-        <!-- AUTH -->
         <div class="menu-section">
             <div class="menu-title">Account</div>
             <a href="{{ route('district.admin.logout') }}">Logout</a>
@@ -159,10 +211,13 @@
 
     </div>
 
-    <!-- ===== MAIN CONTENT ===== -->
+    <!-- MAIN CONTENT -->
     <div class="main">
 
         <div class="topbar">
+
+            <button class="menu-toggle" onclick="openSidebar()">☰ Menu</button>
+
             <h2>District Admin Dashboard</h2>
 
             <a href="{{ route('district.admin.logout') }}" class="logout-btn">
@@ -175,6 +230,18 @@
     </div>
 
 </div>
+
+<script>
+    function openSidebar() {
+        document.querySelector('.sidebar').classList.add('show');
+        document.querySelector('.overlay').classList.add('show');
+    }
+
+    function closeSidebar() {
+        document.querySelector('.sidebar').classList.remove('show');
+        document.querySelector('.overlay').classList.remove('show');
+    }
+</script>
 
 </body>
 </html>

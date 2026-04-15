@@ -1,81 +1,104 @@
 @extends('layouts.admin')
 
-@section('title', 'Add New User')
+@section('title', 'Create New Admin')
 
 @section('content')
-<div class="container mx-auto p-6 max-w-2xl bg-white rounded-lg shadow-md">
 
-    <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">
-        Add New System User
+<!-- Back Button -->
+<a href="{{ route('admin.admins.list') }}" style="
+    padding:8px 12px;
+    background:#607D8B;
+    color:#fff;
+    border-radius:6px;
+    text-decoration:none;
+    margin-bottom:20px;
+    display:inline-block;
+">
+    &larr; Back to Admins List
+</a>
+
+<div style="max-width:700px; margin:auto; background:#fff; padding:25px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.08);">
+
+    <h2 style="margin-bottom:20px; font-size:22px; font-weight:bold;">
+        Add New System Administrator
     </h2>
 
-    @if ($errors->any())
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            <ul class="list-disc pl-5">
-                @foreach ($errors->all() as $error)
+    @if($errors->any())
+        <div style="background:#ffebee; color:#c62828; padding:10px; border-radius:6px; margin-bottom:15px;">
+            <ul style="margin:0; padding-left:20px;">
+                @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
         </div>
     @endif
 
-    <form action="{{ route('admin.admins.store') }}" method="POST" class="space-y-4">
+    <form action="{{ route('admin.admins.store') }}" method="POST">
+
         @csrf
 
-        {{-- NAME --}}
-        <div>
-            <label class="block text-gray-700 font-semibold mb-1">Full Name</label>
+        <!-- Name -->
+        <div style="margin-bottom:15px;">
+            <label style="font-weight:bold;">Full Name</label>
             <input type="text" name="name" value="{{ old('name') }}" required
-                   class="w-full border border-gray-300 rounded px-3 py-2">
+                style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
         </div>
 
-        {{-- EMAIL --}}
-        <div>
-            <label class="block text-gray-700 font-semibold mb-1">Email Address</label>
+        <!-- Email -->
+        <div style="margin-bottom:15px;">
+            <label style="font-weight:bold;">Email Address</label>
             <input type="email" name="email" value="{{ old('email') }}" required
-                   class="w-full border border-gray-300 rounded px-3 py-2">
+                style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
         </div>
 
-        {{-- ROLE --}}
-        <div>
-            <label class="block text-gray-700 font-semibold mb-1">Assign Role</label>
-
-            <select name="role" required class="w-full border border-gray-300 rounded px-3 py-2">
-
-                <option value="">-- Select Role --</option>
-
-                <!-- MUST MATCH Spatie roles exactly -->
-                <option value="super-admin">Super Admin</option>
+        <!-- Role -->
+        <div style="margin-bottom:15px;">
+            <label style="font-weight:bold;">Assign System Role</label>
+            <select name="role" required
+                style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
+                <option value="" disabled selected>Select a role...</option>
+                <option value="super_admin">Super Admin</option>
                 <option value="admin">Admin</option>
-                <option value="general-superintendent">General Superintendent</option>
-                <option value="general-secretary">General Secretary</option>
-                <option value="general-treasurer">General Treasurer</option>
-
+                <option value="general_secretary">General Secretary</option>
+                <option value="general_treasurer">General Treasurer</option>
+                <option value="general_superintendent">General Superintendent</option>
             </select>
         </div>
 
-        {{-- PASSWORD --}}
-        <div>
-            <label class="block text-gray-700 font-semibold mb-1">Password</label>
-            <input type="password" name="password" required class="w-full border border-gray-300 rounded px-3 py-2">
+        <!-- Password -->
+        <div style="margin-bottom:15px;">
+            <label style="font-weight:bold;">Password</label>
+            <input type="password" name="password" required
+                style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
         </div>
 
-        {{-- CONFIRM --}}
-        <div>
-            <label class="block text-gray-700 font-semibold mb-1">Confirm Password</label>
-            <input type="password" name="password_confirmation" required class="w-full border border-gray-300 rounded px-3 py-2">
+        <!-- Confirm Password -->
+        <div style="margin-bottom:20px;">
+            <label style="font-weight:bold;">Confirm Password</label>
+            <input type="password" name="password_confirmation" required
+                style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
         </div>
 
-        <div class="flex justify-between mt-6">
-            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded">
-                Create User
-            </button>
-
-            <a href="{{ route('admin.admins.list') }}" class="bg-gray-400 text-white px-6 py-2 rounded">
-                Back
+        <!-- Buttons -->
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <a href="{{ route('admin.admins.list') }}" style="color:#555; text-decoration:none;">
+                Cancel
             </a>
+
+            <button type="submit" style="
+                background:#2196F3;
+                color:#fff;
+                padding:10px 18px;
+                border:none;
+                border-radius:6px;
+                cursor:pointer;
+                font-weight:bold;
+            ">
+                Create Admin
+            </button>
         </div>
 
     </form>
 </div>
+
 @endsection

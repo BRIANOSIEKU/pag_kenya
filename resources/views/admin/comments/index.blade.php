@@ -3,111 +3,139 @@
 @section('title', 'Comments Moderation')
 
 @section('content')
-<div class="container-fluid">
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white">
-            <h4 class="mb-0">Comments Moderation</h4>
+
+<!-- Back Button -->
+<a href="{{ route('admin.dashboard') }}" style="
+    padding:8px 12px;
+    background:#607D8B;
+    color:#fff;
+    border-radius:6px;
+    text-decoration:none;
+    margin-bottom:20px;
+    display:inline-block;
+">
+    &larr; Back to Dashboard
+</a>
+
+<div style="max-width:1200px; margin:auto; background:#fff; padding:25px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.08);">
+
+    <h2 style="margin-bottom:20px; font-size:22px; font-weight:bold;">
+        Comments Moderation
+    </h2>
+
+    @if(session('success'))
+        <div style="background:#d4edda; color:#155724; padding:10px; border-radius:6px; margin-bottom:15px;">
+            {{ session('success') }}
         </div>
+    @endif
 
-        <div class="card-body">
+    <div style="overflow-x:auto;">
 
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
+        <table style="width:100%; border-collapse:collapse; min-width:900px;">
 
-            <table id="commentsTable" class="table table-bordered table-striped table-hover">
-                <thead class="table-dark">
+            <thead>
+                <tr style="background:#f5f5f5;">
+                    <th style="padding:10px; border:1px solid #ddd;">#</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Devotion</th>
+                    <th style="padding:10px; border:1px solid #ddd;">User</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Comment</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Status</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Admin Reply</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @forelse($comments as $comment)
                     <tr>
-                        <th>#</th>
-                        <th>Devotion</th>
-                        <th>User</th>
-                        <th>Comment</th>
-                        <th>Status</th>
-                        <th>Admin Reply</th>
-                        <th>Actions</th>
+                        <td style="padding:10px; border:1px solid #ddd;">{{ $comment->id }}</td>
+
+                        <td style="padding:10px; border:1px solid #ddd;">
+                            {{ $comment->devotion->title ?? 'N/A' }}
+                        </td>
+
+                        <td style="padding:10px; border:1px solid #ddd;">
+                            <strong>{{ $comment->user->name ?? 'N/A' }}</strong><br>
+                            <small>{{ $comment->user->email ?? '' }}</small>
+                        </td>
+
+                        <td style="padding:10px; border:1px solid #ddd;">
+                            {{ $comment->comment }}
+                        </td>
+
+                        <td style="padding:10px; border:1px solid #ddd;">
+                            @if($comment->admin_response)
+                                <span style="background:#4CAF50; color:#fff; padding:4px 8px; border-radius:4px; font-size:12px;">
+                                    Replied
+                                </span>
+                            @else
+                                <span style="background:#FFC107; color:#000; padding:4px 8px; border-radius:4px; font-size:12px;">
+                                    Pending
+                                </span>
+                            @endif
+                        </td>
+
+                        <td style="padding:10px; border:1px solid #ddd;">
+                            {{ $comment->admin_response ?? '---' }}
+                        </td>
+
+                        <td style="padding:10px; border:1px solid #ddd; min-width:250px;">
+
+                            <!-- Reply Form -->
+                            <form action="{{ route('admin.comments.respond', $comment->id) }}" method="POST">
+                                @csrf
+
+                                <textarea name="admin_response" rows="2" placeholder="Write response..."
+                                    style="width:100%; padding:6px; border:1px solid #ccc; border-radius:6px; margin-bottom:5px;"
+                                    required>{{ $comment->admin_response }}</textarea>
+
+                                <button type="submit" style="
+                                    background:#2196F3;
+                                    color:#fff;
+                                    padding:6px 10px;
+                                    border:none;
+                                    border-radius:6px;
+                                    cursor:pointer;
+                                    font-size:13px;
+                                ">
+                                    {{ $comment->admin_response ? 'Update' : 'Reply' }}
+                                </button>
+                            </form>
+
+                            <!-- Delete Form -->
+                            <form action="{{ route('admin.comments.delete', $comment->id) }}" method="POST" style="margin-top:8px;">
+                                @csrf
+                                @method('DELETE')
+
+                                <button type="submit" onclick="return confirm('Delete this comment?')" style="
+                                    background:#f44336;
+                                    color:#fff;
+                                    padding:6px 10px;
+                                    border:none;
+                                    border-radius:6px;
+                                    cursor:pointer;
+                                    font-size:13px;
+                                ">
+                                    Delete
+                                </button>
+                            </form>
+
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach($comments as $comment) <!-- Use $comments here -->
-                        <tr>
-                            <td>{{ $comment->id }}</td>
-                            <td>{{ $comment->devotion->title ?? 'N/A' }}</td>
-                            <td>
-                                <strong>{{ $comment->user->name ?? 'N/A' }}</strong><br>
-                                <small>{{ $comment->user->email ?? '' }}</small>
-                            </td>
-                            <td>{{ $comment->comment }}</td>
-                            <td>
-                                @if($comment->admin_response)
-                                    <span class="badge bg-success">Replied</span>
-                                @else
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                @endif
-                            </td>
-                            <td>{{ $comment->admin_response ?? '---' }}</td>
-                            <td style="min-width: 250px;">
+                @empty
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:20px; color:#777;">
+                            No comments found.
+                        </td>
+                    </tr>
+                @endforelse
 
-                                {{-- Reply / Update Form --}}
-                                <form action="{{ route('admin.comments.respond', $comment->id) }}" method="POST">
-                                    @csrf
-                                    <div class="mb-2">
-                                        <textarea name="admin_response"
-                                                  class="form-control"
-                                                  rows="2"
-                                                  placeholder="Write response..."
-                                                  required>{{ $comment->admin_response }}</textarea>
-                                    </div>
-                                    <button class="btn btn-sm btn-primary">
-                                        {{ $comment->admin_response ? 'Update' : 'Reply' }}
-                                    </button>
-                                </form>
+            </tbody>
 
-                                {{-- Delete Form --}}
-                                <form action="{{ route('admin.comments.delete', $comment->id) }}"
-                                      method="POST"
-                                      class="mt-2">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this comment?')">
-                                        Delete
-                                    </button>
-                                </form>
+        </table>
 
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-        </div>
     </div>
 </div>
-@endsection
 
-@section('scripts')
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- DataTables -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
-<script>
-$(document).ready(function () {
-    $('#commentsTable').DataTable({
-        "pageLength": 10,
-        "lengthMenu": [5, 10, 25, 50, 100],
-        "order": [[0, 'desc']],
-        "columnDefs": [
-            { "orderable": false, "targets": 6 } // Disable ordering on Actions column
-        ]
-    });
-});
-</script>
 @endsection

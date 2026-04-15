@@ -3,143 +3,227 @@
 @section('content')
 
 <style>
-    .btn-back {
+/* ===== PAGE WRAPPER ===== */
+.page-wrapper {
+    max-width: 1200px;
+    margin: auto;
+    padding: 15px;
+}
+
+/* ===== BACK BUTTON ===== */
+.btn-back {
+    display: inline-block;
     background: #607D8B;
     color: white;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: 6px;
     text-decoration: none;
     font-size: 13px;
     font-weight: bold;
+    margin-bottom: 15px;
 }
 
-.btn-back:hover {
-    opacity: 0.85;
+.btn-back:hover { opacity: 0.85; }
+
+/* ===== TITLE ===== */
+.page-title {
+    font-size: 22px;
+    color: #1e3c72;
+    margin-bottom: 15px;
+}
+
+/* ===== ALERT ===== */
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+/* ===== TABLE WRAPPER ===== */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* ===== TABLE ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+th {
+    background: #f5f5f5;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    font-size: 14px;
+}
+
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    padding: 6px 10px;
+    border-radius: 4px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-view { background: #03A9F4; }
+.btn-approve { background: #4CAF50; }
+.btn-reject { background: #F44336; }
+
+.btn:hover { opacity: 0.85; }
+
+/* ===== STATUS BADGE ===== */
+.badge-pending {
+    background: orange;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* ===== PHOTO ===== */
+.photo {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    table {
+        min-width: 700px;
+    }
+
+    .page-title {
+        font-size: 18px;
+    }
 }
 </style>
 
-   <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
-            ← Back to District Dashboard
-        </a>
+<div class="page-wrapper">
 
-<h2>National Pastoral Approval</h2>
+    {{-- BACK --}}
+    <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
+        ← Back to District Dashboard
+    </a>
 
-@if(session('success'))
-<div style="background:#d4edda;padding:10px;color:#155724;margin-bottom:10px;border-radius:6px;">
-    {{ session('success') }}
+    {{-- TITLE --}}
+    <h2 class="page-title">National Pastoral Approval</h2>
+
+    {{-- SUCCESS --}}
+    @if(session('success'))
+        <div class="alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- EMPTY STATE --}}
+    @if($pastors->count() == 0)
+        <p>No pending pastoral submissions at the national level.</p>
+    @else
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>District</th>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>National ID</th>
+                    <th>Assembly</th>
+                    <th>Contact</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach($pastors as $p)
+                <tr>
+
+                    <td style="font-weight:bold; color:#1e3c72;">
+                        {{ $p->district_name }}
+                    </td>
+
+                    <td>
+                        @if($p->photo)
+                            <img src="{{ asset('storage/'.$p->photo) }}" class="photo">
+                        @else
+                            N/A
+                        @endif
+                    </td>
+
+                    <td>{{ $p->name }}</td>
+
+                    <td>{{ $p->national_id }}</td>
+
+                    <td>{{ $p->assembly_name ?? $p->assembly_id ?? 'N/A' }}</td>
+
+                    <td>{{ $p->contact }}</td>
+
+                    <td>
+                        <span class="badge-pending">Pending</span>
+                    </td>
+
+                    <td>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+
+                            <a href="{{ route('admin.national.pastoral.approvals.view', $p->id) }}"
+                               class="btn btn-view">
+                                View
+                            </a>
+
+                            <form method="POST"
+                                  action="{{ route('admin.national.pastoral.approvals.approve', $p->id) }}">
+                                @csrf
+                                <button class="btn btn-approve">
+                                    Approve
+                                </button>
+                            </form>
+
+                            <form method="POST"
+                                  action="{{ route('admin.national.pastoral.approvals.reject', $p->id) }}">
+                                @csrf
+                                <button class="btn btn-reject"
+                                        onclick="return confirm('Reject this pastor?')">
+                                    Reject
+                                </button>
+                            </form>
+
+                        </div>
+                    </td>
+
+                </tr>
+                @endforeach
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    @endif
+
 </div>
-@endif
-
-@if($pastors->count() == 0)
-    <p>No pending pastoral submissions at the national level.</p>
-@else
-
-<table style="width:100%; border-collapse:collapse; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-
-    <thead>
-        <tr style="background:#f5f5f5;">
-            <th style="padding:10px; border:1px solid #ddd;">District</th>
-            <th style="padding:10px; border:1px solid #ddd;">Photo</th>
-            <th style="padding:10px; border:1px solid #ddd;">Name</th>
-            <th style="padding:10px; border:1px solid #ddd;">National ID</th>
-            <th style="padding:10px; border:1px solid #ddd;">Assembly</th>
-            <th style="padding:10px; border:1px solid #ddd;">Contact</th>
-            <th style="padding:10px; border:1px solid #ddd;">Status</th>
-            <th style="padding:10px; border:1px solid #ddd;">Actions</th>
-        </tr>
-    </thead>
-
-    <tbody>
-
-        @foreach($pastors as $p)
-        <tr>
-
-            <!-- DISTRICT -->
-            <td style="padding:10px; border:1px solid #ddd; font-weight:bold; color:#1e3c72;">
-                {{ $p->district_name }}
-            </td>
-
-            <!-- PHOTO -->
-            <td style="padding:10px; border:1px solid #ddd;">
-                @if($p->photo)
-                    <img src="{{ asset('storage/'.$p->photo) }}"
-                         width="45" height="45"
-                         style="border-radius:50%;">
-                @else
-                    N/A
-                @endif
-            </td>
-
-            <!-- NAME -->
-            <td style="padding:10px; border:1px solid #ddd;">
-                {{ $p->name }}
-            </td>
-
-            <!-- NATIONAL ID -->
-            <td style="padding:10px; border:1px solid #ddd;">
-                {{ $p->national_id }}
-            </td>
-
-            <!-- ASSEMBLY -->
-            <td style="padding:10px; border:1px solid #ddd;">
-                {{ $p->assembly_name ?? $p->assembly_id ?? 'N/A' }}
-            </td>
-
-            <!-- CONTACT -->
-            <td style="padding:10px; border:1px solid #ddd;">
-                {{ $p->contact }}
-            </td>
-
-            <!-- STATUS -->
-            <td style="padding:10px; border:1px solid #ddd;">
-                <span style="background:orange;color:#fff;padding:4px 8px;border-radius:4px;">
-                    Pending
-                </span>
-            </td>
-
-            <!-- ACTIONS -->
-            <td style="padding:10px; border:1px solid #ddd;">
-
-                <!-- VIEW PROFILE -->
-                <a href="{{ route('admin.national.pastoral.approvals.view', $p->id) }}"
-                   style="background:#03A9F4;color:#fff;padding:5px 8px;border-radius:4px;text-decoration:none;">
-                    View
-                </a>
-
-                <!-- APPROVE -->
-                <form method="POST"
-                      action="{{ route('admin.national.pastoral.approvals.approve', $p->id) }}"
-                      style="display:inline-block;">
-
-                    @csrf
-                    <button style="background:#4CAF50;color:#fff;border:none;padding:5px 8px;border-radius:4px;">
-                        Approve
-                    </button>
-
-                </form>
-
-                <!-- REJECT -->
-                <form method="POST"
-                      action="{{ route('admin.national.pastoral.approvals.reject', $p->id) }}"
-                      style="display:inline-block;">
-
-                    @csrf
-                    <button onclick="return confirm('Reject this pastor?')"
-                            style="background:#F44336;color:#fff;border:none;padding:5px 8px;border-radius:4px;">
-                        Reject
-                    </button>
-
-                </form>
-
-            </td>
-
-        </tr>
-        @endforeach
-
-    </tbody>
-
-</table>
-
-@endif
 
 @endsection

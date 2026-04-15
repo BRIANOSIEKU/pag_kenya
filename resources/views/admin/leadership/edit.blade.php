@@ -1,85 +1,176 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-lg">
-    <h1 class="text-2xl font-bold text-center mb-6">Edit Leader</h1>
 
-    <form action="{{ route('admin.leadership.update', [$type, $leader->id]) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-        @csrf
-        @method('PUT')
+<style>
+    .btn-back {
+        background: #607D8B;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
 
-        <!-- Full Name -->
-        <div>
-            <label class="block font-semibold mb-1">Full Name</label>
-            <input type="text" name="full_name" value="{{ old('full_name', $leader->full_name) }}" placeholder="Full Name" required
-                class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400">
-        </div>
+    .btn-back:hover {
+        opacity: 0.85;
+    }
 
-        <!-- Position -->
-        <div>
-            <label class="block font-semibold mb-1">Position</label>
-            <input type="text" name="position" value="{{ old('position', $leader->position) }}" placeholder="Position" required
-                class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400">
-        </div>
+    .container {
+        max-width: 800px;
+        margin: auto;
+    }
 
-        <!-- Contact & Email -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block font-semibold mb-1">Contact</label>
-                <input type="text" name="contact" value="{{ old('contact', $leader->contact) }}" placeholder="Contact" required
-                    class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400">
+    .card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        outline: none;
+        font-size: 14px;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    .row {
+        display: flex;
+        gap: 10px;
+    }
+
+    .col {
+        flex: 1;
+    }
+
+    .btn-update {
+        background: #2196F3;
+        color: white;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .btn-update:hover {
+        opacity: 0.9;
+    }
+
+    .preview {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .section {
+        margin-bottom: 15px;
+    }
+</style>
+
+<div class="container">
+
+    <!-- BACK -->
+    <a href="{{ route('admin.dashboard') }}" class="btn-back">
+        ← Back to Dashboard
+    </a>
+
+    <h2 style="margin-bottom:15px;">Edit Leader</h2>
+
+    <div class="card">
+
+        <form action="{{ route('admin.leadership.update', [$type, $leader->id]) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+
+            <!-- Full Name -->
+            <div class="section">
+                <label>Full Name</label>
+                <input type="text" name="full_name"
+                       value="{{ old('full_name', $leader->full_name) }}" required>
             </div>
-            <div>
-                <label class="block font-semibold mb-1">Email</label>
-                <input type="email" name="email" value="{{ old('email', $leader->email) }}" placeholder="Email" required
-                    class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400">
+
+            <!-- Position -->
+            <div class="section">
+                <label>Position</label>
+                <input type="text" name="position"
+                       value="{{ old('position', $leader->position) }}" required>
             </div>
-        </div>
 
-        <!-- Brief Description -->
-        <div>
-            <label class="block font-semibold mb-1">Brief Description</label>
-            <textarea name="brief_description" rows="4" placeholder="Short description about the leader"
-                class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400" required>{{ old('brief_description', $leader->brief_description) }}</textarea>
-        </div>
+            <!-- Contact & Email -->
+            <div class="row section">
+                <div class="col">
+                    <label>Contact</label>
+                    <input type="text" name="contact"
+                           value="{{ old('contact', $leader->contact) }}" required>
+                </div>
 
-        <!-- Message -->
-        <div>
-            <label class="block font-semibold mb-1">Message (Optional)</label>
-            <textarea name="message" rows="4" placeholder="Message" 
-                class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400">{{ old('message', $leader->message) }}</textarea>
-        </div>
-
-        <!-- Photo Upload & Preview -->
-        <div class="flex flex-col md:flex-row items-center gap-6">
-            <div>
-                <label class="block font-semibold mb-1">Upload Photo</label>
-                <input type="file" name="photo" accept="image/*" onchange="previewImage(event)"
-                    class="border p-2 rounded-lg cursor-pointer">
+                <div class="col">
+                    <label>Email</label>
+                    <input type="email" name="email"
+                           value="{{ old('email', $leader->email) }}" required>
+                </div>
             </div>
-            <div>
-                <img id="photoPreview" src="{{ $leader->photo ? asset($leader->photo) : 'https://via.placeholder.com/150' }}"
-                    class="w-40 h-40 object-cover rounded-xl shadow-md border">
-            </div>
-        </div>
 
-        <!-- Submit -->
-        <div class="text-center">
-            <button type="submit" 
-                class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg shadow hover:bg-blue-700 transition">
+            <!-- Brief Description -->
+            <div class="section">
+                <label>Brief Description</label>
+                <textarea name="brief_description" rows="4" required>{{ old('brief_description', $leader->brief_description) }}</textarea>
+            </div>
+
+            <!-- Message -->
+            <div class="section">
+                <label>Message (Optional)</label>
+                <textarea name="message" rows="4">{{ old('message', $leader->message) }}</textarea>
+            </div>
+
+            <!-- PHOTO -->
+            <div class="section">
+                <label>Photo</label>
+                <input type="file" name="photo" accept="image/*" onchange="previewImage(event)">
+                
+                <img id="photoPreview"
+                     src="{{ $leader->photo ? asset($leader->photo) : 'https://via.placeholder.com/150' }}"
+                     class="preview">
+            </div>
+
+            <!-- BUTTON -->
+            <button type="submit" class="btn-update">
                 Update Leader
             </button>
-        </div>
-    </form>
+
+        </form>
+
+    </div>
 </div>
 
 <script>
 function previewImage(event) {
     const reader = new FileReader();
-    reader.onload = function() {
+    reader.onload = function () {
         document.getElementById('photoPreview').src = reader.result;
     }
     reader.readAsDataURL(event.target.files[0]);
 }
 </script>
+
 @endsection

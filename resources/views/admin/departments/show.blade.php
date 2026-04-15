@@ -2,209 +2,292 @@
 
 @section('content')
 
-<!-- Back to Departments Button -->
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-    <a href="{{ route('admin.departments.index') }}" style="
-        background-color:#9C27B0;
-        color:#fff;
-        padding:10px 16px;
-        border-radius:6px;
-        font-weight:bold;
-        text-decoration:none;
-        transition:0.3s;
-    "
-    onmouseover="this.style.opacity='0.8'"
-    onmouseout="this.style.opacity='1'"
-    >&larr; Back to Departments</a>
+<style>
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
 
-    <h1 style="margin:0;">Department Details: {{ $department->name }}</h1>
-</div>
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
 
-<div style="display:flex; gap:40px; margin-bottom:30px;">
-    <!-- Photo Section -->
-    <div>
-        @if($department->photo)
-            <img src="{{ asset('storage/departments_photos/'.$department->photo) }}" 
-                 alt="{{ $department->name }}" 
-                 style="width:250px; height:auto; border:1px solid #ccc; padding:5px;">
-        @else
-            <p>No Photo Available</p>
-        @endif
+.btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #fff;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-back {
+    background: #9C27B0;
+}
+
+.btn-primary {
+    background: #2196F3;
+}
+
+.btn-success {
+    background: #4CAF50;
+}
+
+.btn-danger {
+    background: #e53935;
+}
+
+.card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 20px 0 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th {
+    background: #1e3c72;
+    color: #fff;
+    padding: 12px;
+    text-align: left;
+}
+
+table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+
+.small-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+</style>
+
+<div class="container">
+
+    {{-- HEADER --}}
+    <div class="header">
+
+        <a href="{{ route('admin.departments.index') }}" class="btn btn-back">
+            ← Back to Departments
+        </a>
+
+        <h2 style="margin:0;">Department Details: {{ $department->name }}</h2>
+
     </div>
 
-    <!-- Details Section -->
-    <div style="flex:1;">
-        <p><strong>1. Name:</strong> {{ $department->name }}</p>
-        <p><strong>2. Leadership:</strong> {{ $department->leadership }}</p>
+    {{-- MAIN CARD --}}
+    <div class="card" style="display:flex; gap:30px; flex-wrap:wrap;">
 
-        <hr>
-        <h4>3. Overview</h4>
-        <div style="margin-left:15px;">
-            @foreach(explode("\n", $department->overview) as $line)
-                @if(trim($line))
-                    @php $parts = explode(':', $line, 2); @endphp
-                    @if(count($parts) == 2)
-                        <strong>{{ trim($parts[0]) }}:</strong>
-                        <ul>
-                            <li>{{ trim($parts[1]) }}</li>
-                        </ul>
-                    @else
-                        <p>{{ trim($line) }}</p>
-                    @endif
-                @endif
-            @endforeach
+        {{-- PHOTO --}}
+        <div>
+            @if($department->photo)
+                <img src="{{ asset('storage/departments_photos/'.$department->photo) }}"
+                     style="width:250px; border-radius:8px; border:1px solid #ddd;">
+            @else
+                <p>No Photo Available</p>
+            @endif
         </div>
 
-        <h4>4. Activities</h4>
-        <div style="margin-left:15px;">
-            @foreach(explode("\n", $department->activities) as $line)
-                @if(trim($line))
-                    @php $parts = explode(':', $line, 2); @endphp
-                    @if(count($parts) == 2)
-                        <strong>{{ trim($parts[0]) }}:</strong>
-                        <ul>
-                            <li>{{ trim($parts[1]) }}</li>
-                        </ul>
-                    @else
-                        <p>{{ trim($line) }}</p>
-                    @endif
-                @endif
-            @endforeach
+        {{-- DETAILS --}}
+        <div style="flex:1;">
+
+            <p><b>Name:</b> {{ $department->name }}</p>
+            <p><b>Leadership:</b> {{ $department->leadership }}</p>
+
+            <hr>
+
+            <div class="section-title">Overview</div>
+            {!! nl2br(e($department->overview)) !!}
+
+            <div class="section-title">Activities</div>
+            {!! nl2br(e($department->activities)) !!}
+
+            <div class="section-title">Description</div>
+            {!! nl2br(e($department->description)) !!}
+
         </div>
 
-        <h4>5. Description</h4>
-        <div style="margin-left:15px;">
-            @foreach(explode("\n", $department->description) as $line)
-                @if(trim($line))
-                    @php $parts = explode(':', $line, 2); @endphp
-                    @if(count($parts) == 2)
-                        <strong>{{ trim($parts[0]) }}:</strong>
-                        <ul>
-                            <li>{{ trim($parts[1]) }}</li>
-                        </ul>
-                    @else
-                        <p>{{ trim($line) }}</p>
-                    @endif
-                @endif
-            @endforeach
-        </div>
     </div>
-</div>
 
-<hr>
+    {{-- DOCUMENTS --}}
+    <div class="card">
 
-<h3>Documents</h3>
-<ul>
-    @foreach($department->documents as $doc)
-        <li>
-            <a href="{{ asset('storage/departments_documents/'.$doc->file_path) }}" target="_blank">
-                {{ $doc->name }}
-            </a>
-            <form action="{{ route('admin.departments.deleteDocument', $doc->id) }}" method="POST" style="display:inline;">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-            </form>
-        </li>
-    @endforeach
-</ul>
+        <div class="section-title">Documents</div>
 
-<h4>Upload New Document</h4>
-<form action="{{ route('admin.departments.uploadDocument', $department->id) }}" method="POST" enctype="multipart/form-data">
-    @csrf
-    <input type="file" name="document" required style="margin-bottom:10px;">
-    <input type="text" name="name" placeholder="Document Name" required style="margin-bottom:10px;">
-    <button type="submit" class="btn btn-success">Upload</button>
-</form>
+        <ul>
+            @foreach($department->documents as $doc)
+                <li style="margin-bottom:8px;">
 
-<hr>
+                    <a href="{{ asset('storage/departments_documents/'.$doc->file_path) }}"
+                       target="_blank"
+                       style="color:#2196F3; font-weight:bold;">
+                        {{ $doc->name }}
+                    </a>
 
-{{-- Achievements Section --}}
-<h3 style="display:flex; justify-content:space-between; align-items:center;">
-    Achievements
-    <button id="toggleAchievementForm" style="
-        background:#4CAF50;
-        color:#fff;
-        border:none;
-        padding:6px 12px;
-        border-radius:6px;
-        cursor:pointer;
-    ">+ Add New Achievement</button>
-</h3>
-
-{{-- Hidden Form --}}
-<div id="achievementForm" style="display:none; margin-top:15px; margin-bottom:25px; border:1px solid #ccc; padding:15px; border-radius:6px;">
-    <form action="{{ route('admin.departments.achievements.store', $department->id) }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        <div style="margin-bottom:10px;">
-            <input type="text" name="name" placeholder="Achievement Name" required style="width:100%; padding:6px;">
-        </div>
-        <div style="margin-bottom:10px;">
-            <textarea name="description" placeholder="Description" rows="3" style="width:100%; padding:6px;"></textarea>
-        </div>
-        <div style="margin-bottom:10px;">
-            <input type="date" name="date" style="width:100%; padding:6px;">
-        </div>
-        <div style="margin-bottom:10px;">
-            <input type="file" name="photo" accept="image/*" style="width:100%; padding:6px;">
-        </div>
-        <button type="submit" class="btn btn-primary">Save Achievement</button>
-    </form>
-</div>
-
-{{-- Achievements Table --}}
-<table style="width:100%; border-collapse: collapse; margin-top:15px;">
-    <thead>
-        <tr style="background:#f5f5f5; text-align:left;">
-            <th style="padding:10px; border-bottom:1px solid #ddd;">Photo</th>
-            <th style="padding:10px; border-bottom:1px solid #ddd;">Name</th>
-            <th style="padding:10px; border-bottom:1px solid #ddd;">Description</th>
-            <th style="padding:10px; border-bottom:1px solid #ddd;">Date</th>
-            <th style="padding:10px; border-bottom:1px solid #ddd;">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @forelse($department->achievements as $achievement)
-            <tr>
-                <td style="padding:10px; border-bottom:1px solid #ddd;">
-                    @if($achievement->photo && Storage::disk('public')->exists('departments_achievements/'.$achievement->photo))
-                        <img src="{{ Storage::url('departments_achievements/'.$achievement->photo) }}" 
-                             alt="Photo" style="width:60px; height:60px; object-fit:cover; border-radius:4px;">
-                    @else
-                        <span style="color:#888;">No Photo</span>
-                    @endif
-                </td>
-                <td style="padding:10px; border-bottom:1px solid #ddd;">{{ $achievement->name }}</td>
-                <td style="padding:10px; border-bottom:1px solid #ddd;">{{ $achievement->description }}</td>
-                <td style="padding:10px; border-bottom:1px solid #ddd;">
-                    {{ $achievement->date ? \Carbon\Carbon::parse($achievement->date)->format('d M Y') : '-' }}
-                </td>
-                <td style="padding:10px; border-bottom:1px solid #ddd;">
-                    <form action="{{ route('admin.departments.achievements.destroy', $achievement->id) }}" method="POST">
+                    <form action="{{ route('admin.departments.deleteDocument', $doc->id) }}"
+                          method="POST"
+                          style="display:inline;">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="5" style="padding:10px; text-align:center; color:#888;">No achievements yet.</td>
-            </tr>
-        @endforelse
-    </tbody>
-</table>
 
-{{-- Toggle Form Script --}}
+                        <button class="small-btn btn-danger">
+                            Delete
+                        </button>
+                    </form>
+
+                </li>
+            @endforeach
+        </ul>
+
+        <form action="{{ route('admin.departments.uploadDocument', $department->id) }}"
+              method="POST"
+              enctype="multipart/form-data"
+              style="margin-top:10px;">
+
+            @csrf
+
+            <input type="file" name="document" required>
+            <input type="text" name="name" placeholder="Document Name" required>
+
+            <button class="btn btn-success">
+                Upload
+            </button>
+
+        </form>
+
+    </div>
+
+    {{-- ACHIEVEMENTS --}}
+    <div class="card">
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="section-title">Achievements</div>
+
+            <button id="toggleAchievementForm" class="btn btn-success">
+                + Add Achievement
+            </button>
+        </div>
+
+        {{-- FORM --}}
+        <div id="achievementForm" style="display:none; margin-top:15px;">
+
+            <form action="{{ route('admin.departments.achievements.store', $department->id) }}"
+                  method="POST"
+                  enctype="multipart/form-data">
+
+                @csrf
+
+                <input type="text" name="name" placeholder="Name" required>
+                <textarea name="description" placeholder="Description"></textarea>
+                <input type="date" name="date">
+                <input type="file" name="photo">
+
+                <button class="btn btn-primary">
+                    Save
+                </button>
+
+            </form>
+
+        </div>
+
+        {{-- TABLE --}}
+        <table style="margin-top:15px;">
+
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @forelse($department->achievements as $achievement)
+
+                <tr>
+
+                    <td>
+                        @if($achievement->photo)
+                            <img src="{{ Storage::url('departments_achievements/'.$achievement->photo) }}"
+                                 style="width:60px;height:60px;border-radius:6px;">
+                        @else
+                            No Photo
+                        @endif
+                    </td>
+
+                    <td>{{ $achievement->name }}</td>
+                    <td>{{ $achievement->description }}</td>
+
+                    <td>
+                        {{ $achievement->date ? \Carbon\Carbon::parse($achievement->date)->format('d M Y') : '-' }}
+                    </td>
+
+                    <td>
+
+                        <form action="{{ route('admin.departments.achievements.destroy', $achievement->id) }}"
+                              method="POST">
+                            @csrf
+                            @method('DELETE')
+
+                            <button class="small-btn btn-danger">
+                                Delete
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+                @empty
+                    <tr>
+                        <td colspan="5" style="text-align:center;">No achievements yet</td>
+                    </tr>
+                @endforelse
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
 <script>
-    document.getElementById('toggleAchievementForm').addEventListener('click', function() {
-        var form = document.getElementById('achievementForm');
-        if (form.style.display === 'none' || form.style.display === '') {
-            form.style.display = 'block';
-        } else {
-            form.style.display = 'none';
-        }
-    });
+document.getElementById('toggleAchievementForm').addEventListener('click', function () {
+    const form = document.getElementById('achievementForm');
+    form.style.display = (form.style.display === 'none' || form.style.display === '')
+        ? 'block'
+        : 'none';
+});
 </script>
 
 @endsection

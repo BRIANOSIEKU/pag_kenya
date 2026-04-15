@@ -18,12 +18,29 @@ class PastoralTransfer extends Model
         'rejection_reason',
 
         // =========================
-        // APPROVAL FIELDS (MISSING BEFORE)
+        // APPROVAL FIELDS
         // =========================
         'from_district_approved',
         'to_district_approved',
         'main_admin_approved',
     ];
+
+    // =========================
+    // CASTS (IMPORTANT FIX)
+    // =========================
+    protected $casts = [
+        'transfer_date' => 'date',
+        'from_district_approved' => 'boolean',
+        'to_district_approved' => 'boolean',
+        'main_admin_approved' => 'boolean',
+    ];
+
+    // =========================
+    // STATUS CONSTANTS (PREVENT BUGS)
+    // =========================
+    const STATUS_PENDING = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
 
     // =========================
     // PASTOR
@@ -63,5 +80,22 @@ class PastoralTransfer extends Model
     public function toAssembly()
     {
         return $this->belongsTo(Assembly::class, 'to_assembly_id');
+    }
+
+    // =========================
+    // HELPER: IS APPROVED
+    // =========================
+    public function isApproved()
+    {
+        return $this->status === self::STATUS_APPROVED
+            && $this->main_admin_approved == 1;
+    }
+
+    // =========================
+    // HELPER: CAN GENERATE LETTER
+    // =========================
+    public function canGenerateLetter()
+    {
+        return $this->isApproved();
     }
 }

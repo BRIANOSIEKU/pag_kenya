@@ -2,49 +2,169 @@
 
 @section('content')
 
-<h2>Ministry Partners</h2>
+<style>
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 15px;
+}
 
-<a href="{{ route('admin.partners.create') }}"
-   style="background:#4CAF50;color:#fff;padding:8px 15px;border-radius:6px;text-decoration:none;">
-   + Add Partner
-</a>
+/* HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
-<br><br>
+/* BUTTONS */
+.btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 13px;
+    display: inline-block;
+}
+.btn-primary {
+    background: #4CAF50;
+    color: #fff;
+}
+.btn:hover {
+    opacity: 0.85;
+}
 
-@if(session('success'))
-    <p style="color:green">{{ session('success') }}</p>
-@endif
+/* SUCCESS MESSAGE */
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
 
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;">
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
 
-@foreach($partners as $partner)
-    <div style="border:1px solid #ddd;padding:15px;border-radius:10px;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,0.08);">
+/* CARD */
+.card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
-        @if($partner->logo)
-            <img src="{{ asset('storage/'.$partner->logo) }}" 
-                 style="width:100%;height:120px;object-fit:contain;margin-bottom:10px;">
-        @endif
+/* IMAGE */
+.card img {
+    width: 100%;
+    height: 120px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
 
-        <h4>{{ $partner->name }}</h4>
-        <p>{{ Str::limit($partner->description, 80) }}</p>
+/* TITLE */
+.card h4 {
+    margin: 5px 0;
+}
 
-        <div style="margin-top:10px;">
-            <a href="{{ route('admin.partners.show', $partner) }}">View</a> |
-            <a href="{{ route('admin.partners.edit', $partner) }}">Edit</a> |
+/* DESCRIPTION */
+.card p {
+    font-size: 14px;
+    color: #555;
+}
 
-            <form action="{{ route('admin.partners.destroy', $partner) }}" 
-                  method="POST" style="display:inline;">
-                @csrf
-                @method('DELETE')
-                <button onclick="return confirm('Delete partner?')" 
-                        style="background:none;border:none;color:red;cursor:pointer;">
-                    Delete
-                </button>
-            </form>
+/* ACTIONS */
+.actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.actions a,
+.actions button {
+    font-size: 12px;
+    border-radius: 5px;
+    padding: 4px 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-view { background:#2196F3; color:#fff; }
+.btn-edit { background:#FFC107; color:#fff; }
+.btn-delete { background:#F44336; color:#fff; }
+
+/* RESPONSIVE */
+@media(max-width:768px){
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+</style>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h2>Ministry Partners</h2>
+
+        <a href="{{ route('admin.partners.create') }}" class="btn btn-primary">
+            + Add Partner
+        </a>
+    </div>
+
+    <!-- SUCCESS -->
+    @if(session('success'))
+        <div class="alert-success">
+            {{ session('success') }}
         </div>
+    @endif
+
+    <!-- GRID -->
+    <div class="grid">
+
+        @foreach($partners as $partner)
+            <div class="card">
+
+                <!-- LOGO -->
+                @if($partner->logo)
+                    <img src="{{ asset('storage/'.$partner->logo) }}" alt="Logo">
+                @endif
+
+                <!-- INFO -->
+                <div>
+                    <h4>{{ $partner->name }}</h4>
+                    <p>{{ \Illuminate\Support\Str::limit($partner->description, 80) }}</p>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="actions">
+                    <a href="{{ route('admin.partners.show', $partner) }}" class="btn-view">View</a>
+                    <a href="{{ route('admin.partners.edit', $partner) }}" class="btn-edit">Edit</a>
+
+                    <form action="{{ route('admin.partners.destroy', $partner) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button onclick="return confirm('Delete partner?')" class="btn-delete">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        @endforeach
 
     </div>
-@endforeach
 
 </div>
 

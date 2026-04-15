@@ -2,134 +2,254 @@
 
 @section('content')
 
-
 <style>
-    .btn-back {
+/* ===== PAGE WRAPPER ===== */
+.page-wrapper {
+    max-width: 1100px;
+    margin: auto;
+    padding: 15px;
+}
+
+/* ===== BACK BUTTON ===== */
+.btn-back {
+    display: inline-block;
     background: #607D8B;
     color: white;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: 6px;
     text-decoration: none;
     font-size: 13px;
     font-weight: bold;
+    margin-bottom: 15px;
 }
 
-.btn-back:hover {
-    opacity: 0.85;
+.btn-back:hover { opacity: 0.85; }
+
+/* ===== TITLE ===== */
+.page-title {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+/* ===== ALERT ===== */
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+/* ===== FILTER FORM ===== */
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.filter-select {
+    padding: 10px;
+    width: 250px;
+    max-width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.btn-blue { background: #2196F3; }
+.btn-gray { background: #607D8B; }
+.btn-green { background: #4CAF50; }
+.btn-red { background: #F44336; }
+
+.btn:hover { opacity: 0.85; }
+
+/* ===== TABLE ===== */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+th {
+    background: #f5f5f5;
+    padding: 10px;
+    border: 1px solid #eee;
+    text-align: left;
+}
+
+td {
+    padding: 10px;
+    border: 1px solid #eee;
+    font-size: 14px;
+}
+
+/* ===== STATUS ===== */
+.status {
+    color: orange;
+    font-weight: bold;
+}
+
+/* ===== ACTIONS ===== */
+.actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .filter-form {
+        flex-direction: column;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    table {
+        min-width: 600px;
+    }
+
+    .actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
 </style>
 
-   <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
-            ← Back to District Dashboard
-        </a>
+<div class="page-wrapper">
 
-<h2>New Assembly Requests</h2>
-
-@if(session('success'))
-    <div style="background:#d4edda;color:#155724;padding:10px;border-radius:6px;margin-bottom:15px;">
-        {{ session('success') }}
-    </div>
-@endif
-
-<!-- ================= SEARCH FILTER ================= -->
-<form method="GET" action="{{ route('admin.assembly.requests') }}"
-      style="margin-bottom:15px; display:flex; gap:10px;">
-
-    <select name="district_id" style="padding:8px; width:250px;">
-        <option value="">-- Filter by District --</option>
-
-        @foreach($districts as $district)
-            <option value="{{ $district->id }}"
-                {{ request('district_id') == $district->id ? 'selected' : '' }}>
-                {{ $district->name }}
-            </option>
-        @endforeach
-    </select>
-
-    <button type="submit"
-            style="padding:8px 12px;background:#2196F3;color:#fff;border:none;border-radius:5px;">
-        Search
-    </button>
-
-    <a href="{{ route('admin.assembly.requests') }}"
-       style="padding:8px 12px;background:#607D8B;color:#fff;border-radius:5px;text-decoration:none;">
-        Reset
+    {{-- BACK --}}
+    <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
+        ← Back to District Dashboard
     </a>
 
-</form>
+    {{-- TITLE --}}
+    <h2 class="page-title">New Assembly Requests</h2>
 
-<!-- ================= TABLE ================= -->
-<table style="width:100%;border-collapse:collapse;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+    {{-- SUCCESS --}}
+    @if(session('success'))
+        <div class="alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
-    <thead>
-        <tr style="background:#f5f5f5;">
-            <th style="padding:10px;border:1px solid #ddd;">District</th>
-            <th style="padding:10px;border:1px solid #ddd;">Proposed Assembly</th>
-            <th style="padding:10px;border:1px solid #ddd;">Physical Address</th>
-            <th style="padding:10px;border:1px solid #ddd;">Status</th>
-            <th style="padding:10px;border:1px solid #ddd;">Actions</th>
-        </tr>
-    </thead>
+    {{-- FILTER --}}
+    <form method="GET"
+          action="{{ route('admin.assembly.requests') }}"
+          class="filter-form">
 
-    <tbody>
-        @forelse($requests as $request)
-        <tr>
+        <select name="district_id" class="filter-select">
+            <option value="">-- Filter by District --</option>
 
-            <!-- DISTRICT -->
-            <td style="padding:10px;border:1px solid #ddd;">
-                {{ $request->district->name ?? 'N/A' }}
-            </td>
+            @foreach($districts as $district)
+                <option value="{{ $district->id }}"
+                    {{ request('district_id') == $district->id ? 'selected' : '' }}>
+                    {{ $district->name }}
+                </option>
+            @endforeach
+        </select>
 
-            <!-- ASSEMBLY NAME -->
-            <td style="padding:10px;border:1px solid #ddd;">
-                {{ $request->name }}
-            </td>
+        <button type="submit" class="btn btn-blue">
+            Search
+        </button>
 
-            <!-- ADDRESS -->
-            <td style="padding:10px;border:1px solid #ddd;">
-                {{ $request->physical_address }}
-            </td>
+        <a href="{{ route('admin.assembly.requests') }}" class="btn btn-gray">
+            Reset
+        </a>
 
-            <!-- STATUS -->
-            <td style="padding:10px;border:1px solid #ddd;color:orange;font-weight:bold;">
-                {{ ucfirst($request->status) }}
-            </td>
+    </form>
 
-            <!-- ACTIONS -->
-            <td style="padding:10px;border:1px solid #ddd;">
+    {{-- TABLE --}}
+    <div class="table-wrapper">
 
-                <!-- APPROVE -->
-                <form action="{{ route('admin.assembly.approve', $request->id) }}"
-                      method="POST"
-                      style="display:inline-block;">
-                    @csrf
-                    <button style="background:#4CAF50;color:#fff;padding:6px 10px;border:none;border-radius:5px;">
-                        Approve
-                    </button>
-                </form>
+        <table>
 
-                <!-- REJECT -->
-                <form action="{{ route('admin.assembly.reject', $request->id) }}"
-                      method="POST"
-                      style="display:inline-block;">
-                    @csrf
-                    <button style="background:#F44336;color:#fff;padding:6px 10px;border:none;border-radius:5px;">
-                        Reject
-                    </button>
-                </form>
+            <thead>
+                <tr>
+                    <th>District</th>
+                    <th>Proposed Assembly</th>
+                    <th>Physical Address</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
 
-            </td>
+            <tbody>
+                @forelse($requests as $request)
+                <tr>
 
-        </tr>
-        @empty
-        <tr>
-            <td colspan="5" style="padding:15px;text-align:center;">
-                No pending assembly requests.
-            </td>
-        </tr>
-        @endforelse
-    </tbody>
+                    <td>{{ $request->district->name ?? 'N/A' }}</td>
 
-</table>
+                    <td>{{ $request->name }}</td>
+
+                    <td>{{ $request->physical_address }}</td>
+
+                    <td class="status">
+                        {{ ucfirst($request->status) }}
+                    </td>
+
+                    <td>
+
+                        <div class="actions">
+
+                            <!-- APPROVE -->
+                            <form action="{{ route('admin.assembly.approve', $request->id) }}"
+                                  method="POST">
+                                @csrf
+                                <button class="btn btn-green">
+                                    Approve
+                                </button>
+                            </form>
+
+                            <!-- REJECT -->
+                            <form action="{{ route('admin.assembly.reject', $request->id) }}"
+                                  method="POST">
+                                @csrf
+                                <button class="btn btn-red">
+                                    Reject
+                                </button>
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" style="text-align:center; padding:15px;">
+                        No pending assembly requests.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
 
 @endsection

@@ -3,7 +3,6 @@
 @section('content')
 
 <style>
-    /* ===== Dashboard Grid Styling ===== */
     .dashboard-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -40,16 +39,14 @@
         text-decoration: none;
         text-align: center;
         color: #fff;
-        transition: all 0.3s ease;
+        transition: 0.3s;
     }
 
     .card a:hover {
         opacity: 0.85;
     }
 
-    /* Specific colors for buttons */
     .btn-gold { background: #FFD700; color: #1e3c72; border: 2px solid #4CAF50; }
-    .btn-gold:hover { background: #4CAF50; color: #fff; }
     .btn-green { background: #4CAF50; }
     .btn-blue { background: #2196F3; }
     .btn-orange { background: #FF9800; }
@@ -62,7 +59,6 @@
     .btn-orange-dark { background: #FF4500; }
     .btn-amber { background: #FFA500; }
 
-    /* Section headings */
     h2 {
         margin-top: 40px;
         margin-bottom: 20px;
@@ -72,17 +68,11 @@
         padding-bottom: 6px;
     }
 
-    /* Logout area */
     .logout-area {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 20px;
-    }
-
-    .logout-area h1 {
-        font-size: 1.8rem;
-        color: #1e3c72;
     }
 
     @media (max-width: 600px) {
@@ -93,50 +83,55 @@
     }
 </style>
 
-<!-- ===== Header & Logout ===== -->
+<!-- HEADER -->
 <div class="logout-area">
     <h1>Admin Dashboard</h1>
 
-    <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
+    <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display:none;">
         @csrf
     </form>
 
-    <a href="#"
-       onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-       class="btn-gold">
-       Logout
+    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="btn-gold">
+        Logout
     </a>
 </div>
 
 <p>Welcome, {{ Auth::user()->name }}</p>
 <hr>
 
-<!-- ================= WEBSITE CONTENT ================= -->
+<!-- ================= WEBSITE MANAGEMENT ================= -->
 <h2>Website Management</h2>
+
 <div class="dashboard-grid">
-<!-- ================= DISTRICT MANAGEMENT ================= -->
-<div class="dashboard-grid">
+
+    {{-- ================= DISTRICT MODULE (VISIBLE TO ALL EXCEPT ADMIN) ================= --}}
+    @if(!auth()->user()->hasRole('admin'))
     <div class="card">
         <h3>District Management</h3>
         <p>
-            Manage all district-level operations including assemblies, pastoral teams,
-            members, finance reports, transfers, and approvals.
+            Manage assemblies, pastoral teams, members, finance reports, transfers, and approvals.
         </p>
-
         <a href="{{ route('admin.districts.dashboard') }}" class="btn-gold">
-             District Module
+            District Module
         </a>
     </div>
-</div>
+    @endif
+
     <!-- Church Profile -->
     <div class="card">
         <h3>Church Profile</h3>
         <p>Mission, Vision, Core Values</p>
+
         @php $profile = \App\Models\ChurchProfile::first(); @endphp
+
         @if($profile)
-            <a href="{{ route('admin.church-profile.show', $profile->id) }}" class="btn-blue">View Profile</a>
+            <a href="{{ route('admin.church-profile.show', $profile->id) }}" class="btn-blue">
+                View Profile
+            </a>
         @else
-            <a href="{{ route('admin.church-profile.create') }}" class="btn-blue">Add Profile</a>
+            <a href="{{ route('admin.church-profile.create') }}" class="btn-blue">
+                Add Profile
+            </a>
         @endif
     </div>
 
@@ -144,7 +139,8 @@
     <div class="card">
         <h3>Leadership</h3>
         <p>Manage Leadership Structure</p>
-        <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
             <a href="{{ route('admin.leadership.index', ['type' => 'executive']) }}" class="btn-green">Executive Committee</a>
             <a href="{{ route('admin.leadership.index', ['type' => 'council']) }}" class="btn-blue">Church Council</a>
             <a href="{{ route('admin.overseers.index') }}" class="btn-brown">Church Overseers</a>
@@ -174,7 +170,7 @@
         <a href="{{ route('admin.projects.index') }}" class="btn-orange">Manage</a>
     </div>
 
-    <!-- Daily Devotions -->
+    <!-- Devotions -->
     <div class="card">
         <h3>Daily Devotions</h3>
         <p>Create & schedule devotions</p>
@@ -187,23 +183,28 @@
         <p>Manage ministry partners</p>
         <a href="{{ route('admin.partners.index') }}" class="btn-teal">Manage</a>
     </div>
-      <!--Admin Management -->
+
+    <!-- Admin Management -->
     <div class="card">
         <h3>Admin Management</h3>
         <p>Manage Admins</p>
         <a href="{{ route('admin.admins.create') }}" class="btn-teal">Manage</a>
     </div>
-     <!--Admin Management -->
+
+    <!-- Password Reset -->
     <div class="card">
-        <h3>PASSWORD RESET</h3>
-        <p>Reset my Password </p>
+        <h3>Password Reset</h3>
+        <p>Reset my password</p>
         <a href="{{ route('admin.admins.reset_my_password.form') }}" class="btn-teal">Reset</a>
     </div>
+
 </div>
 
 <!-- ================= USER INTERACTIONS ================= -->
 <h2>User Interactions</h2>
+
 <div class="dashboard-grid">
+
     <div class="card">
         <h3>Comments Moderation</h3>
         <p>Approve or delete user comments</p>
@@ -211,28 +212,33 @@
     </div>
 
     <div class="card">
-        <h3>Standing Commitees</h3>
-        <p>Manage and promote upcoming Committes</p>
-        <a href="{{ route('admin.committees.index') }}" class="btn-teal">View Standing Committes</a>
+        <h3>Standing Committees</h3>
+        <p>Manage committees</p>
+        <a href="{{ route('admin.committees.index') }}" class="btn-teal">View Committees</a>
     </div>
+
 </div>
 
 <!-- ================= ANNOUNCEMENTS ================= -->
 <h2>Announcements</h2>
+
 <div class="card">
     <h3>Announcements</h3>
     <p>Post official memos & videos</p>
-    <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
-        <a href="{{ route('admin.announcements.index') }}" class="btn-blue-">Manage Announcements</a>
+
+    <div style="display:flex; flex-direction:column; gap:8px;">
+        <a href="{{ route('admin.announcements.index') }}" class="btn-blue">Manage Announcements</a>
         <a href="{{ route('admin.announcements.create') }}" class="btn-amber">Add Announcement</a>
     </div>
 </div>
 
-<!-- ================= FINANCE & COMMUNICATION ================= -->
+<!-- ================= FINANCE ================= -->
 <h2>Finance & Communication</h2>
+
 <div class="dashboard-grid">
+
     <div class="card">
-        <h3>Donations / Online Giving</h3>
+        <h3>Donations</h3>
         <p>View transactions & reports</p>
         <a href="{{ route('admin.donations.index') }}" class="btn-green">View Donations</a>
     </div>
@@ -245,12 +251,14 @@
 
     <div class="card">
         <h3>Live Streaming</h3>
-        <p>Manage YouTube, Facebook & Radio</p>
-        <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
-            <a href="{{ route('admin.livestreams.index') }}" class="btn-teal">Manage Live Streams</a>
-            <a href="{{ route('admin.livestreams.create') }}" class="btn-green">Add New Stream</a>
+        <p>YouTube, Facebook & Radio</p>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <a href="{{ route('admin.livestreams.index') }}" class="btn-teal">Manage Streams</a>
+            <a href="{{ route('admin.livestreams.create') }}" class="btn-green">Add Stream</a>
         </div>
     </div>
+
 </div>
 
 @endsection

@@ -2,148 +2,243 @@
 
 @section('content')
 
-<h2>Edit Leader</h2>
+<style>
+/* ===== PAGE WRAPPER ===== */
+.form-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 10px;
+}
 
-<form method="POST"
-      action="{{ route('admin.districts.leadership.update', [$district->id, $leader->id]) }}"
-      enctype="multipart/form-data">
+/* ===== CARD ===== */
+.form-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
 
-    @csrf
-    @method('PUT')
+/* ===== TITLE ===== */
+.page-title {
+    font-size: 22px;
+    margin-bottom: 15px;
+}
 
-    <!-- NAME -->
-    <label>Name</label><br>
-    <input type="text"
-           name="name"
-           value="{{ old('name', $leader->name) }}"
-           required><br><br>
+/* ===== LABEL ===== */
+label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 14px;
+}
 
-    <!-- POSITION -->
-    <label>Position</label><br>
-    <select name="position" required>
-        <option value="">-- Select Position --</option>
+/* ===== INPUTS ===== */
+input[type="text"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+}
 
-        <option value="Overseer"
-            {{ old('position', $leader->position) == 'Overseer' ? 'selected' : '' }}>
-            Overseer
-        </option>
+input:focus, select:focus {
+    border-color: #2196F3;
+}
 
-        <option value="Secretary"
-            {{ old('position', $leader->position) == 'Secretary' ? 'selected' : '' }}>
-            Secretary
-        </option>
+/* ===== SECTION TITLE ===== */
+.section-title {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
 
-        <option value="CEYD"
-            {{ old('position', $leader->position) == 'CEYD' ? 'selected' : '' }}>
-            CEYD
-        </option>
+/* ===== IMAGE ===== */
+.current-photo {
+    width: 90px;
+    height: 90px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
 
-        <option value="Women Director"
-            {{ old('position', $leader->position) == 'Women Director' ? 'selected' : '' }}>
-            Women Director
-        </option>
+/* ===== FILE INPUTS ===== */
+input[type="file"] {
+    margin-top: 5px;
+}
 
-        <option value="LayPerson"
-            {{ old('position', $leader->position) == 'LayPerson' ? 'selected' : '' }}>
-            LayPerson
-        </option>
+/* ===== ATTACHMENTS ===== */
+.attachments a {
+    display: inline-block;
+    margin-bottom: 6px;
+    color: #2196F3;
+    text-decoration: none;
+    font-size: 13px;
+}
 
-        <option value="Treasurer"
-            {{ old('position', $leader->position) == 'Treasurer' ? 'selected' : '' }}>
-            Treasurer
-        </option>
+.attachments a:hover {
+    text-decoration: underline;
+}
 
-        <option value="Senior Pastor"
-            {{ old('position', $leader->position) == 'Senior Pastor' ? 'selected' : '' }}>
-            Senior Pastor
-        </option>
+/* ===== BUTTON ===== */
+.btn-update {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background: #FFC107;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+}
 
-    </select><br><br>
+.btn-update:hover {
+    opacity: 0.9;
+}
 
-    <!-- GENDER -->
-    <label>Gender</label><br>
-    <select name="gender" required>
-        <option value="Male"
-            {{ old('gender', $leader->gender) == 'Male' ? 'selected' : '' }}>
-            Male
-        </option>
+/* ===== GRID FOR BANK DETAILS (optional clean look) ===== */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
 
-        <option value="Female"
-            {{ old('gender', $leader->gender) == 'Female' ? 'selected' : '' }}>
-            Female
-        </option>
-    </select><br><br>
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
 
-    <!-- CONTACT -->
-    <label>Contact</label><br>
-    <input type="text"
-           name="contact"
-           value="{{ old('contact', $leader->contact) }}"><br><br>
+    .page-title {
+        font-size: 18px;
+    }
+}
+</style>
 
-    <!-- NATIONAL ID -->
-    <label>National ID</label><br>
-    <input type="text"
-           name="national_id"
-           value="{{ old('national_id', $leader->national_id) }}"><br><br>
+<div class="form-container">
 
-    <!-- DATE OF BIRTH -->
-    <label>Date of Birth</label><br>
-    <input type="date"
-           name="dob"
-           value="{{ old('dob', \Carbon\Carbon::parse($leader->dob)->format('Y-m-d')) }}"><br><br>
+    <div class="form-card">
 
-    {{-- ================= BANK DETAILS ================= --}}
-    <h3>Bank Details</h3>
+        <h2 class="page-title">Edit Leader</h2>
 
-    <label>Bank Name</label><br>
-    <input type="text"
-           name="bank_name"
-           value="{{ old('bank_name', $leader->bank_name) }}"
-           required><br><br>
+        <form method="POST"
+              action="{{ route('admin.districts.leadership.update', [$district->id, $leader->id]) }}"
+              enctype="multipart/form-data">
 
-    <label>Branch</label><br>
-    <input type="text"
-           name="bank_branch"
-           value="{{ old('bank_branch', $leader->bank_branch) }}"
-           required><br><br>
+            @csrf
+            @method('PUT')
 
-    <label>Account Number</label><br>
-    <input type="text"
-           name="account_number"
-           value="{{ old('account_number', $leader->account_number) }}"
-           required><br><br>
+            <!-- NAME -->
+            <label>Name</label>
+            <input type="text"
+                   name="name"
+                   value="{{ old('name', $leader->name) }}"
+                   required>
 
-    <!-- CURRENT PHOTO -->
-    <label>Current Photo</label><br>
-    @if($leader->photo)
-        <img src="{{ asset('storage/'.$leader->photo) }}" width="90"><br><br>
-    @endif
+            <!-- POSITION -->
+            <label>Position</label>
+            <select name="position" required>
+                <option value="">-- Select Position --</option>
 
-    <!-- NEW PHOTO -->
-    <input type="file" name="photo"><br><br>
+                @foreach([
+                    'Overseer','Secretary','CEYD','Women Director',
+                    'LayPerson','Treasurer','Senior Pastor'
+                ] as $pos)
+                    <option value="{{ $pos }}"
+                        {{ old('position', $leader->position) == $pos ? 'selected' : '' }}>
+                        {{ $pos }}
+                    </option>
+                @endforeach
+            </select>
 
-    <!-- ATTACHMENTS -->
-    <label>New Attachments</label><br>
-    <input type="file" name="attachments[]" multiple><br><br>
+            <!-- GENDER -->
+            <label>Gender</label>
+            <select name="gender" required>
+                <option value="Male" {{ old('gender', $leader->gender) == 'Male' ? 'selected' : '' }}>Male</option>
+                <option value="Female" {{ old('gender', $leader->gender) == 'Female' ? 'selected' : '' }}>Female</option>
+            </select>
 
-    <!-- EXISTING ATTACHMENTS -->
-    @if($leader->attachments)
-        <label>Existing Attachments</label><br>
+            <!-- CONTACT -->
+            <label>Contact</label>
+            <input type="text" name="contact" value="{{ old('contact', $leader->contact) }}">
 
-        @foreach($leader->attachments as $file)
-            <a href="{{ asset('storage/'.$file) }}" target="_blank">
-                View File
-            </a><br>
-        @endforeach
+            <!-- NATIONAL ID -->
+            <label>National ID</label>
+            <input type="text" name="national_id" value="{{ old('national_id', $leader->national_id) }}">
 
-        <br>
-    @endif
+            <!-- DATE OF BIRTH -->
+            <label>Date of Birth</label>
+            <input type="date"
+                   name="dob"
+                   value="{{ old('dob', \Carbon\Carbon::parse($leader->dob)->format('Y-m-d')) }}">
 
-    <button type="submit"
-            style="background:#FFC107; color:#fff; padding:8px 12px; border:none;">
-        Update Leader
-    </button>
+            <!-- BANK DETAILS -->
+            <h3 class="section-title">Bank Details</h3>
 
-</form>
+            <div class="grid-2">
+
+                <div>
+                    <label>Bank Name</label>
+                    <input type="text" name="bank_name"
+                           value="{{ old('bank_name', $leader->bank_name) }}" required>
+                </div>
+
+                <div>
+                    <label>Branch</label>
+                    <input type="text" name="bank_branch"
+                           value="{{ old('bank_branch', $leader->bank_branch) }}" required>
+                </div>
+
+            </div>
+
+            <label>Account Number</label>
+            <input type="text" name="account_number"
+                   value="{{ old('account_number', $leader->account_number) }}" required>
+
+            <!-- CURRENT PHOTO -->
+            <label>Current Photo</label>
+
+            @if($leader->photo)
+                <br>
+                <img src="{{ asset('storage/'.$leader->photo) }}" class="current-photo">
+            @else
+                <p>No photo available</p>
+            @endif
+
+            <!-- NEW PHOTO -->
+            <label>Update Photo</label>
+            <input type="file" name="photo">
+
+            <!-- NEW ATTACHMENTS -->
+            <label>New Attachments</label>
+            <input type="file" name="attachments[]" multiple>
+
+            <!-- EXISTING ATTACHMENTS -->
+            @if($leader->attachments)
+                <label class="section-title">Existing Attachments</label>
+
+                <div class="attachments">
+                    @foreach($leader->attachments as $file)
+                        <a href="{{ asset('storage/'.$file) }}" target="_blank">
+                            📎 View File
+                        </a><br>
+                    @endforeach
+                </div>
+            @endif
+
+            <!-- SUBMIT -->
+            <button type="submit" class="btn-update">
+                Update Leader
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
 
 @endsection

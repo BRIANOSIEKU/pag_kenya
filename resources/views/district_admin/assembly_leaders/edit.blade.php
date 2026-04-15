@@ -2,94 +2,203 @@
 
 @section('content')
 
-<h2>Edit Assembly Leader</h2>
+<style>
+/* ===== GLOBAL SAFETY FIX ===== */
+* {
+    box-sizing: border-box;
+}
 
-<form method="POST"
-      action="{{ route('district.assemblies.leaders.update', [$assembly->id, $leader->id]) }}"
-      enctype="multipart/form-data">
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
 
-    @csrf
-    @method('PUT')
+/* ===== PAGE WRAPPER ===== */
+.page-wrapper {
+    padding: 15px;
+    max-width: 100%;
+}
 
-    <!-- NAME -->
-    <label>Name</label><br>
-    <input type="text" name="name" value="{{ $leader->name }}" required><br><br>
+/* ===== FORM CARD ===== */
+.form-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
 
-    <!-- POSITION -->
-    <label>Position</label><br>
-    <select name="position" required>
-        @php
-            $positions = [
-                'Secretary',
-                'Treasurer',
-                'CEYD',
-                'Deacon',
-                'Deaconess',
-                'Women Director',
-                'Sunday School Superintendent'
-            ];
-        @endphp
+/* ===== TITLE ===== */
+h2 {
+    color: #1e3c72;
+    margin-bottom: 15px;
+}
 
-        @foreach($positions as $pos)
-            <option value="{{ $pos }}"
-                {{ $leader->position == $pos ? 'selected' : '' }}>
-                {{ $pos }}
-            </option>
-        @endforeach
-    </select><br><br>
+/* ===== LABELS ===== */
+label {
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
 
-    <!-- GENDER -->
-    <label>Gender</label><br>
-    <select name="gender" required>
-        <option value="Male" {{ $leader->gender == 'Male' ? 'selected' : '' }}>Male</option>
-        <option value="Female" {{ $leader->gender == 'Female' ? 'selected' : '' }}>Female</option>
-    </select><br><br>
+/* ===== INPUTS ===== */
+input[type="text"],
+input[type="date"],
+select,
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
 
-    <!-- CONTACT -->
-    <label>Contact</label><br>
-    <input type="text" name="contact" value="{{ $leader->contact }}"><br><br>
+/* ===== IMAGE ===== */
+img {
+    border-radius: 6px;
+    max-width: 100%;
+    height: auto;
+}
 
-    <!-- NATIONAL ID -->
-    <label>National ID</label><br>
-    <input type="text" name="national_id" value="{{ $leader->national_id }}"><br><br>
+/* ===== LINKS ===== */
+a {
+    color: #2196F3;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 5px;
+    word-break: break-word;
+}
 
-    <!-- DOB -->
-    <label>Date of Birth</label><br>
-    <input type="date" name="dob" value="{{ $leader->dob }}"><br><br>
+/* ===== BUTTON ===== */
+button {
+    background: #FFC107;
+    color: #fff;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 15px;
+}
 
-    <!-- CURRENT PHOTO -->
-    <label>Current Photo</label><br>
-    @if($leader->photo)
-        <img src="{{ asset('storage/'.$leader->photo) }}" width="80"><br><br>
-    @endif
+/* ===== SECTION SPACING ===== */
+.section {
+    margin-bottom: 15px;
+}
 
-    <!-- NEW PHOTO -->
-    <input type="file" name="photo"><br><br>
+/* ===== MOBILE ===== */
+@media (max-width: 480px) {
+    .page-wrapper {
+        padding: 10px;
+    }
 
-    <!-- ATTACHMENTS -->
-    <label>New Attachments</label><br>
-    <input type="file" name="attachments[]" multiple><br><br>
+    button {
+        font-size: 16px;
+    }
+}
+</style>
 
-    <!-- EXISTING ATTACHMENTS -->
-    @php
-        $attachments = $leader->attachments ? json_decode($leader->attachments, true) : [];
-    @endphp
+<div class="page-wrapper">
 
-    @if(!empty($attachments))
-        <p>Existing Attachments:</p>
-        @foreach($attachments as $file)
-            <a href="{{ asset('storage/'.$file) }}" target="_blank">
-                {{ basename($file) }}
-            </a><br>
-        @endforeach
-        <br>
-    @endif
+    <h2>Edit Assembly Leader</h2>
 
-    <button type="submit"
-            style="background:#FFC107;color:#fff;padding:8px 12px;border:none;">
-        Update Leader
-    </button>
+    <div class="form-card">
 
-</form>
+        <form method="POST"
+              action="{{ route('district.assemblies.leaders.update', [$assembly->id, $leader->id]) }}"
+              enctype="multipart/form-data">
+
+            @csrf
+            @method('PUT')
+
+            <!-- NAME -->
+            <label>Name</label>
+            <input type="text" name="name" value="{{ $leader->name }}" required>
+
+            <!-- POSITION -->
+            <label>Position</label>
+            <select name="position" required>
+                @php
+                    $positions = [
+                        'Secretary',
+                        'Treasurer',
+                        'CEYD',
+                        'Deacon',
+                        'Deaconess',
+                        'Women Director',
+                        'Sunday School Superintendent'
+                    ];
+                @endphp
+
+                @foreach($positions as $pos)
+                    <option value="{{ $pos }}"
+                        {{ $leader->position == $pos ? 'selected' : '' }}>
+                        {{ $pos }}
+                    </option>
+                @endforeach
+            </select>
+
+            <!-- GENDER -->
+            <label>Gender</label>
+            <select name="gender" required>
+                <option value="Male" {{ $leader->gender == 'Male' ? 'selected' : '' }}>Male</option>
+                <option value="Female" {{ $leader->gender == 'Female' ? 'selected' : '' }}>Female</option>
+            </select>
+
+            <!-- CONTACT -->
+            <label>Contact</label>
+            <input type="text" name="contact" value="{{ $leader->contact }}">
+
+            <!-- NATIONAL ID -->
+            <label>National ID</label>
+            <input type="text" name="national_id" value="{{ $leader->national_id }}">
+
+            <!-- DOB -->
+            <label>Date of Birth</label>
+            <input type="date" name="dob" value="{{ $leader->dob }}">
+
+            <!-- CURRENT PHOTO -->
+            <label>Current Photo</label>
+            @if($leader->photo)
+                <img src="{{ asset('storage/'.$leader->photo) }}" width="80">
+            @endif
+
+            <!-- NEW PHOTO -->
+            <label>Change Photo</label>
+            <input type="file" name="photo">
+
+            <!-- ATTACHMENTS -->
+            <label>New Attachments</label>
+            <input type="file" name="attachments[]" multiple>
+
+            <!-- EXISTING ATTACHMENTS -->
+            @php
+                $attachments = $leader->attachments ? json_decode($leader->attachments, true) : [];
+            @endphp
+
+            @if(!empty($attachments))
+                <div class="section">
+                    <strong>Existing Attachments:</strong><br>
+
+                    @foreach($attachments as $file)
+                        <a href="{{ asset('storage/'.$file) }}" target="_blank">
+                            {{ basename($file) }}
+                        </a><br>
+                    @endforeach
+                </div>
+            @endif
+
+            <!-- SUBMIT -->
+            <button type="submit">
+                Update Leader
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
 
 @endsection

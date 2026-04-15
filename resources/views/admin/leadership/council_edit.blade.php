@@ -1,12 +1,100 @@
 @extends('layouts.admin')
 
 @section('content')
+
+<style>
+    .btn-back {
+        background: #607D8B;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+
+    .btn-back:hover {
+        opacity: 0.85;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: auto;
+    }
+
+    .card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        outline: none;
+        font-size: 14px;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    .section {
+        margin-bottom: 15px;
+    }
+
+    .btn-update {
+        background: #4CAF50;
+        color: #fff;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .btn-update:hover {
+        opacity: 0.9;
+    }
+
+    .btn-cancel {
+        margin-left: 10px;
+        color: #555;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .preview-img {
+        margin-top: 10px;
+        height: 120px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+    }
+</style>
+
 <div class="container">
-    <h2 class="mb-4">Edit Church Council Member</h2>
+
+    <!-- BACK -->
+    <a href="{{ route('admin.dashboard') }}" class="btn-back">
+        ← Back to Dashboard
+    </a>
+
+    <h2 style="margin-bottom:15px;">Edit Church Council Member</h2>
 
     @if ($errors->any())
-        <div style="color:red; margin-bottom:10px;">
-            <ul>
+        <div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:6px;margin-bottom:15px;">
+            <ul style="margin:0;padding-left:20px;">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -14,51 +102,71 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.leadership.update', ['council', $leader->id]) }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
+    <div class="card">
 
-        <div style="margin-bottom:15px;">
-            <label for="full_name">Full Name *</label>
-            <input type="text" name="full_name" id="full_name" class="form-control" value="{{ old('full_name', $leader->full_name) }}" required>
-        </div>
+        <form action="{{ route('admin.leadership.update', ['council', $leader->id]) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
 
-        <div style="margin-bottom:15px;">
-            <label for="position">Position *</label>
-            <input type="text" name="position" id="position" class="form-control" value="{{ old('position', $leader->position) }}" required>
-        </div>
+            <div class="section">
+                <label>Full Name *</label>
+                <input type="text" name="full_name"
+                       value="{{ old('full_name', $leader->full_name) }}" required>
+            </div>
 
-        <div style="margin-bottom:15px;">
-            <label for="contact">Contact *</label>
-            <input type="text" name="contact" id="contact" class="form-control" value="{{ old('contact', $leader->contact) }}" required>
-        </div>
+            <div class="section">
+                <label>Position *</label>
+                <input type="text" name="position"
+                       value="{{ old('position', $leader->position) }}" required>
+            </div>
 
-        <div style="margin-bottom:15px;">
-            <label for="email">Email *</label>
-            <input type="email" name="email" id="email" class="form-control" value="{{ old('email', $leader->email) }}" required>
-        </div>
+            <div class="section">
+                <label>Contact *</label>
+                <input type="text" name="contact"
+                       value="{{ old('contact', $leader->contact) }}" required>
+            </div>
 
-        <div style="margin-bottom:15px;">
-            <label for="brief_description">Brief Description</label>
-            <textarea name="brief_description" id="brief_description" class="form-control">{{ old('brief_description', $leader->brief_description) }}</textarea>
-        </div>
+            <div class="section">
+                <label>Email *</label>
+                <input type="email" name="email"
+                       value="{{ old('email', $leader->email) }}" required>
+            </div>
 
-        <div style="margin-bottom:15px;">
-            <label for="message">Message</label>
-            <textarea name="message" id="message" class="form-control">{{ old('message', $leader->message) }}</textarea>
-        </div>
+            <div class="section">
+                <label>Brief Description</label>
+                <textarea name="brief_description">{{ old('brief_description', $leader->brief_description) }}</textarea>
+            </div>
 
-        <div style="margin-bottom:15px;">
-            <label for="photo">Photo</label>
-            <input type="file" name="photo" id="photo" class="form-control">
-            @if($leader->photo)
-                <p style="margin-top:5px;">Current Photo:</p>
-                <img src="{{ asset($leader->photo) }}" alt="{{ $leader->full_name }}" style="height:120px; border-radius:5px;">
-            @endif
-        </div>
+            <div class="section">
+                <label>Message</label>
+                <textarea name="message">{{ old('message', $leader->message) }}</textarea>
+            </div>
 
-        <button type="submit" style="background-color:#4CAF50; color:#fff; padding:10px 20px; border:none; border-radius:5px;">Update Member</button>
-        <a href="{{ route('admin.leadership.index', 'council') }}" style="margin-left:10px; color:#555;">Cancel</a>
-    </form>
+            <!-- PHOTO -->
+            <div class="section">
+                <label>Photo</label>
+                <input type="file" name="photo">
+
+                @if($leader->photo)
+                    <p style="margin-top:10px;font-weight:bold;">Current Photo:</p>
+                    <img src="{{ asset($leader->photo) }}"
+                         class="preview-img"
+                         alt="Photo">
+                @endif
+            </div>
+
+            <button type="submit" class="btn-update">
+                Update Member
+            </button>
+
+            <a href="{{ route('admin.leadership.index', 'council') }}" class="btn-cancel">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+
 </div>
+
 @endsection

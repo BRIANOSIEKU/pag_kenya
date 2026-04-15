@@ -57,14 +57,18 @@
             @if($department->overview)
                 <div class="white-card">
                     <h2 class="section-title">Overview</h2>
-                    <p class="section-text">{!! nl2br(e($department->overview)) !!}</p>
+                    <div class="section-text">
+    {!! $department->overview !!}
+</div>
                 </div>
             @endif
 
             @if($department->activities)
                 <div class="white-card">
                     <h2 class="section-title">Activities</h2>
-                    <p class="section-text">{!! nl2br(e($department->activities)) !!}</p>
+                    <div class="section-text">
+    {!! $department->activities !!}
+</div>
                 </div>
             @endif
         </div>
@@ -397,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // ✅ View More Button
+    
     if(viewMoreBtn){
         viewMoreBtn.addEventListener('click', () => {
             document.querySelectorAll('.hidden-image').forEach(img => img.style.display = 'block');

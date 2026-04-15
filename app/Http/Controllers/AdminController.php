@@ -9,25 +9,26 @@ use App\Models\User;
 
 class AdminController extends Controller
 {
-    // ======================
-    // ALLOWED ROLES (CENTRALIZED FIX)
-    // ======================
+    /**
+     * Allowed admin roles (Spatie ONLY)
+     */
     private array $adminRoles = [
+        'super_admin',
         'admin',
-        'super-admin',
-        'general-secretary',
-        'general-treasurer',
-        'general-superintendent',
+        'general_secretary',
+        'general_treasurer',
+        'general_superintendent',
     ];
 
-    // ======================
-    // LOGIN PAGE
-    // ======================
+    /**
+     * LOGIN PAGE
+     */
     public function showLogin()
     {
         if (Auth::check()) {
+            $user = Auth::user();
 
-            if (Auth::user()->hasAnyRole($this->adminRoles)) {
+            if ($user->hasAnyRole($this->adminRoles)) {
                 return redirect()->route('admin.dashboard');
             }
 
@@ -37,9 +38,9 @@ class AdminController extends Controller
         return view('admin.login');
     }
 
-    // ======================
-    // LOGIN PROCESS
-    // ======================
+    /**
+     * LOGIN PROCESS (FIXED FLOW)
+     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -47,44 +48,47 @@ class AdminController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
-
-            $request->session()->regenerate();
-
-            $user = Auth::user();
-
-            // ✅ STRICT ROLE CHECK
-            if ($user && $user->hasAnyRole($this->adminRoles)) {
-                return redirect()->route('admin.dashboard');
-            }
-
-            Auth::logout();
-
+        // Attempt login
+        if (!Auth::attempt($credentials)) {
             return back()->withErrors([
-                'email' => 'You do not have admin access.',
+                'email' => 'The provided credentials do not match our records.',
             ]);
         }
 
-        return back()->withErrors([
-            'email' => 'Invalid credentials.',
-        ]);
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        // IMPORTANT: Spatie role check ONLY
+        if (!$user || !$user->hasAnyRole($this->adminRoles)) {
+            Auth::logout();
+
+            return redirect()->route('admin.login')
+                ->withErrors([
+                    'email' => 'You do not have administrative access.',
+                ]);
+        }
+
+        return redirect()->route('admin.dashboard');
     }
 
-    // ======================
-    // DASHBOARD
-    // ======================
+    /**
+     * DASHBOARD (ROLE PROTECTED)
+     */
     public function dashboard()
     {
-        if (!Auth::check() || !Auth::user()->hasAnyRole($this->adminRoles)) {
-            abort(403);
+        $user = Auth::user();
+
+        if (!$user || !$user->hasAnyRole($this->adminRoles)) {
+            abort(403, 'Unauthorized access.');
         }
 
         return view('admin.dashboard');
     }
 
-    // ======================
-    // LOGOUT
-    // ======================
+    /**
+     * LOGOUT
+     */
     public function logout(Request $request)
     {
         Auth::logout();
@@ -95,9 +99,9 @@ class AdminController extends Controller
         return redirect()->route('admin.login');
     }
 
-    // ======================
-    // LIST ADMINS
-    // ======================
+    /**
+     * LIST ADMINS
+     */
     public function listAdmins()
     {
         $admins = User::role($this->adminRoles)->get();
@@ -105,17 +109,17 @@ class AdminController extends Controller
         return view('admin.admins.list', compact('admins'));
     }
 
-    // ======================
-    // CREATE FORM
-    // ======================
+    /**
+     * CREATE ADMIN FORM
+     */
     public function createAdmin()
     {
         return view('admin.admins.create');
     }
 
-    // ======================
-    // STORE ADMIN
-    // ======================
+    /**
+     * STORE ADMIN
+     */
     public function storeAdmin(Request $request)
     {
         $request->validate([
@@ -131,19 +135,18 @@ class AdminController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        // ✅ CLEAN ROLE ASSIGNMENT
-        $user->syncRoles([$request->role]);
+        $user->assignRole($request->role);
 
         return redirect()->route('admin.admins.list')
-            ->with('success', 'User created successfully.');
+            ->with('success', 'Admin user created successfully.');
     }
 
-    // ======================
-    // RESET PASSWORD (ADMIN)
-    // ======================
+    /**
+     * RESET PASSWORD (SUPER ADMIN ONLY)
+     */
     public function showResetPasswordForm(User $admin)
     {
-        if (!Auth::user()->hasRole('super-admin')) {
+        if (!Auth::user()->hasRole('super_admin')) {
             abort(403);
         }
 
@@ -152,7 +155,7 @@ class AdminController extends Controller
 
     public function updateAdminPassword(Request $request, User $admin)
     {
-        if (!Auth::user()->hasRole('super-admin')) {
+        if (!Auth::user()->hasRole('super_admin')) {
             abort(403);
         }
 
@@ -168,9 +171,9 @@ class AdminController extends Controller
             ->with('success', 'Password updated successfully.');
     }
 
-    // ======================
-    // RESET OWN PASSWORD
-    // ======================
+    /**
+     * RESET OWN PASSWORD
+     */
     public function showResetMyPasswordForm()
     {
         return view('admin.admins.reset_my_password');
@@ -187,7 +190,7 @@ class AdminController extends Controller
 
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors([
-                'current_password' => 'Incorrect password'
+                'current_password' => 'Current password is incorrect.'
             ]);
         }
 
@@ -195,6 +198,6 @@ class AdminController extends Controller
             'password' => Hash::make($request->new_password),
         ]);
 
-        return back()->with('success', 'Password updated successfully.');
+        return back()->with('success', 'Your password has been updated.');
     }
 }

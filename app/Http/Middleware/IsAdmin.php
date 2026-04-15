@@ -7,11 +7,24 @@ use Illuminate\Support\Facades\Auth;
 
 class IsAdmin
 {
-   public function handle($request, Closure $next)
-{
-    if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'super_admin'])) {
-        return redirect('/'); // or redirect()->route('admin.login');
+    public function handle($request, Closure $next)
+    {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
+        $user = Auth::user();
+
+        if (!$user->hasAnyRole([
+            'super_admin',
+            'admin',
+            'general_superintendent',
+            'general_treasurer',
+            'general_secretary'
+        ])) {
+            abort(403, 'Unauthorized access');
+        }
+
+        return $next($request);
     }
-    return $next($request);
-}
 }

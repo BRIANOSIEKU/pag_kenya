@@ -1,71 +1,187 @@
 @extends('layouts.admin')
 
 @section('content')
-<!-- Back to Dashboard -->
-<a href="{{ route('admin.dashboard') }}" style="padding:8px 12px; background:#2196F3; color:#fff; border-radius:6px; text-decoration:none; margin-bottom:15px; display:inline-block;">
-    &larr; Back to Dashboard
-</a>
-<div class="container">
-    <h2 class="mb-4">Church Council Members</h2>
 
-    {{-- Success Message --}}
+<style>
+    .btn-back {
+        background: #607D8B;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+
+    .btn-back:hover {
+        opacity: 0.85;
+    }
+
+    .container {
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    .card {
+        background: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background: #1e3c72;
+        color: #fff;
+        padding: 12px;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    td {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+    }
+
+    .btn {
+        padding: 6px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 13px;
+        color: #fff;
+        display: inline-block;
+    }
+
+    .btn-edit {
+        background: #FFC107;
+    }
+
+    .btn-delete {
+        background: #F44336;
+        border: none;
+        cursor: pointer;
+    }
+
+    .actions {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    img.avatar {
+        height: 60px;
+        border-radius: 6px;
+        object-fit: cover;
+    }
+
+</style>
+
+<div class="container">
+
+    <!-- BACK -->
+    <a href="{{ route('admin.dashboard') }}" class="btn-back">
+        ← Back to Dashboard
+    </a>
+
+    <h2 style="margin-bottom:15px;">Church Council Members</h2>
+
+    <!-- SUCCESS -->
     @if(session('success'))
-        <div style="color:green; margin-bottom:15px;">
+        <div style="background:#d4edda;color:#155724;padding:10px;border-radius:6px;margin-bottom:15px;">
             {{ session('success') }}
         </div>
     @endif
 
-    {{-- Add New Member Button --}}
-    <a href="{{ route('admin.leadership.create', 'council') }}" 
-       style="display:inline-block; margin-bottom:15px; background-color:#2196F3; color:#fff; padding:10px 20px; border-radius:5px; text-decoration:none;">
-       Add New Member
+    <!-- ADD BUTTON -->
+    <a href="{{ route('admin.leadership.create', 'council') }}"
+       style="background:#2196F3;color:#fff;padding:10px 15px;border-radius:6px;text-decoration:none;display:inline-block;margin-bottom:15px;">
+        + Add New Member
     </a>
 
-    {{-- Members Table --}}
-    <table style="width:100%; border-collapse:collapse; border:1px solid #ccc;">
-        <thead style="background-color:#f2f2f2;">
-            <tr>
-                <th style="padding:10px; border:1px solid #ccc;">Photo</th>
-                <th style="padding:10px; border:1px solid #ccc;">Full Name</th>
-                <th style="padding:10px; border:1px solid #ccc;">Position</th>
-                <th style="padding:10px; border:1px solid #ccc;">Contact</th>
-                <th style="padding:10px; border:1px solid #ccc;">Email</th>
-                <th style="padding:10px; border:1px solid #ccc;">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($leaders as $leader)
+    <div class="card">
+
+        <table>
+
+            <thead>
                 <tr>
-                    <td style="text-align:center; padding:10px; border:1px solid #ccc;">
-                        @if($leader->photo)
-                            <img src="{{ asset($leader->photo) }}" alt="{{ $leader->full_name }}" style="height:60px; border-radius:5px;">
-                        @endif
-                    </td>
-                    <td style="padding:10px; border:1px solid #ccc;">{{ $leader->full_name }}</td>
-                    <td style="padding:10px; border:1px solid #ccc;">{{ $leader->position }}</td>
-                    <td style="padding:10px; border:1px solid #ccc;">{{ $leader->contact }}</td>
-                    <td style="padding:10px; border:1px solid #ccc;">{{ $leader->email }}</td>
-                    <td style="padding:10px; border:1px solid #ccc; display:flex; gap:5px; justify-content:center;">
-                        <a href="{{ route('admin.leadership.edit', ['council', $leader->id]) }}" 
-                           style="background-color:#FFC107; color:#fff; padding:5px 10px; border-radius:5px; text-decoration:none;">
-                           Edit
-                        </a>
-                        <form action="{{ route('admin.leadership.destroy', ['council', $leader->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this member?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" 
-                                    style="background-color:#F44336; color:#fff; padding:5px 10px; border:none; border-radius:5px; cursor:pointer;">
-                                Delete
-                            </button>
-                        </form>
-                    </td>
+                    <th>Photo</th>
+                    <th>Full Name</th>
+                    <th>Position</th>
+                    <th>Contact</th>
+                    <th>Email</th>
+                    <th style="width:160px;">Actions</th>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="6" style="text-align:center; padding:15px;">No Church Council members found.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
+
+            <tbody>
+
+                @forelse($leaders as $leader)
+
+                    <tr>
+
+                        <td>
+                            @if($leader->photo)
+                                <img src="{{ asset($leader->photo) }}"
+                                     class="avatar"
+                                     alt="{{ $leader->full_name }}">
+                            @endif
+                        </td>
+
+                        <td>{{ $leader->full_name }}</td>
+
+                        <td>{{ $leader->position }}</td>
+
+                        <td>{{ $leader->contact }}</td>
+
+                        <td>{{ $leader->email }}</td>
+
+                        <td class="actions">
+
+                            <a href="{{ route('admin.leadership.edit', ['council', $leader->id]) }}"
+                               class="btn btn-edit">
+                                Edit
+                            </a>
+
+                            <form action="{{ route('admin.leadership.destroy', ['council', $leader->id]) }}"
+                                  method="POST">
+                                @csrf
+                                @method('DELETE')
+
+                                <button type="submit"
+                                        class="btn btn-delete"
+                                        onclick="return confirm('Are you sure you want to delete this member?')">
+                                    Delete
+                                </button>
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+                        <td colspan="6" style="text-align:center;padding:15px;">
+                            No Church Council members found.
+                        </td>
+                    </tr>
+
+                @endforelse
+
+            </tbody>
+
+        </table>
+
+    </div>
+
 </div>
+
 @endsection

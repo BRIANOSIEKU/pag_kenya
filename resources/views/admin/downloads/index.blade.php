@@ -3,215 +3,272 @@
 @section('content')
 
 <style>
-.container {
+/* ===== PAGE WRAPPER ===== */
+.page-wrapper {
     max-width: 1200px;
     margin: auto;
+    padding: 15px;
 }
 
+/* ===== HEADER ===== */
 .header {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:15px;
-    flex-wrap:wrap;
-    gap:10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-.left, .right {
-    display:flex;
-    gap:10px;
-    align-items:center;
-    flex-wrap:wrap;
+/* ===== TITLE ===== */
+.page-title {
+    color: #1e3c72;
+    margin: 0;
+    font-size: 20px;
 }
 
+/* ===== SEARCH ===== */
 .search-box {
-    width:280px;
-    padding:10px;
-    border:1px solid #ccc;
-    border-radius:8px;
-    outline:none;
+    width: 280px;
+    max-width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
 }
 
-.card {
-    background:#fff;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 3px 10px rgba(0,0,0,0.05);
-}
-
-.table {
-    width:100%;
-    border-collapse:collapse;
-}
-
-.table th {
-    background:#1e3c72;
-    color:white;
-    padding:12px;
-    text-align:left;
-}
-
-.table td {
-    padding:12px;
-    border-bottom:1px solid #eee;
-}
-
-.btn {
-    padding:6px 10px;
-    border-radius:6px;
-    color:white;
-    text-decoration:none;
-    cursor:pointer;
-    font-size:13px;
-    border:none;
-}
-
-.btn-primary { background:#2196F3; }
-.btn-view { background:#28a745; }
-.btn-edit { background:#FF9800; }
-.btn-danger { background:#e74c3c; }
-
-.file-link {
-    color:#2196F3;
-    text-decoration:none;
-    font-weight:bold;
-}
-</style>
-
-<style>
-    .btn-back {
+/* ===== BACK BUTTON ===== */
+.btn-back {
+    display: inline-block;
     background: #607D8B;
     color: white;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: 6px;
     text-decoration: none;
     font-size: 13px;
     font-weight: bold;
+    margin-bottom: 15px;
 }
 
-.btn-back:hover {
-    opacity: 0.85;
+.btn-back:hover { opacity: 0.85; }
+
+/* ===== BUTTONS ===== */
+.btn {
+    padding: 10px 14px;
+    border-radius: 6px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 13px;
+    display: inline-block;
+}
+
+.btn-primary { background: #2196F3; }
+.btn-view { background: #28a745; }
+.btn-edit { background: #FF9800; }
+.btn-danger { background: #e74c3c; }
+
+.btn:hover { opacity: 0.85; }
+
+/* ===== CARD ===== */
+.card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+/* ===== TABLE ===== */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+th {
+    background: #1e3c72;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+/* ===== FILE LINK ===== */
+.file-link {
+    color: #2196F3;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* ===== ALERT ===== */
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+/* ===== RIGHT SECTION ===== */
+.right {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    table {
+        min-width: 600px;
+    }
+
+    .right {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
 </style>
 
-   <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
-            ← Back to District Dashboard
-        </a>
+<div class="page-wrapper">
 
-<div class="container">
+    {{-- BACK --}}
+    <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
+        ← Back to District Dashboard
+    </a>
 
     {{-- HEADER --}}
     <div class="header">
 
-        {{-- LEFT --}}
-        <div class="left">
-            <h2 style="color:#1e3c72;">Downloads Management</h2>
-        </div>
+        <h2 class="page-title">Downloads Management</h2>
 
-        {{-- RIGHT --}}
         <div class="right">
 
-            {{-- SEARCH --}}
             <input type="text"
                    id="searchInput"
                    class="search-box"
                    placeholder="Search title, file name...">
 
-            {{-- UPLOAD BUTTON --}}
             <a href="{{ route('admin.downloads.create') }}"
                class="btn btn-primary">
                 + Upload File
             </a>
 
         </div>
+
     </div>
 
-    {{-- ALERTS --}}
+    {{-- ALERT --}}
     @if(session('success'))
-        <div style="background:#d4edda; padding:10px; color:#155724; margin-bottom:10px; border-radius:6px;">
+        <div class="alert-success">
             {{ session('success') }}
         </div>
     @endif
 
-    {{-- TABLE CARD --}}
+    {{-- TABLE --}}
     <div class="card">
 
-        <table class="table" id="downloadsTable">
+        <div class="table-wrapper">
 
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>File</th>
-                    <th>Type</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+            <table id="downloadsTable">
 
-            <tbody>
-                @forelse($downloads as $download)
-                <tr class="download-row">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>File</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
 
-                    <td>{{ $loop->iteration }}</td>
+                <tbody>
+                    @forelse($downloads as $download)
+                    <tr class="download-row">
 
-                    <td>{{ $download->title }}</td>
+                        <td>{{ $loop->iteration }}</td>
 
-                    <td>
-                        <a class="file-link"
-                           href="{{ asset('storage/' . $download->file_path) }}"
-                           target="_blank">
-                            {{ $download->file_name }}
-                        </a>
-                    </td>
+                        <td>{{ $download->title }}</td>
 
-                    <td>{{ $download->file_type }}</td>
+                        <td>
+                            <a class="file-link"
+                               href="{{ asset('storage/' . $download->file_path) }}"
+                               target="_blank">
+                                {{ $download->file_name }}
+                            </a>
+                        </td>
 
-                    <td>{{ $download->created_at }}</td>
+                        <td>{{ $download->file_type }}</td>
 
-                    <td>
+                        <td>{{ $download->created_at }}</td>
 
-                        {{-- VIEW --}}
-                        <a href="{{ route('admin.downloads.show', $download->id) }}"
-                           class="btn btn-view">
-                            View
-                        </a>
+                        <td>
 
-                        {{-- EDIT --}}
-                        <a href="{{ route('admin.downloads.edit', $download->id) }}"
-                           class="btn btn-edit">
-                            Edit
-                        </a>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
 
-                        {{-- DELETE --}}
-                        <form action="{{ route('admin.downloads.destroy', $download->id) }}"
-                              method="POST"
-                              style="display:inline;">
-                            @csrf
-                            @method('DELETE')
+                                <a href="{{ route('admin.downloads.show', $download->id) }}"
+                                   class="btn btn-view">
+                                    View
+                                </a>
 
-                            <button type="submit"
-                                    class="btn btn-danger"
-                                    onclick="return confirm('Delete this file?')">
-                                Delete
-                            </button>
-                        </form>
+                                <a href="{{ route('admin.downloads.edit', $download->id) }}"
+                                   class="btn btn-edit">
+                                    Edit
+                                </a>
 
-                    </td>
+                                <form action="{{ route('admin.downloads.destroy', $download->id) }}"
+                                      method="POST">
+                                    @csrf
+                                    @method('DELETE')
 
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" style="text-align:center; padding:20px;">
-                        No downloads available
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
+                                    <button type="submit"
+                                            class="btn btn-danger"
+                                            onclick="return confirm('Delete this file?')">
+                                        Delete
+                                    </button>
+                                </form>
 
-        </table>
+                            </div>
+
+                        </td>
+
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:20px;">
+                            No downloads available
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
+
 </div>
 
 {{-- LIVE SEARCH --}}

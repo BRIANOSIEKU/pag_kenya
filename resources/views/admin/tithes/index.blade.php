@@ -3,163 +3,204 @@
 @section('content')
 
 <style>
-.container {
+/* ===== PAGE WRAPPER ===== */
+.page-wrapper {
     max-width: 1200px;
     margin: auto;
+    padding: 15px;
 }
 
+/* ===== HEADER ===== */
 .header {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:15px;
-    flex-wrap:wrap;
-    gap:10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-.left, .right {
-    display:flex;
-    gap:10px;
-    align-items:center;
-    flex-wrap:wrap;
+/* ===== TITLE ===== */
+.page-title {
+    color: #1e3c72;
+    font-size: 22px;
+    margin: 0;
 }
 
+/* ===== SEARCH ===== */
 .search-box {
-    width:280px;
-    padding:10px;
-    border:1px solid #ccc;
-    border-radius:8px;
-    outline:none;
+    width: 280px;
+    max-width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
 }
 
-.card {
-    background:#fff;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 3px 10px rgba(0,0,0,0.05);
-}
-
-.table {
-    width:100%;
-    border-collapse:collapse;
-}
-
-.table th {
-    background:#1e3c72;
-    color:white;
-    padding:12px;
-    text-align:left;
-}
-
-.table td {
-    padding:12px;
-    border-bottom:1px solid #eee;
-}
-
+/* ===== BUTTONS ===== */
 .btn {
-    padding:6px 10px;
-    border-radius:6px;
-    color:white;
-    text-decoration:none;
-    cursor:pointer;
+    padding: 10px 14px;
+    border-radius: 6px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 13px;
 }
 
-.btn-review {
-    background:#2196f3;
-}
+.btn-export { background: #28a745; }
+.btn-review { background: #2196f3; }
+.btn:hover { opacity: 0.85; }
 
-.btn-export {
-    background:#28a745;
-}
-
-/* EXPORT BOX */
-.export-box {
-    display:none;
-    margin-top:15px;
-}
-</style>
-
-<div class="container">
-
-    {{-- HEADER --}}
-    <div class="header">
-
-    <style>
-    .btn-back {
+/* ===== BACK BUTTON ===== */
+.btn-back {
     background: #607D8B;
     color: white;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: 6px;
     text-decoration: none;
     font-size: 13px;
     font-weight: bold;
 }
 
-.btn-back:hover {
-    opacity: 0.85;
+.btn-back:hover { opacity: 0.85; }
+
+/* ===== CARD ===== */
+.card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    margin-bottom: 15px;
+}
+
+/* ===== TABLE ===== */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 750px;
+}
+
+.table th {
+    background: #1e3c72;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+/* ===== EXPORT BOX ===== */
+.export-box {
+    display: none;
+}
+
+/* ===== ALERTS ===== */
+.alert-success {
+    background: #d4edda;
+    padding: 10px;
+    color: #155724;
+    margin-bottom: 10px;
+    border-radius: 6px;
+}
+
+.alert-error {
+    background: #f8d7da;
+    padding: 10px;
+    color: #721c24;
+    margin-bottom: 10px;
+    border-radius: 6px;
+}
+
+/* ===== HEADER RIGHT ===== */
+.right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 18px;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .right {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
 </style>
 
-   <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
+<div class="page-wrapper">
+
+    {{-- HEADER --}}
+    <div class="header">
+
+        <!-- BACK -->
+        <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
             ← Back to District Module Dashboard
         </a>
 
+        <!-- TITLE -->
+        <h2 class="page-title">Tithe Reports Verification Queue</h2>
 
-        {{-- LEFT --}}
-        <div class="left">
-            <h2 style="color:#1e3c72;">Tithe Reports Verification Queue</h2>
-        </div>
-
-        {{-- RIGHT --}}
+        <!-- RIGHT CONTROLS -->
         <div class="right">
 
-            {{-- SEARCH --}}
             <input type="text"
                    id="searchInput"
                    class="search-box"
                    placeholder="Search district, year, month...">
 
-            {{-- EXPORT BUTTON --}}
-            <button class="btn btn-export"
-                    onclick="toggleExportBox()">
+            <button class="btn btn-export" onclick="toggleExportBox()">
                 Export Reports
             </button>
 
         </div>
+
     </div>
 
     {{-- ALERTS --}}
     @if(session('success'))
-        <div style="background:#d4edda; padding:10px; color:#155724; margin-bottom:10px; border-radius:6px;">
-            {{ session('success') }}
-        </div>
+        <div class="alert-success">{{ session('success') }}</div>
     @endif
 
     @if(session('error'))
-        <div style="background:#f8d7da; padding:10px; color:#721c24; margin-bottom:10px; border-radius:6px;">
-            {{ session('error') }}
-        </div>
+        <div class="alert-error">{{ session('error') }}</div>
     @endif
 
-    {{-- EXPORT FILTER BOX --}}
+    {{-- EXPORT BOX --}}
     <div class="card export-box" id="exportBox">
 
         <h3 style="margin-bottom:10px; color:#1e3c72;">Export Reports (PDF)</h3>
 
         <form method="GET" action="{{ route('admin.tithe_reports.export') }}">
 
-            {{-- YEAR --}}
-            <label>Year</label><br>
-            <input type="number"
-                   name="year"
-                   class="search-box"
-                   placeholder="e.g. 2026"
-                   required>
+            <label>Year</label>
+            <input type="number" name="year" class="search-box" placeholder="e.g. 2026" required>
 
             <br><br>
 
-            {{-- MONTH --}}
-            <label>Month</label><br>
+            <label>Month</label>
             <select name="month" class="search-box" required>
                 <option value="">Select Month</option>
                 @for($i=1; $i<=12; $i++)
@@ -171,8 +212,7 @@
 
             <br><br>
 
-            {{-- STATUS --}}
-            <label>Status</label><br>
+            <label>Status</label>
             <select name="status" class="search-box" required>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
@@ -185,62 +225,66 @@
             </button>
 
         </form>
+
     </div>
 
     {{-- TABLE --}}
     <div class="card">
 
-        <table class="table" id="reportsTable">
+        <div class="table-wrapper">
 
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>District</th>
-                    <th>Year</th>
-                    <th>Month</th>
-                    <th>Total Amount</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
+            <table class="table" id="reportsTable">
 
-            <tbody>
-                @forelse($reports as $report)
-                <tr class="report-row">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>District</th>
+                        <th>Year</th>
+                        <th>Month</th>
+                        <th>Total Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
 
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $report->district->name }}</td>
-                    <td>{{ $report->year }}</td>
-                    <td>{{ $report->month }}</td>
+                <tbody>
+                    @forelse($reports as $report)
+                    <tr class="report-row">
 
-                    <td>
-                        <strong>
-                            KES {{ number_format($report->total_amount, 2) }}
-                        </strong>
-                    </td>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $report->district->name }}</td>
+                        <td>{{ $report->year }}</td>
+                        <td>{{ $report->month }}</td>
 
-                    <td>
-                        <a class="btn btn-review"
-                           href="{{ route('admin.tithe_review.show', $report->id) }}">
-                            Review
-                        </a>
-                    </td>
+                        <td>
+                            <strong>KES {{ number_format($report->total_amount, 2) }}</strong>
+                        </td>
 
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" style="text-align:center; padding:20px;">
-                        No pending reports found
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
+                        <td>
+                            <a class="btn btn-review"
+                               href="{{ route('admin.tithe_review.show', $report->id) }}">
+                                Review
+                            </a>
+                        </td>
 
-        </table>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:20px;">
+                            No pending reports found
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
+
 </div>
 
-{{-- LIVE SEARCH --}}
+{{-- LIVE SEARCH + TOGGLE --}}
 <script>
 document.getElementById("searchInput").addEventListener("keyup", function () {
 

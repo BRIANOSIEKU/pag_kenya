@@ -1,186 +1,159 @@
-@extends('layouts.app') {{-- Use your public layout --}}
+@extends('layouts.app')
 
 @section('content')
-<div class="hero-section">
-    <h1 class="page-title">
-        PAG Kenya HQ Staff
-    </h1>
-</div>
 
-<div class="staff-container">
-    @if($staffs->isEmpty())
-        <p style="text-align:center; font-size:1.1rem; color:#555;">No HQ staff found at the moment.</p>
-    @else
-        <div class="staff-grid">
-            @foreach($staffs as $staff)
-            <div class="staff-card animate-on-scroll">
-                <div class="staff-photo">
-                    @if($staff->photo && file_exists(public_path($staff->photo)))
-                        <img src="{{ asset($staff->photo) }}" alt="{{ $staff->full_name }}">
-                    @else
-                        <img src="{{ asset('images/default-avatar.png') }}" alt="Default Staff Photo">
-                    @endif
+<div class="page-wrapper">
+
+    {{-- SIMPLE PAGE TITLE (NO HERO SECTION) --}}
+    <h1 class="page-title">
+        EXECUTIVE OFFICE STAFF
+    </h1>
+
+    {{-- STAFF SECTION --}}
+    <div class="staff-container">
+
+        @if($staffs->isEmpty())
+            <p class="empty-text">No HQ staff found at the moment.</p>
+        @else
+            <div class="staff-grid">
+
+                @foreach($staffs as $staff)
+                <div class="staff-card animate-on-scroll">
+
+                    <div class="staff-photo">
+                        @if($staff->photo && file_exists(public_path($staff->photo)))
+                            <img src="{{ asset($staff->photo) }}" alt="{{ $staff->full_name }}">
+                        @else
+                            <img src="{{ asset('images/default-avatar.png') }}" alt="Default Staff Photo">
+                        @endif
+                    </div>
+
+                    <div class="staff-info">
+                        <h3>{{ $staff->full_name }}</h3>
+                        <p class="position">{{ $staff->position }}</p>
+                        <p class="email">{{ $staff->email }}</p>
+                    </div>
+
                 </div>
-                <div class="staff-info">
-                    <h3>{{ $staff->full_name }}</h3>
-                    <p class="position">{{ $staff->position }}</p>
-                    <p class="email">{{ $staff->email }}</p>
-                </div>
+                @endforeach
+
             </div>
-            @endforeach
-        </div>
-    @endif
+        @endif
+
+    </div>
+
 </div>
 
 <style>
-/* Hero section: full screen, centered title */
-.hero-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 60vh; /* title vertical center in viewport */
-    flex-direction: column;
-    text-align: center;
-    padding: 0 20px;
-    background: #f4f4f4;
-}
 
-/* Page Title with animated underline */
-.page-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 3rem;
-    color: #0f3c78;
-    position: relative;
-    display: inline-block;
-    margin: 0;
-}
-
-/* Animated underline from center */
-.page-title::after {
-    content: '';
-    display: block;
-    width: 60%;
-    height: 4px;
-    background-color: orange;
-    margin: 8px auto 0;
-    border-radius: 2px;
-    transform: scaleX(0);
-    transform-origin: center;
-    animation: underline-grow 1s ease forwards;
-}
-
-@keyframes underline-grow {
-    to {
-        transform: scaleX(1);
-    }
-}
-
-/* Staff container below hero */
-.staff-container {
+/* PAGE WRAPPER */
+.page-wrapper{
     padding: 40px 20px 80px;
 }
 
-/* Staff Grid */
-.staff-grid {
+/* SIMPLE TITLE (NO HERO) */
+.page-title{
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    color: #0f3c78;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+/* subtle underline */
+.page-title::after{
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: orange;
+    margin: 10px auto 0;
+    border-radius: 2px;
+}
+
+/* EMPTY STATE */
+.empty-text{
+    text-align:center;
+    font-size:1.1rem;
+    color:#666;
+    margin-top: 40px;
+}
+
+/* STAFF GRID */
+.staff-grid{
     display: grid;
-    grid-template-columns: repeat(10, 1fr); /* 10 cards per row on desktop */
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 22px;
     justify-items: center;
 }
 
-/* Staff Card */
-.staff-card {
+/* STAFF CARD */
+.staff-card{
     background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
     overflow: hidden;
     text-align: center;
     width: 100%;
-    max-width: 150px; /* smaller cards */
-    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.6s ease;
-    opacity: 0; /* hidden initially for animation */
-    transform: translateY(30px); /* slide-up effect */
+    max-width: 200px;
+    transition: 0.3s ease;
+    opacity: 0;
+    transform: translateY(25px);
 }
 
-.staff-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+.staff-card:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
 }
 
-/* Photo */
-.staff-photo img {
+/* IMAGE */
+.staff-photo img{
     width: 100%;
-    height: 150px;
+    height: 180px;
     object-fit: cover;
 }
 
-/* Info */
-.staff-info {
-    padding: 10px 8px;
+/* INFO */
+.staff-info{
+    padding: 12px 10px;
 }
 
-.staff-info h3 {
-    font-family: 'Playfair Display', serif;
+.staff-info h3{
     font-size: 1rem;
     color: #0f3c78;
     margin-bottom: 4px;
+    font-family: 'Playfair Display', serif;
 }
 
-.staff-info .position {
-    font-family: 'Inter', sans-serif;
+.staff-info .position{
     font-size: 0.85rem;
-    color: #4CAF50;
+    color: #2e7d32;
     margin-bottom: 3px;
 }
 
-.staff-info .email {
-    font-family: 'Inter', sans-serif;
+.staff-info .email{
     font-size: 0.75rem;
     color: #555;
-    word-wrap: break-word;
+    word-break: break-word;
 }
 
-/* Scroll animation class */
-.animate-on-scroll.show {
+/* ANIMATION */
+.animate-on-scroll.show{
     opacity: 1;
     transform: translateY(0);
 }
 
-/* Responsive */
-@media(max-width: 1200px) {
-    .staff-grid {
-        grid-template-columns: repeat(6, 1fr);
-    }
-}
-
-@media(max-width: 992px) {
-    .staff-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-@media(max-width: 768px) {
-    .staff-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media(max-width: 500px) {
-    .staff-grid {
-        grid-template-columns: repeat(2, 1fr); /* 2 cards per row on mobile */
-    }
-    .page-title {
+/* MOBILE */
+@media(max-width: 600px){
+    .page-title{
         font-size: 2rem;
     }
-    .page-title::after {
-        width: 50%;
-        height: 3px;
-    }
 }
+
 </style>
 
 <script>
-/* Scroll animation for staff cards */
 document.addEventListener('DOMContentLoaded', () => {
     const cards = document.querySelectorAll('.animate-on-scroll');
 
@@ -191,9 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 observer.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.2 });
+    }, { threshold: 0.15 });
 
     cards.forEach(card => observer.observe(card));
 });
 </script>
+
 @endsection

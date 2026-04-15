@@ -54,6 +54,7 @@ use App\Http\Controllers\Admin\NationalOfficeShareController;
 use App\Http\Controllers\Admin\DistrictSummaryController;
 use App\Http\Controllers\DistrictAdmin\PastoralTransferLetterController;
 use App\Http\Controllers\Admin\NationalPastoralApprovalController;
+use App\Http\Controllers\Admin\TransferLetterController;
 
 // -------------------- PUBLIC ROUTES --------------------
 //Public for Committees
@@ -141,21 +142,23 @@ Route::get('/district-admin/logout', [DistrictAdminAuthController::class, 'logou
 
 //DISTRICT DASHBOARD
 // -------------------- ADMIN ROUTES --------------------
+// Auth routes
 Route::prefix('admin')->name('admin.')->group(function () {
 
-    // Login & logout
     Route::get('/login', [AdminController::class, 'showLogin'])->name('login');
     Route::post('/login', [AdminController::class, 'login'])->name('login.post');
     Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
 
-    // Protected admin routes
-    Route::middleware(['auth', 'is_admin'])->group(function () {
+    // ALL ADMIN ROLES
+    Route::middleware(['auth'])->group(function () {
 
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])
+            ->name('dashboard');
 
+        // other admin routes...
+  
 
 //DISTRICT DASHBOARD
-Route::get('/district-admin/dashboard', [DashboardController::class, 'index'])
-    ->name('district.admin.dashboard');
 
 
         // Dashboard route
@@ -455,31 +458,45 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])->group(
         });
 
     });
- // ================= DISTRICTS =================
- // EXPORT ALL PASTORS
-// =====================
-Route::get('/pastors/export', 
-    [App\Http\Controllers\Admin\PastoralTeamController::class, 'exportAllPastors']
-)->name('pastors.export');
+});
+// ================= DISTRICTS (FULLY PROTECTED) =================
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware([
+        'auth',
+        'role:general_superintendent|general_secretary|general_treasurer|super_admin'
+    ])
+    ->group(function () {
 
-       // EXPORT ROUTES (FIXED LOCATION)
-    Route::get('districts/export', [DistrictLeaderController::class, 'exportForm'])
+    // ================= EXPORT =================
+    Route::get('/districts/export', [DistrictLeaderController::class, 'exportForm'])
         ->name('districts.export.form');
 
-    Route::post('districts/export', [DistrictLeaderController::class, 'exportPdf'])
+    Route::post('/districts/export', [DistrictLeaderController::class, 'exportPdf'])
         ->name('districts.export.pdf');
- Route::prefix('districts')->name('districts.')->group(function () {
+
+    Route::get('/pastors/export', 
+        [App\Http\Controllers\Admin\PastoralTeamController::class, 'exportAllPastors']
+    )->name('pastors.export');
+
+    // ================= DISTRICTS =================
+    Route::prefix('districts')->name('districts.')->group(function () {
+
         Route::get('/', [DistrictController::class, 'index'])->name('index');
-        Route::get('/create', [DistrictController::class, 'create'])->name('create');
+        Route::get('/create', [DistrictController::class, 'create'])    ->middleware([
+        'auth',
+        'role:general_superintendent|general_secretary|super_admin'
+    ])->name('create');
         Route::post('/', [DistrictController::class, 'store'])->name('store');
 
         Route::get('/{district}/edit', [DistrictController::class, 'edit'])->name('edit');
         Route::put('/{district}', [DistrictController::class, 'update'])->name('update');
         Route::delete('/{district}', [DistrictController::class, 'destroy'])->name('destroy');
 
-        // DISTRICT LEADERSHIP
         Route::get('/dashboard', [DistrictController::class, 'dashboard'])
-    ->name('dashboard');
+            ->name('dashboard');
+
+        // ================= LEADERSHIP =================
         Route::prefix('{district}/leadership')->name('leadership.')->group(function () {
 
             Route::get('/', [DistrictLeaderController::class, 'index'])->name('index');
@@ -506,7 +523,10 @@ Route::get('/admin/district-admins/check/{id}', [DistrictAdminController::class,
 Route::resource('/admin/district-admins', DistrictAdminController::class);
 
 Route::prefix('admin/district-admins')->name('admin.district_admins.')->group(function () {
-    Route::get('/', [DistrictAdminController::class, 'index'])->name('index');
+    Route::get('/', [DistrictAdminController::class, 'index'])    ->middleware([
+        'auth',
+        'role:general_superintendent|general_secretary|super_admin'
+    ])->name('index');
     Route::get('/create', [DistrictAdminController::class, 'create'])->name('create');
     Route::post('/store', [DistrictAdminController::class, 'store'])->name('store');
     Route::get('/{id}/edit', [DistrictAdminController::class, 'edit'])->name('edit');
@@ -521,7 +541,7 @@ Route::prefix('district-admin')
     ->middleware(['district_auth'])
     ->group(function () {
 
-        Route::get('/dashboard', [DashboardController::class, 'index'])
+        Route::get('/dashboard', [DashboardController::class, 'index']) 
             ->name('dashboard');
 
         Route::prefix('assemblies')->name('assemblies.')->group(function () {
@@ -618,7 +638,10 @@ Route::prefix('district-admin')->name('district.admin.')->group(function () {
 });
 
 //========ASSEMBLY APPROVALS====
-Route::get('/admin/assembly-requests', [AssemblyApprovalController::class, 'index'])
+Route::get('/admin/assembly-requests', [AssemblyApprovalController::class, 'index'])     ->middleware([
+        'auth',
+        'role:general_superintendent|general_secretary|super_admin'
+    ])
     ->name('admin.assembly.requests');
 
 Route::post('/admin/assembly-requests/{id}/approve', [AssemblyApprovalController::class, 'approve'])
@@ -643,7 +666,10 @@ Route::get('/{id}/export', [TitheReportController::class, 'export'])
     ->name('export');
 });
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])    ->middleware([
+        'auth',
+        'role:general_treasurer|super_admin'
+    ])->group(function () {
 
     Route::get('/tithe-reports-review', [App\Http\Controllers\Admin\TitheReportReviewController::class, 'index'])
         ->name('tithe_review.index');
@@ -740,7 +766,10 @@ Route::prefix('district-admin')->name('district.admin.')->group(function () {
 });
 
 //====== ADMIN TRANSFER APPROVALS ======
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])    ->middleware([
+        'auth',
+        'role:general_superintendent|super_admin'
+    ])->group(function () {
 
     // LIST ALL PENDING HQ APPROVALS
     Route::get('/transfers', [TransferApprovalController::class, 'index'])
@@ -750,7 +779,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])->group(
     Route::post('/transfers/{id}/approve', [TransferApprovalController::class, 'approve'])
         ->name('transfers.approve');
 
-    // REJECT TRANSFER (HQ) ✅ FIXED
+    // REJECT TRANSFER (HQ) 
     Route::post('/transfers/{id}/reject', [TransferApprovalController::class, 'reject'])
         ->name('transfers.reject');
 
@@ -856,7 +885,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])->group(
 });
 
 //=====national pastor approval=======
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')    ->middleware([
+        'auth',
+        'role:general_secretary|super_admin'
+    ])->group(function () {
 
     // LIST
     Route::get('/national-pastoral-approvals',
@@ -877,5 +909,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/national-pastoral-approvals/reject/{id}',
         [NationalPastoralApprovalController::class, 'reject']
     )->name('national.pastoral.approvals.reject');
+
+});
+
+//=====ADMIN APPROVED LETTER===
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth', 'role:general_superintendent|super_admin'])
+    ->group(function () {
+      Route::get('/transfers/{id}/letter', 
+        [TransferApprovalController::class, 'showLetter']
+    )->name('transfers.letter');
+
+    Route::get('/transfers/download-letter/{id}', 
+        [TransferApprovalController::class, 'downloadLetter']
+    )->name('transfers.download');
 
 });

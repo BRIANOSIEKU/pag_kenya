@@ -2,129 +2,207 @@
 
 @section('content')
 
-
-<h1>Districts</h1>
+<h1 class="page-title">Districts</h1>
 
 <style>
-    .btn-back {
+/* ===== PAGE WRAPPER ===== */
+.page-title {
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+/* ===== BACK BUTTON ===== */
+.btn-back {
+    display: inline-block;
     background: #607D8B;
     color: white;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: 6px;
     text-decoration: none;
     font-size: 13px;
     font-weight: bold;
+    margin-bottom: 10px;
 }
 
-.btn-back:hover {
-    opacity: 0.85;
+.btn-back:hover { opacity: 0.85; }
+
+/* ===== ACTION BUTTONS ===== */
+.btn {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 13px;
+    margin: 4px 4px 4px 0;
+    white-space: nowrap;
+}
+
+.btn-black { background: #000; }
+.btn-blue { background: #1976D2; }
+.btn-green { background: #4CAF50; }
+.btn-cyan { background: #03A9F4; }
+.btn-purple { background: #9C27B0; }
+.btn-yellow { background: #FFC107; color: #000; }
+.btn-red { background: #F44336; }
+.btn-grey { background: #607D8B; }
+
+.btn:hover { opacity: 0.85; }
+
+/* ===== SEARCH ===== */
+.search-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.search-form input {
+    flex: 1;
+    min-width: 180px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.search-form button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #2196F3;
+    color: #fff;
+}
+
+/* ===== TABLE WRAPPER (MOBILE FIX) ===== */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* ===== TABLE ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #eee;
+    text-align: left;
+    font-size: 14px;
+}
+
+th {
+    background: #f5f5f5;
+}
+
+/* ===== SUCCESS MESSAGE ===== */
+.alert-success {
+    margin: 10px 0;
+    padding: 10px;
+    background: #d4edda;
+    color: #155724;
+    border-radius: 6px;
+}
+
+/* ===== MOBILE OPTIMIZATION ===== */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 18px;
+    }
+
+    th, td {
+        font-size: 13px;
+        padding: 10px;
+    }
+
+    .btn {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
 }
 </style>
 
-   <a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
-            ← Back to District Module Dashboard
-        </a>
-
-<!-- EXPORT BUTTONS -->
-
-<!-- EXPORT ALL DISTRICTS -->
-<a href="{{ route('admin.districts.export.form') }}" 
-   style="padding:8px 12px; background:#000; color:#fff; border-radius:6px; text-decoration:none; margin-bottom:15px; display:inline-block;">
-    Export District leadership
+<!-- BACK -->
+<a href="{{ route('admin.districts.dashboard') }}" class="btn-back">
+    ← Back to District Module Dashboard
 </a>
 
-<!-- EXPORT ALL PASTORS -->
-<a href="{{ route('admin.pastors.export') }}" 
-   style="padding:8px 12px; background:#1976D2; color:#fff; border-radius:6px; text-decoration:none; margin-bottom:15px; display:inline-block;">
-    Export All Pastors
-</a>
+<!-- ACTION BUTTONS -->
+<div style="margin-bottom:10px;">
+    <a href="{{ route('admin.districts.export.form') }}" class="btn btn-black">
+        Export District Leadership
+    </a>
 
-<!-- Add Button -->
-<a href="{{ route('admin.districts.create') }}" 
-   style="padding:8px 12px; background:#4CAF50; color:#fff; border-radius:6px; text-decoration:none; margin-bottom:15px; display:inline-block;">
-    + Add District
-</a>
+    <a href="{{ route('admin.pastors.export') }}" class="btn btn-blue">
+        Export All Pastors
+    </a>
 
-<!-- Success Message -->
+    <a href="{{ route('admin.districts.create') }}" class="btn btn-green">
+        + Add District
+    </a>
+</div>
+
+<!-- SUCCESS -->
 @if(session('success'))
-    <div style="margin:10px 0; padding:10px; background:#d4edda; color:#155724; border-radius:6px;">
+    <div class="alert-success">
         {{ session('success') }}
     </div>
 @endif
 
-<!-- Search Form -->
-<form action="{{ route('admin.districts.index') }}" method="GET" 
-      style="margin-bottom:15px; display:flex; gap:8px; flex-wrap:wrap;">
-    
-    <input type="text" name="search" 
-           placeholder="Search districts..." 
-           value="{{ request('search') }}" 
-           style="padding:6px 10px; border-radius:4px; border:1px solid #ccc; flex:1; min-width:200px;">
-
-    <button type="submit" 
-            style="padding:6px 12px; background:#2196F3; color:#fff; border:none; border-radius:4px;">
-        Search
-    </button>
+<!-- SEARCH -->
+<form action="{{ route('admin.districts.index') }}" method="GET" class="search-form">
+    <input type="text" name="search" placeholder="Search districts..."
+           value="{{ request('search') }}">
+    <button type="submit">Search</button>
 </form>
 
-<!-- Table -->
-<table style="width:100%; border-collapse:collapse; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-    
+<!-- TABLE -->
+<div class="table-wrapper">
+<table>
     <thead>
-        <tr style="background:#f5f5f5; text-align:left;">
-            <th style="padding:10px; border:1px solid #ddd;">#</th>
-            <th style="padding:10px; border:1px solid #ddd;">District Name</th>
-            <th style="padding:10px; border:1px solid #ddd;">Actions</th>
+        <tr>
+            <th>#</th>
+            <th>District Name</th>
+            <th>Actions</th>
         </tr>
     </thead>
 
     <tbody>
         @foreach($districts as $index => $district)
         <tr>
-            <td style="padding:10px; border:1px solid #ddd;">
-                {{ $index + 1 }}
-            </td>
+            <td>{{ $index + 1 }}</td>
+            <td>{{ $district->name }}</td>
+            <td>
 
-            <td style="padding:10px; border:1px solid #ddd;">
-                {{ $district->name }}
-            </td>
-
-            <td style="padding:10px; border:1px solid #ddd;">
-
-                <!-- Pastoral Team -->
-                <a href="{{ route('admin.districts.pastoral-teams.index', $district->id) }}" 
-                   style="margin-right:5px; color:#fff; background:#03A9F4; padding:4px 8px; border-radius:4px; text-decoration:none;">
+                <a href="{{ route('admin.districts.pastoral-teams.index', $district->id) }}" class="btn btn-cyan">
                     Pastoral Team
                 </a>
 
-                <!-- EXPORT SINGLE DISTRICT PASTORAL TEAM -->
-                <a href="{{ route('admin.districts.pastoral-teams.export', $district->id) }}" 
-                   style="margin-right:5px; color:#fff; background:#607D8B; padding:4px 8px; border-radius:4px; text-decoration:none;">
-                    Export District Pastors
+                <a href="{{ route('admin.districts.pastoral-teams.export', $district->id) }}" class="btn btn-grey">
+                    Export Pastors
                 </a>
 
-                <!-- Leadership -->
-                <a href="{{ route('admin.districts.leadership.index', $district->id) }}" 
-                   style="margin-right:5px; color:#fff; background:#9C27B0; padding:4px 8px; border-radius:4px; text-decoration:none;">
+                <a href="{{ route('admin.districts.leadership.index', $district->id) }}" class="btn btn-purple">
                     Leadership
                 </a>
 
-                <!-- Edit -->
-                <a href="{{ route('admin.districts.edit', $district->id) }}" 
-                   style="margin-right:5px; color:#fff; background:#FFC107; padding:4px 8px; border-radius:4px; text-decoration:none;">
+                <a href="{{ route('admin.districts.edit', $district->id) }}" class="btn btn-yellow">
                     Edit
                 </a>
 
-                <!-- Delete -->
-                <form action="{{ route('admin.districts.destroy', $district->id) }}" 
-                      method="POST" style="display:inline-block;">
-                    
+                <form action="{{ route('admin.districts.destroy', $district->id) }}"
+                      method="POST" style="display:inline;">
                     @csrf
                     @method('DELETE')
 
-                    <button type="submit" 
-                            onclick="return confirm('Delete this district?');" 
-                            style="color:#fff; background:#F44336; padding:4px 8px; border:none; border-radius:4px; cursor:pointer;">
+                    <button type="submit"
+                        onclick="return confirm('Delete this district?');"
+                        class="btn btn-red">
                         Delete
                     </button>
                 </form>
@@ -134,8 +212,9 @@
         @endforeach
     </tbody>
 </table>
+</div>
 
-<!-- Pagination -->
+<!-- PAGINATION -->
 @if(method_exists($districts, 'links'))
     <div style="margin-top:15px;">
         {{ $districts->links() }}

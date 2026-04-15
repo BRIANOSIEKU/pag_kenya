@@ -1,13 +1,105 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="max-w-6xl mx-auto px-10 py-10">
 
-    <h2 class="text-3xl font-bold mb-8">Add New {{ ucfirst($type) }} Leader</h2>
+<style>
+    .btn-back {
+        background: #607D8B;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+
+    .btn-back:hover {
+        opacity: 0.85;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: auto;
+    }
+
+    .card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        vertical-align: top;
+    }
+
+    td.label {
+        width: 30%;
+        background: #f7f7f7;
+        font-weight: bold;
+    }
+
+    input, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+        outline: none;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    .btn-save {
+        background: #2196F3;
+        color: #fff;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .btn-save:hover {
+        opacity: 0.9;
+    }
+
+    .preview-img {
+        margin-top: 10px;
+        width: 180px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 8px;
+        display: none;
+        border: 1px solid #ddd;
+    }
+</style>
+
+<div class="container">
+
+    <!-- BACK -->
+    <a href="{{ route('admin.dashboard') }}" class="btn-back">
+        ← Back to Dashboard
+    </a>
+
+    <h2 style="margin-bottom:15px;">
+        Add New {{ ucfirst($type) }} Leader
+    </h2>
 
     @if ($errors->any())
-        <div class="bg-red-100 text-red-700 p-5 rounded-lg mb-6">
-            <ul class="list-disc pl-6 space-y-1">
+        <div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:6px;margin-bottom:15px;">
+            <ul style="margin:0;padding-left:20px;">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -15,106 +107,85 @@
         </div>
     @endif
 
-    <div class="bg-white shadow-xl rounded-xl overflow-hidden">
+    <div class="card">
 
         <form action="{{ route('admin.leadership.store', $type) }}" method="POST" enctype="multipart/form-data">
             @csrf
 
-            <!-- TABLE STRUCTURE -->
-            <table class="w-full border border-gray-200">
+            <table>
 
-                <!-- Full Name -->
-                <tr class="border-b">
-                    <td class="w-1/4 bg-gray-50 p-5 font-semibold text-lg">Full Name</td>
-                    <td class="p-5">
-                        <input type="text" name="full_name" value="{{ old('full_name') }}"
-                            class="w-full border rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500">
-                    </td>
-                </tr>
-
-                <!-- Position -->
-                <tr class="border-b">
-                    <td class="bg-gray-50 p-5 font-semibold text-lg">Position</td>
-                    <td class="p-5">
-                        <input type="text" name="position" value="{{ old('position') }}"
-                            class="w-full border rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500">
-                    </td>
-                </tr>
-
-                <!-- Contact -->
-                <tr class="border-b">
-                    <td class="bg-gray-50 p-5 font-semibold text-lg">Contact</td>
-                    <td class="p-5">
-                        <input type="text" name="contact" value="{{ old('contact') }}"
-                            class="w-full border rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500">
-                    </td>
-                </tr>
-
-                <!-- Email -->
-                <tr class="border-b">
-                    <td class="bg-gray-50 p-5 font-semibold text-lg">Email Address</td>
-                    <td class="p-5">
-                        <input type="email" name="email" value="{{ old('email') }}"
-                            class="w-full border rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500">
-                    </td>
-                </tr>
-
-                <!-- Brief Description -->
-                <tr class="border-b">
-                    <td class="bg-gray-50 p-5 font-semibold text-lg align-top">Brief Description</td>
-                    <td class="p-5">
-                        <textarea name="brief_description" rows="8"
-                            class="w-full border rounded-lg px-4 py-4 text-lg focus:ring-2 focus:ring-blue-500 resize-none"
-                            placeholder="Write a detailed description...">{{ old('brief_description') }}</textarea>
-                    </td>
-                </tr>
-
-                <!-- Message -->
-                <tr class="border-b">
-                    <td class="bg-gray-50 p-5 font-semibold text-lg align-top">Message</td>
-                    <td class="p-5">
-                        <textarea name="message" rows="10"
-                            class="w-full border rounded-lg px-4 py-4 text-lg focus:ring-2 focus:ring-blue-500 resize-none"
-                            placeholder="Type a full message here...">{{ old('message') }}</textarea>
-                    </td>
-                </tr>
-
-                <!-- Photo -->
                 <tr>
-                    <td class="bg-gray-50 p-5 font-semibold text-lg align-top">Photo</td>
-                    <td class="p-5">
-                        <input type="file" name="photo" id="photoInput"
-                            class="w-full border rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500">
+                    <td class="label">Full Name</td>
+                    <td>
+                        <input type="text" name="full_name" value="{{ old('full_name') }}">
+                    </td>
+                </tr>
 
-                        <div class="mt-6">
-                            <img id="photoPreview" src="#" alt="Preview"
-                                class="hidden w-64 h-64 object-cover rounded-lg shadow">
-                        </div>
+                <tr>
+                    <td class="label">Position</td>
+                    <td>
+                        <input type="text" name="position" value="{{ old('position') }}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">Contact</td>
+                    <td>
+                        <input type="text" name="contact" value="{{ old('contact') }}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">Email Address</td>
+                    <td>
+                        <input type="email" name="email" value="{{ old('email') }}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">Brief Description</td>
+                    <td>
+                        <textarea name="brief_description" rows="6">{{ old('brief_description') }}</textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">Message</td>
+                    <td>
+                        <textarea name="message" rows="8">{{ old('message') }}</textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">Photo</td>
+                    <td>
+                        <input type="file" name="photo" id="photoInput">
+
+                        <img id="photoPreview" class="preview-img">
                     </td>
                 </tr>
 
             </table>
 
-            <!-- Button -->
-            <div class="p-6">
-                <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-10 py-4 text-lg rounded-lg shadow">
+            <div style="margin-top:15px;">
+                <button type="submit" class="btn-save">
                     Save Leader
                 </button>
             </div>
 
         </form>
+
     </div>
 </div>
 
-<!-- Photo Preview Script -->
 <script>
-document.getElementById('photoInput').addEventListener('change', function(event) {
-    const [file] = event.target.files;
+document.getElementById('photoInput').addEventListener('change', function (event) {
+    const file = event.target.files[0];
     const preview = document.getElementById('photoPreview');
+
     if (file) {
         preview.src = URL.createObjectURL(file);
-        preview.classList.remove('hidden');
+        preview.style.display = 'block';
     }
 });
 </script>

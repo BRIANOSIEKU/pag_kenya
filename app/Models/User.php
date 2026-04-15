@@ -12,17 +12,16 @@ class User extends Authenticatable
 
     /**
      * Mass assignable fields
-     * We keep 'role' for backward compatibility (temporary bridge)
+     * NOTE: Removed 'role' to fully rely on Spatie
      */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
     ];
 
     /**
-     * Hidden fields for security
+     * Hidden fields for arrays
      */
     protected $hidden = [
         'password',
@@ -30,7 +29,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Casts (recommended for Laravel security & consistency)
+     * Casts
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -42,9 +41,6 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Users can make comments on devotions
-     */
     public function comments()
     {
         return $this->hasMany(Comment::class, 'user_name', 'name');
@@ -52,65 +48,86 @@ class User extends Authenticatable
 
     /*
     |--------------------------------------------------------------------------
-    | ROLE SYSTEM (HYBRID - TEMPORARY)
+    | ROLE HELPERS (SPATIE ONLY)
     |--------------------------------------------------------------------------
     */
 
     /**
-     * OLD ROLE ACCESSOR (for backward compatibility)
+     * Check if user is super admin
      */
-    public function getRoleNameAttribute()
+    public function isSuperAdmin()
     {
-        return $this->role;
+        return $this->hasRole('super_admin');
     }
 
     /**
-     * SAFE ROLE CHECKER (HYBRID SYSTEM)
-     * - Uses Spatie first (PRIMARY)
-     * - Falls back to old role column (TEMPORARY)
+     * Check if user is general secretary
      */
-    public function hasSystemRole($role)
+    public function isSecretary()
     {
-        return $this->hasRole($role) ||
-               $this->role === $role ||
-               $this->role === str_replace('-', '_', $role);
+        return $this->hasRole('general_secretary');
+    }
+
+    /**
+     * Check if user is treasurer
+     */
+    public function isTreasurer()
+    {
+        return $this->hasRole('general_treasurer');
+    }
+
+    /**
+     * Check if user is superintendent
+     */
+    public function isSuperintendent()
+    {
+        return $this->hasRole('general_superintendent');
     }
 
     /*
     |--------------------------------------------------------------------------
-    | APPROVAL HELPERS (FOR YOUR PAG SYSTEM)
+    | APPROVAL PERMISSIONS (ROLE-BASED)
     |--------------------------------------------------------------------------
     */
 
     /**
-     * Check if user can approve pastoral transfers
+     * Pastoral transfers approval
      */
     public function canApproveTransfers()
     {
-        return $this->hasRole(['super-admin', 'general-superintendent']);
+        return $this->hasAnyRole([
+            'super_admin',
+            'general_superintendent'
+        ]);
     }
 
     /**
-     * Check if user can approve financial reports
+     * Financial reports approval
      */
     public function canApproveReports()
     {
-        return $this->hasRole(['super-admin', 'general-treasurer']);
+        return $this->hasAnyRole([
+            'super_admin',
+            'general_treasurer'
+        ]);
     }
 
     /**
-     * Check if user can approve assemblies & teams
+     * Assemblies & administrative approvals
      */
     public function canApproveAssemblies()
     {
-        return $this->hasRole(['super-admin', 'general-secretary']);
+        return $this->hasAnyRole([
+            'super_admin',
+            'general_secretary'
+        ]);
     }
 
     /**
-     * Check if user has full system control
+     * Full system access
      */
-    public function isSuperAdmin()
+    public function hasFullAccess()
     {
-        return $this->hasRole('super-admin');
+        return $this->hasRole('super_admin');
     }
 }
