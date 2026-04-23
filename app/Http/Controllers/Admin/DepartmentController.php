@@ -4,34 +4,37 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+
 use App\Models\Department;
 use App\Models\DepartmentDocument;
-use App\Models\DepartmentGallery; // add this model for gallery
+use App\Models\DepartmentGallery;
+use App\Models\OtherLeader;
+use App\Models\DepartmentUpcomingEvent;
+
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class DepartmentController extends Controller
 {
     /**
-     * Display a listing of the departments (Admin view).
+     * ================= ADMIN =================
      */
+
     public function index()
     {
-        $departments = Department::with('documents')->orderBy('id', 'desc')->paginate(10);
+        $departments = Department::with('documents')
+            ->latest()
+            ->paginate(10);
+
         return view('admin.departments.index', compact('departments'));
     }
 
-    /**
-     * Show the form for creating a new department.
-     */
     public function create()
     {
         return view('admin.departments.create');
     }
 
-    /**
-     * Store a newly created department in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -40,7 +43,7 @@ class DepartmentController extends Controller
             'leadership' => 'nullable|string',
             'activities' => 'nullable|string',
             'description' => 'nullable|string',
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $department = new Department($request->only([
@@ -54,29 +57,27 @@ class DepartmentController extends Controller
 
         $department->save();
 
-        return redirect()->route('admin.departments.index')->with('success', 'Department created successfully.');
+        return redirect()->route('admin.departments.index')
+            ->with('success', 'Department created successfully.');
     }
 
-    /**
-     * Display the specified department (Admin view).
-     */
     public function show(Department $department)
     {
-        $department->load('documents');
+        $department->load([
+            'documents',
+            'galleryImages',
+            'otherLeaders',
+            'upcomingEvents'
+        ]);
+
         return view('admin.departments.show', compact('department'));
     }
 
-    /**
-     * Show the form for editing the specified department.
-     */
     public function edit(Department $department)
     {
         return view('admin.departments.edit', compact('department'));
     }
 
-    /**
-     * Update the specified department in storage.
-     */
     public function update(Request $request, Department $department)
     {
         $request->validate([
@@ -85,7 +86,7 @@ class DepartmentController extends Controller
             'leadership' => 'nullable|string',
             'activities' => 'nullable|string',
             'description' => 'nullable|string',
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $department->fill($request->only([
@@ -93,50 +94,57 @@ class DepartmentController extends Controller
         ]));
 
         if ($request->hasFile('photo')) {
-            if ($department->photo && Storage::disk('public')->exists('departments_photos/'.$department->photo)) {
-                Storage::disk('public')->delete('departments_photos/'.$department->photo);
+
+            if (
+                $department->photo &&
+                Storage::disk('public')->exists('departments_photos/' . $department->photo)
+            ) {
+                Storage::disk('public')->delete('departments_photos/' . $department->photo);
             }
+
             $path = $request->file('photo')->store('departments_photos', 'public');
             $department->photo = basename($path);
         }
 
         $department->save();
 
-        return redirect()->route('admin.departments.index')->with('success', 'Department updated successfully.');
+        return redirect()->route('admin.departments.index')
+            ->with('success', 'Department updated successfully.');
     }
 
-    /**
-     * Remove the specified department from storage.
-     */
     public function destroy(Department $department)
     {
-        if ($department->photo && Storage::disk('public')->exists('departments_photos/'.$department->photo)) {
-            Storage::disk('public')->delete('departments_photos/'.$department->photo);
+        if (
+            $department->photo &&
+            Storage::disk('public')->exists('departments_photos/' . $department->photo)
+        ) {
+            Storage::disk('public')->delete('departments_photos/' . $department->photo);
         }
 
         foreach ($department->documents as $doc) {
-            if (Storage::disk('public')->exists('departments_documents/'.$doc->file_path)) {
-                Storage::disk('public')->delete('departments_documents/'.$doc->file_path);
+            if (Storage::disk('public')->exists('departments_documents/' . $doc->file_path)) {
+                Storage::disk('public')->delete('departments_documents/' . $doc->file_path);
             }
             $doc->delete();
         }
 
-        // Delete gallery images
         foreach ($department->galleryImages as $img) {
-            if (Storage::disk('public')->exists('departments_gallery/'.$img->image_path)) {
-                Storage::disk('public')->delete('departments_gallery/'.$img->image_path);
+            if (Storage::disk('public')->exists('departments_gallery/' . $img->image_path)) {
+                Storage::disk('public')->delete('departments_gallery/' . $img->image_path);
             }
             $img->delete();
         }
 
         $department->delete();
 
-        return redirect()->route('admin.departments.index')->with('success', 'Department deleted successfully.');
+        return redirect()->route('admin.departments.index')
+            ->with('success', 'Department deleted successfully.');
     }
 
     /**
-     * Upload a new document for a department.
+     * ================= DOCUMENTS =================
      */
+
     public function uploadDocument(Request $request, Department $department)
     {
         $request->validate([
@@ -145,6 +153,7 @@ class DepartmentController extends Controller
         ]);
 
         $file = $request->file('document');
+
         $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
             . '_' . time() . '.' . $file->getClientOriginalExtension();
 
@@ -158,13 +167,10 @@ class DepartmentController extends Controller
         return back()->with('success', 'Document uploaded successfully.');
     }
 
-    /**
-     * Delete a specific document.
-     */
     public function deleteDocument(DepartmentDocument $document)
     {
-        if (Storage::disk('public')->exists('departments_documents/'.$document->file_path)) {
-            Storage::disk('public')->delete('departments_documents/'.$document->file_path);
+        if (Storage::disk('public')->exists('departments_documents/' . $document->file_path)) {
+            Storage::disk('public')->delete('departments_documents/' . $document->file_path);
         }
 
         $document->delete();
@@ -173,28 +179,36 @@ class DepartmentController extends Controller
     }
 
     /**
-     * Public-facing method to show a department
+     * ================= PUBLIC PAGE (FIXED) =================
      */
-    public function publicShow($id)
+
+    public function publicShow(Department $department)
     {
-        $department = Department::with(['achievements', 'documents'])->findOrFail($id);
+        $department->load([
+            'achievements',
+            'documents',
+            'galleryImages',
+            'otherLeaders',
+            'upcomingEvents' => function ($query) {
+                $query->whereDate('event_date', '>=', Carbon::today())
+                    ->orderBy('event_date', 'asc')
+                    ->take(5);
+            }
+        ]);
+
         return view('pages.department-show', compact('department'));
     }
 
-    // ================== GALLERY METHODS ==================
-
     /**
-     * Show the gallery for a department.
+     * ================= GALLERY =================
      */
+
     public function gallery(Department $department)
     {
-        $images = $department->galleryImages ?? [];
+        $images = $department->galleryImages;
         return view('admin.departments.gallery', compact('department', 'images'));
     }
 
-    /**
-     * Upload an image to the department gallery.
-     */
     public function uploadGallery(Request $request, Department $department)
     {
         $request->validate([
@@ -202,8 +216,10 @@ class DepartmentController extends Controller
         ]);
 
         $file = $request->file('image');
-        $filename = time().'_'.Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
-                    .'.'.$file->getClientOriginalExtension();
+
+        $filename = time() . '_' .
+            Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
+            . '.' . $file->getClientOriginalExtension();
 
         $file->storeAs('departments_gallery', $filename, 'public');
 
@@ -212,18 +228,15 @@ class DepartmentController extends Controller
         ]);
 
         return redirect()->route('admin.departments.gallery', $department->id)
-                         ->with('success', 'Image uploaded successfully.');
+            ->with('success', 'Image uploaded successfully.');
     }
 
-    /**
-     * Delete an image from the department gallery.
-     */
     public function deleteGallery($imageId)
     {
         $image = DepartmentGallery::findOrFail($imageId);
 
-        if (Storage::disk('public')->exists('departments_gallery/'.$image->image_path)) {
-            Storage::disk('public')->delete('departments_gallery/'.$image->image_path);
+        if (Storage::disk('public')->exists('departments_gallery/' . $image->image_path)) {
+            Storage::disk('public')->delete('departments_gallery/' . $image->image_path);
         }
 
         $image->delete();

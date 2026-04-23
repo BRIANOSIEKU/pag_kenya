@@ -90,7 +90,7 @@ h2 {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 900px; /* prevents overflow break */
+    min-width: 900px;
     background: #fff;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
@@ -208,6 +208,7 @@ thead {
                             ||
                             (!$isSameDistrict &&
                              $transfer->to_district_approved &&
+                             $transfer->general_secretary_approved &&
                              $transfer->status === 'approved');
                     @endphp
 
@@ -231,37 +232,38 @@ thead {
                         <!-- STATUS -->
                         <td class="small-text">
 
+                            {{-- ================= DISTRICT ================= --}}
+                            District:
                             @if($isSameDistrict)
-
-                                Final:
-                                @if($transfer->status == 'approved')
-                                    <span class="status-green">Approved</span>
-                                @elseif($transfer->status == 'rejected')
-                                    <span class="status-red">Rejected</span>
-                                @else
-                                    <span class="status-orange">Pending</span>
-                                @endif
-
+                                <span class="status-green">✔ Approved</span>
                             @else
-
-                                District:
                                 @if($transfer->to_district_approved)
                                     <span class="status-green">✔ Approved</span>
                                 @else
                                     <span class="status-orange">Pending</span>
                                 @endif
+                            @endif
 
-                                <br>
+                            <br>
 
-                                Final:
-                                @if($transfer->status == 'approved')
-                                    <span class="status-green">Approved</span>
-                                @elseif($transfer->status == 'rejected')
-                                    <span class="status-red">Rejected</span>
-                                @else
-                                    <span class="status-orange">Pending</span>
-                                @endif
+                            {{-- ================= GENERAL SECRETARY ================= --}}
+                            General Secretary:
+                            @if($transfer->general_secretary_approved)
+                                <span class="status-green">✔ Approved</span>
+                            @else
+                                <span class="status-orange">Pending</span>
+                            @endif
 
+                            <br>
+
+                            {{-- ================= GENERAL SUPERINTENDENT (FINAL) ================= --}}
+                            General Superintendent:
+                            @if($transfer->status == 'approved')
+                                <span class="status-green">Approved</span>
+                            @elseif($transfer->status == 'rejected')
+                                <span class="status-red">Rejected</span>
+                            @else
+                                <span class="status-orange">Pending</span>
                             @endif
 
                             @if($transfer->status == 'rejected' && $transfer->rejection_reason)

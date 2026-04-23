@@ -55,6 +55,11 @@ use App\Http\Controllers\Admin\DistrictSummaryController;
 use App\Http\Controllers\DistrictAdmin\PastoralTransferLetterController;
 use App\Http\Controllers\Admin\NationalPastoralApprovalController;
 use App\Http\Controllers\Admin\TransferLetterController;
+use App\Http\Controllers\Admin\OtherLeaderController;
+use App\Http\Controllers\Admin\DepartmentUpcomingEventController;
+use App\Http\Controllers\Public\DepartmentShowController;
+use App\Http\Controllers\Admin\DepartmentFinanceController;
+use App\Http\Controllers\Admin\DepartmentFinanceReportController;
 
 // -------------------- PUBLIC ROUTES --------------------
 //Public for Committees
@@ -111,6 +116,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/devotions/{devotion}/comment', [\App\Http\Controllers\DevotionCommentController::class, 'store'])
         ->name('devotions.comment.store');
 });
+
+
+
+
 Route::get('/projects', [ProjectPublicController::class, 'index'])->name('projects.public.index');
 Route::get('/projects/{project}', [ProjectPublicController::class, 'show'])->name('projects.public.show');
 Route::get('/partners', [PublicPartnerController::class, 'index'])->name('partners.index');
@@ -205,30 +214,64 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{type}/{id}', [LeadershipController::class, 'destroy'])->name('destroy');
         });
 
-        // Departments CRUD
-        Route::prefix('departments')->name('departments.')->group(function () {
-            Route::get('/', [DepartmentController::class, 'index'])->name('index');
-            Route::get('/create', [DepartmentController::class, 'create'])->name('create');
-            Route::post('/', [DepartmentController::class, 'store'])->name('store');
-            Route::get('/{department}', [DepartmentController::class, 'show'])->name('show');
-            Route::get('/{department}/edit', [DepartmentController::class, 'edit'])->name('edit');
-            Route::put('/{department}', [DepartmentController::class, 'update'])->name('update');
-            Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('destroy');
+// ================= DEPARTMENTS CRUD =================
+Route::prefix('departments')->name('departments.')->group(function () {
+ // UPCOMOMING EVENTS
+    Route::prefix('{department}/department-upcoming-events')
+        ->name('department_upcoming_events.')
+        ->group(function () {
 
-            Route::post('/{department}/upload-document', [DepartmentController::class, 'uploadDocument'])->name('uploadDocument');
-            Route::delete('/documents/{document}', [DepartmentController::class, 'deleteDocument'])->name('deleteDocument');
-            Route::post('/{department}/achievements', [DepartmentAchievementController::class, 'store'])->name('achievements.store');
-            Route::delete('/achievements/{achievement}', [DepartmentAchievementController::class, 'destroy'])->name('achievements.destroy');
+            Route::get('/', [DepartmentUpcomingEventController::class, 'index'])
+                ->name('index');
 
-              Route::get('/{department}/gallery', [DepartmentController::class, 'gallery'])
-         ->name('gallery');
+            Route::get('/create', [DepartmentUpcomingEventController::class, 'create'])
+                ->name('create');
 
-    Route::post('/{department}/gallery', [DepartmentController::class, 'uploadGallery'])
-         ->name('uploadGallery');
+            Route::post('/', [DepartmentUpcomingEventController::class, 'store'])
+                ->name('store');
 
-    Route::delete('/gallery/{image}', [DepartmentController::class, 'deleteGallery'])
-         ->name('deleteGallery');
+            Route::get('/{id}/edit', [DepartmentUpcomingEventController::class, 'edit'])
+                ->name('edit');
+
+            Route::put('/{id}', [DepartmentUpcomingEventController::class, 'update'])
+                ->name('update');
+
+            Route::delete('/{id}', [DepartmentUpcomingEventController::class, 'destroy'])
+                ->name('destroy');
         });
+
+
+    Route::get('/', [DepartmentController::class, 'index'])->name('index');
+    Route::get('/create', [DepartmentController::class, 'create'])->name('create');
+    Route::post('/', [DepartmentController::class, 'store'])->name('store');
+    Route::get('/{department}', [DepartmentController::class, 'show'])->name('show');
+    Route::get('/{department}/edit', [DepartmentController::class, 'edit'])->name('edit');
+    Route::put('/{department}', [DepartmentController::class, 'update'])->name('update');
+    Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('destroy');
+
+    Route::post('/{department}/upload-document', [DepartmentController::class, 'uploadDocument'])->name('uploadDocument');
+    Route::delete('/documents/{document}', [DepartmentController::class, 'deleteDocument'])->name('deleteDocument');
+
+    Route::post('/{department}/achievements', [DepartmentAchievementController::class, 'store'])->name('achievements.store');
+    Route::delete('/achievements/{achievement}', [DepartmentAchievementController::class, 'destroy'])->name('achievements.destroy');
+
+    Route::get('/{department}/gallery', [DepartmentController::class, 'gallery'])->name('gallery');
+    Route::post('/{department}/gallery', [DepartmentController::class, 'uploadGallery'])->name('uploadGallery');
+    Route::delete('/gallery/{image}', [DepartmentController::class, 'deleteGallery'])->name('deleteGallery');
+
+    // ================= OTHER LEADERS =================
+    Route::prefix('{department}/other-leaders')->name('other-leaders.')->group(function () {
+
+        Route::get('/', [OtherLeaderController::class, 'index'])->name('index');
+        Route::get('/create', [OtherLeaderController::class, 'create'])->name('create');
+        Route::post('/', [OtherLeaderController::class, 'store'])->name('store');
+        Route::get('/{leader}', [OtherLeaderController::class, 'show'])->name('show');
+        Route::get('/{leader}/edit', [OtherLeaderController::class, 'edit'])->name('edit');
+        Route::put('/{leader}', [OtherLeaderController::class, 'update'])->name('update');
+        Route::delete('/{leader}', [OtherLeaderController::class, 'destroy'])->name('destroy');
+
+    });
+});        
 
 
         // Admin News
@@ -623,15 +666,11 @@ Route::prefix('district-admin')->name('district.admin.')->group(function () {
 
     Route::post('/pastoral-team/store', [PastoralTeamController::class, 'store'])
         ->name('pastoral.store');
-            // ✅ EDIT
     Route::get('/pastoral-team/{id}/edit', [PastoralTeamController::class, 'edit'])
         ->name('pastoral.edit');
-
-    // ✅ UPDATE
     Route::put('/pastoral-team/{id}/update', [PastoralTeamController::class, 'update'])
         ->name('pastoral.update');
 
-    // ✅ DELETE
     Route::delete('/pastoral-team/{id}/delete', [PastoralTeamController::class, 'destroy'])
         ->name('pastoral.delete');
 
@@ -766,24 +805,34 @@ Route::prefix('district-admin')->name('district.admin.')->group(function () {
 });
 
 //====== ADMIN TRANSFER APPROVALS ======
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])    ->middleware([
+Route::prefix('admin/transfers')
+    ->name('admin.transfers.')
+    ->middleware([
         'auth',
-        'role:general_superintendent|super_admin'
-    ])->group(function () {
+        'role:general_secretary|general_superintendent|super_admin'
+    ])
+    ->group(function () {
 
-    // LIST ALL PENDING HQ APPROVALS
-    Route::get('/transfers', [TransferApprovalController::class, 'index'])
-        ->name('transfers');
+        // LIST
+        Route::get('/', [TransferApprovalController::class, 'index'])
+            ->name('index');
 
-    // APPROVE TRANSFER (HQ)
-    Route::post('/transfers/{id}/approve', [TransferApprovalController::class, 'approve'])
-        ->name('transfers.approve');
+        // =========================
+        // SECRETARY APPROVAL (STEP 1)
+        // =========================
+        Route::post('/{id}/secretary-approve', [TransferApprovalController::class, 'secretaryApprove'])
+            ->name('secretary.approve');
 
-    // REJECT TRANSFER (HQ) 
-    Route::post('/transfers/{id}/reject', [TransferApprovalController::class, 'reject'])
-        ->name('transfers.reject');
+        // =========================
+        // FINAL APPROVAL (STEP 2)
+        // =========================
+        Route::post('/{id}/approve', [TransferApprovalController::class, 'approve'])
+            ->name('approve');
 
-});
+        // REJECT (ANY STAGE)
+        Route::post('/{id}/reject', [TransferApprovalController::class, 'reject'])
+            ->name('reject');
+    });
 
 
 // ======== DISTRICT PASTORAL TEAM (ADMIN SIDE) ========
@@ -926,3 +975,60 @@ Route::prefix('admin')
     )->name('transfers.download');
 
 });
+
+Route::prefix('admin/departments')->name('admin.departments.')->group(function () {
+
+    Route::get('{department}/finance', [DepartmentFinanceController::class, 'dashboard'])
+        ->name('finance.dashboard')
+        ->whereNumber('department');
+
+    Route::post('{department}/finance/store', [DepartmentFinanceController::class, 'store'])
+        ->name('finance.store')
+        ->whereNumber('department');
+
+    Route::get('{department}/finance/report/{year}/{month}', [DepartmentFinanceController::class, 'monthlyReport'])
+        ->name('finance.report')
+        ->whereNumber(['department', 'year', 'month']);
+
+    Route::get('{department}/finance/{year}/{month}', [DepartmentFinanceController::class, 'index'])
+        ->name('finance.index')
+        ->whereNumber(['department', 'year', 'month']);
+
+    // ✅ FIXED CLOSE MONTH ROUTE (IMPORTANT)
+    Route::post('{department}/finance/close-month', [DepartmentFinanceController::class, 'closeMonth'])
+        ->name('finance.closeMonth')
+        ->whereNumber('department');
+
+// ================= EXPORTS =================
+
+Route::get('{department}/finance/export/monthly', 
+    [DepartmentFinanceController::class, 'exportMonthlyPdf']
+)->name('finance.export.monthly')
+->whereNumber('department');
+
+
+Route::get('{department}/finance/export/monthly', 
+    [DepartmentFinanceController::class, 'exportMonthly']
+)->name('finance.export.monthly');
+
+// Expense PDF export
+Route::get('{department}/finance/export/yearly', 
+    [DepartmentFinanceController::class, 'exportYearlySummary']
+)->name('finance.export.yearly');
+});
+
+//-----DEPARTMENT REPORTS EXECUTIVE SIDE--
+Route::get(
+    '/admin/departments/finance/reports',
+    [DepartmentFinanceReportController::class, 'index']
+)->name('admin.departments.finance.reports');
+
+Route::get(
+    '/admin/departments/finance/reports/monthly',
+    [DepartmentFinanceReportController::class, 'monthly']
+)->name('admin.departments.finance.reports.monthly');
+
+Route::get(
+    '/admin/departments/finance/reports/yearly',
+    [DepartmentFinanceReportController::class, 'yearly']
+)->name('admin.departments.finance.reports.yearly');

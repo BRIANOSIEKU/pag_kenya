@@ -223,7 +223,7 @@ h2 {
     <div class="card">
         <h3>Transfers</h3>
         <p>Manage pastoral transfers</p>
-        <a href="{{ route('admin.transfers') }}" class="btn-orange">View</a>
+        <a href="{{ route('admin.transfers.index') }}" class="btn-orange">View</a>
     </div>
 
     <div class="card">
@@ -241,6 +241,12 @@ h2 {
         <h3>National Pastoral Approval</h3>
         <p>Approve and review all pastoral teams from districts</p>
         <a href="{{ route('admin.national.pastoral.approvals.index') }}" class="btn-gold">Open</a>
+    </div>
+
+        <div class="card">
+        <h3>Departments Finance</h3>
+        <p>Download Departments Finance Reports</p>
+        <a href="{{ route('admin.departments.finance.reports') }}" class="btn-green">Open</a>
     </div>
 
 </div>

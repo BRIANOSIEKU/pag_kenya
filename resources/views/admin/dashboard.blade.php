@@ -2,6 +2,13 @@
 
 @section('content')
 
+@php
+    $currentMonth = request('month', now()->month);
+    $currentYear  = request('year', now()->year);
+
+    $monthName = \Carbon\Carbon::create()->month($currentMonth)->format('F');
+@endphp
+
 <style>
     .dashboard-grid {
         display: grid;
@@ -81,6 +88,22 @@
             gap: 12px;
         }
     }
+
+    /* FINANCE BADGE */
+    .finance-period {
+        display: inline-block;
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 14px;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+
+    .finance-period strong {
+        color: #FFD700;
+    }
 </style>
 
 <!-- HEADER -->
@@ -97,6 +120,13 @@
 </div>
 
 <p>Welcome, {{ Auth::user()->name }}</p>
+
+<!-- ================= FINANCE PERIOD ================= -->
+<div class="finance-period">
+    📊 Current Finance Period:
+    <strong>{{ $monthName }} {{ $currentYear }}</strong>
+</div>
+
 <hr>
 
 <!-- ================= WEBSITE MANAGEMENT ================= -->
@@ -104,7 +134,6 @@
 
 <div class="dashboard-grid">
 
-    {{-- ================= DISTRICT MODULE (VISIBLE TO ALL EXCEPT ADMIN) ================= --}}
     @if(!auth()->user()->hasRole('admin'))
     <div class="card">
         <h3>District Management</h3>
@@ -117,7 +146,6 @@
     </div>
     @endif
 
-    <!-- Church Profile -->
     <div class="card">
         <h3>Church Profile</h3>
         <p>Mission, Vision, Core Values</p>
@@ -135,7 +163,6 @@
         @endif
     </div>
 
-    <!-- Leadership -->
     <div class="card">
         <h3>Leadership</h3>
         <p>Manage Leadership Structure</p>
@@ -143,55 +170,41 @@
         <div style="display:flex; flex-direction:column; gap:8px;">
             <a href="{{ route('admin.leadership.index', ['type' => 'executive']) }}" class="btn-green">Executive Committee</a>
             <a href="{{ route('admin.leadership.index', ['type' => 'council']) }}" class="btn-blue">Church Council</a>
-            <a href="{{ route('admin.overseers.index') }}" class="btn-brown">Church Overseers</a>
-            <a href="{{ route('admin.pastoral-teams.index') }}" class="btn-brown">Pastoral Team</a>
-            <a href="{{ route('admin.leadership.index', ['type' => 'hq']) }}" class="btn-orange">PAG HQ Staff</a>
+            <a href="{{ route('admin.committees.index') }}" class="btn-teal">Standing Committees</a>
+            <a href="{{ route('admin.departments.index') }}" class="btn-purple">Church Departments</a>
         </div>
     </div>
 
-    <!-- Departments -->
-    <div class="card">
-        <h3>Departments</h3>
-        <p>Create, Edit & Delete Departments</p>
-        <a href="{{ route('admin.departments.index') }}" class="btn-purple">Manage</a>
-    </div>
-
-    <!-- News -->
     <div class="card">
         <h3>News & Updates</h3>
         <p>Post church news</p>
         <a href="{{ route('admin.news.index') }}" class="btn-red">Manage</a>
     </div>
 
-    <!-- Projects -->
     <div class="card">
         <h3>Projects</h3>
         <p>Manage church projects</p>
         <a href="{{ route('admin.projects.index') }}" class="btn-orange">Manage</a>
     </div>
 
-    <!-- Devotions -->
     <div class="card">
         <h3>Daily Devotions</h3>
         <p>Create & schedule devotions</p>
         <a href="{{ route('admin.devotions.index') }}" class="btn-deep-purple">Manage</a>
     </div>
 
-    <!-- Partners -->
     <div class="card">
         <h3>Partners</h3>
         <p>Manage ministry partners</p>
         <a href="{{ route('admin.partners.index') }}" class="btn-teal">Manage</a>
     </div>
 
-    <!-- Admin Management -->
     <div class="card">
         <h3>Admin Management</h3>
         <p>Manage Admins</p>
         <a href="{{ route('admin.admins.create') }}" class="btn-teal">Manage</a>
     </div>
 
-    <!-- Password Reset -->
     <div class="card">
         <h3>Password Reset</h3>
         <p>Reset my password</p>
@@ -204,19 +217,11 @@
 <h2>User Interactions</h2>
 
 <div class="dashboard-grid">
-
     <div class="card">
         <h3>Comments Moderation</h3>
         <p>Approve or delete user comments</p>
         <a href="{{ route('admin.comments.index') }}" class="btn-orange-dark">Moderate</a>
     </div>
-
-    <div class="card">
-        <h3>Standing Committees</h3>
-        <p>Manage committees</p>
-        <a href="{{ route('admin.committees.index') }}" class="btn-teal">View Committees</a>
-    </div>
-
 </div>
 
 <!-- ================= ANNOUNCEMENTS ================= -->

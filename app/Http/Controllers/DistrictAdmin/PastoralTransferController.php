@@ -13,7 +13,6 @@ use App\Models\DistrictAdmin;
 
 // NOTIFICATIONS
 use App\Notifications\PastoralTransferCreated;
-use App\Notifications\PastoralTransferApproved;
 use App\Notifications\PastoralTransferCompleted;
 
 class PastoralTransferController extends Controller
@@ -26,64 +25,56 @@ class PastoralTransferController extends Controller
         $districtId = session('district_admin_district_id');
 
         $transfers = PastoralTransfer::with([
-                'pastor',
-                'fromDistrict',
-                'toDistrict',
-                'fromAssembly',
-                'toAssembly'
-            ])
-            ->where(function ($q) use ($districtId) {
-                $q->where('from_district_id', $districtId)
-                  ->orWhere('to_district_id', $districtId);
-            })
-            ->latest()
-            ->get();
+            'pastor',
+            'fromDistrict',
+            'toDistrict',
+            'fromAssembly',
+            'toAssembly'
+        ])
+        ->where(function ($q) use ($districtId) {
+            $q->where('from_district_id', $districtId)
+              ->orWhere('to_district_id', $districtId);
+        })
+        ->latest()
+        ->get();
 
         return view('district_admin.pastoral_transfers.index', compact('transfers'));
     }
 
     // =========================
-    // INCOMING (🔥 FINAL FIX - PROPER DISAPPEARING LOGIC)
+    // INCOMING
     // =========================
     public function incoming()
     {
         $districtId = session('district_admin_district_id');
 
         $transfers = PastoralTransfer::with([
-                'pastor',
-                'fromDistrict',
-                'toDistrict',
-                'fromAssembly',
-                'toAssembly'
-            ])
-            ->where(function ($q) use ($districtId) {
-                $q->where('from_district_id', $districtId)
-                  ->orWhere('to_district_id', $districtId);
+            'pastor',
+            'fromDistrict',
+            'toDistrict',
+            'fromAssembly',
+            'toAssembly'
+        ])
+        ->where(function ($q) use ($districtId) {
+            $q->where('from_district_id', $districtId)
+              ->orWhere('to_district_id', $districtId);
+        })
+        ->where('status', 'pending')
+        ->where(function ($q) use ($districtId) {
+
+            $q->where(function ($sub) use ($districtId) {
+                $sub->where('from_district_id', $districtId)
+                    ->where('from_district_approved', 0);
             })
+            ->orWhere(function ($sub) use ($districtId) {
+                $sub->where('to_district_id', $districtId)
+                    ->where('to_district_approved', 0);
+            });
 
-            // must still be active workflow
-            ->where('status', 'pending')
-
-            // 🔥 KEY FIX: hide if THIS district already approved its side
-            ->where(function ($q) use ($districtId) {
-
-                // If this district is SOURCE → hide if already approved
-                $q->where(function ($sub) use ($districtId) {
-                    $sub->where('from_district_id', $districtId)
-                        ->where('from_district_approved', 0);
-                })
-
-                // OR if this district is TARGET → hide if already approved
-                ->orWhere(function ($sub) use ($districtId) {
-                    $sub->where('to_district_id', $districtId)
-                        ->where('to_district_approved', 0);
-                });
-            })
-
-            ->whereNull('rejection_reason')
-
-            ->latest()
-            ->get();
+        })
+        ->whereNull('rejection_reason')
+        ->latest()
+        ->get();
 
         return view('district_admin.pastoral_transfers.incoming', compact('transfers'));
     }
@@ -134,7 +125,7 @@ class PastoralTransferController extends Controller
 
             'from_district_approved' => 0,
             'to_district_approved' => ($fromDistrict == $toDistrict ? 1 : 0),
-            'main_admin_approved' => 0,
+            'general_secretary_approved' => 0,
         ]);
 
         $admins = DistrictAdmin::where('district_id', $toDistrict)->get();
@@ -148,7 +139,7 @@ class PastoralTransferController extends Controller
     }
 
     // =========================
-    // APPROVE
+    // DISTRICT APPROVAL
     // =========================
     public function approve($id)
     {
@@ -166,13 +157,11 @@ class PastoralTransferController extends Controller
             $transfer->update([
                 'from_district_approved' => 1,
                 'to_district_approved' => 1,
-                'status' => 'approved',
-                'main_admin_approved' => 1,
             ]);
 
-            $this->movePastor($transfer);
+            $this->checkFinalApproval($transfer);
 
-            return back()->with('success', 'Transfer fully approved.');
+            return back()->with('success', 'District approved.');
         }
 
         // FROM DISTRICT
@@ -203,29 +192,74 @@ class PastoralTransferController extends Controller
     }
 
     // =========================
-    // FINAL CHECK
+    // GENERAL SECRETARY APPROVAL
+    // =========================
+    public function generalSecretaryApprove($id)
+    {
+        $transfer = PastoralTransfer::findOrFail($id);
+
+        if ($transfer->status !== 'pending') {
+            return back()->with('error', 'Already processed.');
+        }
+
+        if (!($transfer->from_district_approved && $transfer->to_district_approved)) {
+            return back()->with('error', 'District approval required first.');
+        }
+
+        $transfer->update([
+            'general_secretary_approved' => 1,
+            'general_secretary_approved_at' => now(),
+        ]);
+
+        $this->checkFinalApproval($transfer);
+
+        return back()->with('success', 'General Secretary approved.');
+    }
+
+    // =========================
+    // FINAL APPROVAL (GENERAL SUPERINTENDENT)
     // =========================
     private function checkFinalApproval($transfer)
     {
         $transfer->refresh();
 
-        if ($transfer->from_district_approved && $transfer->to_district_approved) {
+        // STEP 1: District approvals
+        if (!($transfer->from_district_approved && $transfer->to_district_approved)) {
+            return;
+        }
 
-            $transfer->update([
-                'status' => 'approved',
-                'main_admin_approved' => 1,
-            ]);
+        // STEP 2: General Secretary
+        if (!$transfer->general_secretary_approved) {
+            return;
+        }
 
-            $this->movePastor($transfer);
+        // STEP 3: FINAL (GENERAL SUPERINTENDENT)
+        $transfer->update([
+            'status' => 'approved',
+        ]);
 
-            $admins = DistrictAdmin::whereNull('district_id')->get();
+        $this->movePastor($transfer);
 
-            foreach ($admins as $admin) {
-                $admin->notify(new PastoralTransferCompleted($transfer));
-            }
+        $admins = DistrictAdmin::whereNull('district_id')->get();
+
+        foreach ($admins as $admin) {
+            $admin->notify(new PastoralTransferCompleted($transfer));
         }
     }
 
+    public function destroy($id)
+{
+    $transfer = PastoralTransfer::findOrFail($id);
+
+    // optional safety check
+    if ($transfer->status === 'approved') {
+        return back()->with('error', 'Cannot delete an approved transfer.');
+    }
+
+    $transfer->delete();
+
+    return back()->with('success', 'Transfer deleted successfully.');
+}
     // =========================
     // REJECT
     // =========================

@@ -552,6 +552,222 @@ function resetInterval() {
 
 showSlide(0);
 </script>
+<!-- ================= UPCOMING EVENTS SECTION ================= -->
+<section class="section upcoming-events-section" id="upcoming-events">
+    <h2>Upcoming Events</h2>
+
+    @if($upcomingEvents->isEmpty())
+        <p class="no-events">
+            No upcoming events at the moment. Please check later.
+        </p>
+    @else
+
+        <div class="events-wrapper">
+
+            <div class="events-row">
+
+                @foreach($upcomingEvents as $event)
+                    <div class="event-card">
+
+                        {{-- Calendar Icon --}}
+                        <div class="event-icon">
+                            📅
+                        </div>
+
+                        {{-- Content --}}
+                        <div class="event-content">
+
+                            <h3>{{ $event->title }}</h3>
+
+                            <span class="event-date">
+                                {{ \Carbon\Carbon::parse($event->event_date)->format('F j, Y') }}
+                            </span>
+
+                            @if($event->department)
+                                <span class="event-department">
+                                    {{ $event->department->name }}
+                                </span>
+                            @endif
+
+                            <p>
+                                {{ \Illuminate\Support\Str::limit($event->description, 120) }}
+                            </p>
+
+@if($event->file)
+    @php
+        $ext = pathinfo($event->file, PATHINFO_EXTENSION);
+    @endphp
+
+    @if(in_array($ext, ['jpg','jpeg','png','webp']))
+        <a href="{{ Storage::url($event->file) }}" 
+           target="_blank" class="event-link">
+            View Image
+        </a>
+    @else
+        <a href="{{ Storage::url($event->file) }}" 
+           target="_blank" class="event-link">
+            Download File
+        </a>
+    @endif
+@endif
+
+                        </div>
+                    </div>
+                @endforeach
+
+            </div>
+
+        </div>
+
+    @endif
+</section>
+
+<!-- ================= STYLES ================= -->
+<style>
+.upcoming-events-section {
+    background: #f4f9ff;
+    padding: 60px 20px;
+}
+
+.upcoming-events-section h2 {
+    text-align: center;
+    color: #007BB8;
+    font-size: 2rem;
+    margin-bottom: 30px;
+}
+
+.no-events {
+    text-align: center;
+    color: #555;
+}
+
+/* Wrapper */
+.events-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+/* ROW */
+.events-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scroll-snap-type: x mandatory;
+}
+
+.events-row::-webkit-scrollbar {
+    display: none;
+}
+
+/* CARD */
+.event-card {
+    flex: 0 0 auto;
+    width: 260px;
+    min-width: 260px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    transition: 0.3s ease;
+    scroll-snap-align: center;
+    text-align: center;
+    overflow: hidden;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+}
+
+/* ================= CALENDAR ICON ================= */
+.event-icon {
+    font-size: 2.8rem;
+    background: #007BB8;
+    color: #fff;
+    padding: 25px 0;
+}
+
+/* CONTENT */
+.event-content {
+    padding: 15px;
+}
+
+.event-content h3 {
+    font-size: 1rem;
+    color: #4B2E2E;
+    margin-bottom: 8px;
+}
+
+/* DATE */
+.event-date {
+    display: inline-block;
+    background: #007BB8;
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+}
+
+/* DEPARTMENT */
+.event-department {
+    display: inline-block;
+    background: #FFD700;
+    color: #000;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 15px;
+    margin-left: 5px;
+}
+
+/* TEXT */
+.event-content p {
+    font-size: 0.9rem;
+    color: #444;
+    margin: 10px 0;
+    line-height: 1.4;
+}
+
+/* LINK */
+.event-link {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: #007BB8;
+    color: #fff;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.8rem;
+}
+
+.event-link:hover {
+    background: #005f8c;
+}
+
+/* ================= MOBILE FIX ================= */
+@media (max-width: 768px) {
+
+    .events-row {
+        justify-content: flex-start;
+        padding-left: 10px;
+        gap: 15px;
+    }
+
+    .event-card {
+        width: 85%;
+        min-width: 85%;
+    }
+
+    .event-content h3 {
+        font-size: 1.1rem;
+    }
+
+    .event-content p {
+        font-size: 0.95rem;
+    }
+}
+</style>
+
 <!-- Latest Announcements Section -->
 <section class="section">
     <h2>Latest Announcements</h2>

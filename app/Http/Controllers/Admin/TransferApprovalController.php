@@ -10,47 +10,94 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransferApprovalController extends Controller
 {
-    /**
-     * Only authenticated users
-     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
     // =========================
-    // ROLE CHECK HELPER
+    // ROLE HELPERS
     // =========================
+    private function isSecretary()
+    {
+        return auth()->user()->hasRole('general_secretary');
+    }
+
+    private function isSuperintendent()
+    {
+        return auth()->user()->hasRole('general_superintendent');
+    }
+
+    private function isHQ()
+    {
+        return auth()->user()->hasRole(['super_admin', 'general_secretary', 'general_superintendent']);
+    }
+
     private function authorizeHQ()
     {
-        if (!auth()->user()->hasRole(['super_admin', 'general_superintendent'])) {
-            abort(403, 'You are not authorized to perform this action.');
+        if (!$this->isHQ()) {
+            abort(403, 'Unauthorized.');
+        }
+    }
+
+    private function authorizeSecretary()
+    {
+        if (!auth()->user()->hasRole(['general_secretary', 'super_admin'])) {
+            abort(403, 'Unauthorized.');
         }
     }
 
     // =========================
-    // LIST (HQ PENDING APPROVALS)
+    // INDEX (ROLE-BASED VIEW)
     // =========================
     public function index()
     {
         $this->authorizeHQ();
 
-        $transfers = PastoralTransfer::with([
+        $query = PastoralTransfer::with([
             'pastor',
             'fromDistrict',
             'toDistrict',
             'fromAssembly',
             'toAssembly'
-        ])
-        ->where('to_district_approved', 1)
-        ->where('main_admin_approved', 0)
-        ->whereNull('rejection_reason')
-        ->latest()
-        ->get();
+        ]);
+
+        /*
+        ======================================================
+        ROLE LOGIC FIX:
+        - Secretary sees ALL initiated transfers (pending GS approval OR already approved by GS)
+        - Superintendent sees ONLY transfers already approved by Secretary
+        - HQ final view sees after GS approval (your previous logic)
+        ======================================================
+        */
+
+        if ($this->isSecretary()) {
+
+            // Secretary sees EVERYTHING pending initial HQ review
+            $query->whereNull('rejection_reason')
+                  ->where('status', '!=', 'rejected');
+
+        } elseif ($this->isSuperintendent()) {
+
+            // Superintendent sees only secretary-approved ones
+            $query->where('general_secretary_approved', 1)
+                  ->where('main_admin_approved', 0)
+                  ->whereNull('rejection_reason')
+                  ->where('status', '!=', 'rejected');
+
+        } else {
+
+            // Super admin / HQ final view
+            $query->where('general_secretary_approved', 1)
+                  ->where('main_admin_approved', 0)
+                  ->whereNull('rejection_reason')
+                  ->where('status', '!=', 'rejected');
+        }
+
+        $transfers = $query->latest()->get();
 
         foreach ($transfers as $transfer) {
 
-            // CURRENT PERFORMANCE
             $transfer->currentAssemblyPerformance = $transfer->from_assembly_id
                 ? DB::table('tithe_report_items')
                     ->join('tithe_reports', 'tithe_reports.id', '=', 'tithe_report_items.tithe_report_id')
@@ -62,12 +109,10 @@ class TransferApprovalController extends Controller
                     )
                     ->groupBy('tithe_reports.month', 'tithe_reports.year')
                     ->orderByDesc('tithe_reports.year')
-                    ->orderByDesc('tithe_reports.id')
                     ->limit(4)
                     ->get()
                 : collect();
 
-            // TARGET PERFORMANCE
             $transfer->targetAssemblyPerformance = $transfer->to_assembly_id
                 ? DB::table('tithe_report_items')
                     ->join('tithe_reports', 'tithe_reports.id', '=', 'tithe_report_items.tithe_report_id')
@@ -79,7 +124,6 @@ class TransferApprovalController extends Controller
                     )
                     ->groupBy('tithe_reports.month', 'tithe_reports.year')
                     ->orderByDesc('tithe_reports.year')
-                    ->orderByDesc('tithe_reports.id')
                     ->limit(4)
                     ->get()
                 : collect();
@@ -89,38 +133,54 @@ class TransferApprovalController extends Controller
     }
 
     // =========================
-    // APPROVE (MESSAGE + DOWNLOAD TRIGGER)
+    // GENERAL SECRETARY APPROVAL
+    // =========================
+    public function secretaryApprove($id)
+    {
+        $this->authorizeSecretary();
+
+        $transfer = PastoralTransfer::findOrFail($id);
+
+        if ($transfer->general_secretary_approved) {
+            return back()->with('error', 'Already approved by General Secretary.');
+        }
+
+        if ($transfer->status === 'rejected') {
+            return back()->with('error', 'Cannot approve rejected transfer.');
+        }
+
+        $transfer->update([
+            'general_secretary_approved' => 1,
+            'general_secretary_approved_at' => now(),
+        ]);
+
+        return back()->with('success', 'Approved by General Secretary.');
+    }
+
+    // =========================
+    // FINAL HQ APPROVAL
     // =========================
     public function approve($id)
     {
         $this->authorizeHQ();
 
         $transfer = PastoralTransfer::with([
-            'pastor',
-            'fromDistrict',
-            'toDistrict',
-            'fromAssembly',
-            'toAssembly'
+            'pastor','fromDistrict','toDistrict','fromAssembly','toAssembly'
         ])->findOrFail($id);
 
-        $status = strtolower(trim($transfer->status));
-
-        // SAFETY CHECKS
-        if ($transfer->main_admin_approved == 1 || $status === 'approved') {
-            return back()->with('error', 'This transfer has already been approved.');
+        if ($transfer->general_secretary_approved != 1) {
+            return back()->with('error', 'Secretary approval required first.');
         }
 
-        if ($status === 'rejected') {
-            return back()->with('error', 'This transfer has already been rejected.');
+        if ($transfer->main_admin_approved || $transfer->status === 'approved') {
+            return back()->with('error', 'Already approved.');
         }
 
-        // APPROVE
         $transfer->update([
             'main_admin_approved' => 1,
             'status' => 'approved',
         ]);
 
-        // UPDATE PASTOR LOCATION
         if ($transfer->pastor) {
             $transfer->pastor->update([
                 'district_id' => $transfer->to_district_id,
@@ -128,10 +188,9 @@ class TransferApprovalController extends Controller
             ]);
         }
 
-        // SUCCESS + TRIGGER DOWNLOAD FLAG
         return redirect()
-            ->route('admin.transfers')
-            ->with('success', 'Transfer approved successfully.')
+            ->route('admin.transfers.index')
+            ->with('success', 'Transfer fully approved.')
             ->with('download_transfer_id', $transfer->id);
     }
 
@@ -140,22 +199,14 @@ class TransferApprovalController extends Controller
     // =========================
     public function reject(Request $request, $id)
     {
-        $this->authorizeHQ();
-
         $request->validate([
             'rejection_reason' => 'required|string|max:255'
         ]);
 
         $transfer = PastoralTransfer::findOrFail($id);
 
-        $status = strtolower(trim($transfer->status));
-
-        if ($transfer->main_admin_approved == 1 || $status === 'approved') {
-            return back()->with('error', 'This transfer has already been approved.');
-        }
-
-        if ($status === 'rejected') {
-            return back()->with('error', 'This transfer has already been rejected.');
+        if ($transfer->status === 'approved') {
+            return back()->with('error', 'Already approved.');
         }
 
         $transfer->update([
@@ -163,48 +214,40 @@ class TransferApprovalController extends Controller
             'rejection_reason' => $request->rejection_reason,
         ]);
 
-        return back()->with('success', 'Transfer rejected successfully.');
+        return back()->with('success', 'Transfer rejected.');
     }
 
     // =========================
-    // SHOW LETTER
+    // LETTER
     // =========================
     public function showLetter($id)
     {
         $this->authorizeHQ();
 
         $transfer = PastoralTransfer::with([
-            'pastor',
-            'fromDistrict',
-            'toDistrict',
-            'fromAssembly',
-            'toAssembly'
+            'pastor','fromDistrict','toDistrict','fromAssembly','toAssembly'
         ])->findOrFail($id);
 
-        if ($transfer->status !== 'approved' || $transfer->main_admin_approved != 1) {
-            abort(403, 'Transfer letter not available until approval.');
+        if ($transfer->status !== 'approved') {
+            abort(403);
         }
 
         return view('district_admin.pastoral_transfers.letter', compact('transfer'));
     }
 
     // =========================
-    // DOWNLOAD LETTER (PDF)
+    // PDF
     // =========================
     public function downloadLetter($id)
     {
         $this->authorizeHQ();
 
         $transfer = PastoralTransfer::with([
-            'pastor',
-            'fromDistrict',
-            'toDistrict',
-            'fromAssembly',
-            'toAssembly'
+            'pastor','fromDistrict','toDistrict','fromAssembly','toAssembly'
         ])->findOrFail($id);
 
-        if ($transfer->status !== 'approved' || $transfer->main_admin_approved != 1) {
-            abort(403, 'Cannot generate letter until approval.');
+        if ($transfer->status !== 'approved') {
+            abort(403);
         }
 
         $pdf = Pdf::loadView(
@@ -212,11 +255,8 @@ class TransferApprovalController extends Controller
             compact('transfer')
         );
 
-        $pastorName = $transfer->pastor->name ?? 'pastor';
-$pastorName = str_replace(' ', '_', strtolower($pastorName));
+        $name = strtolower(str_replace(' ', '_', $transfer->pastor->name ?? 'pastor'));
 
-$fileName = 'transfer-letter-' . $pastorName . '-' . $transfer->id . '.pdf';
-
-return $pdf->download($fileName);
+        return $pdf->download("transfer-letter-{$name}-{$transfer->id}.pdf");
     }
 }

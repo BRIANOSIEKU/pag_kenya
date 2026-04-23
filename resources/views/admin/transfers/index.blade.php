@@ -164,13 +164,9 @@ th {
         align-items: flex-start;
     }
 
-    table {
-        min-width: 500px;
-    }
+    table { min-width: 500px; }
 
-    .input {
-        width: 100%;
-    }
+    .input { width: 100%; }
 
     .actions {
         flex-direction: column;
@@ -186,8 +182,18 @@ th {
         ← Back to District Dashboard
     </a>
 
-    {{-- TITLE --}}
-    <h2 class="page-title">Pending Transfer Requests (HQ Comparison View)</h2>
+    {{-- TITLE (ROLE-AWARE) --}}
+    <h2 class="page-title">
+        Pending Transfer Requests
+
+        @if(auth()->user()->hasRole('general_secretary'))
+            (General Secretary View)
+        @elseif(auth()->user()->hasRole('general_superintendent'))
+            (General Superintendent View)
+        @else
+            (HQ View)
+        @endif
+    </h2>
 
     {{-- ALERTS --}}
     @if(session('success'))
@@ -250,12 +256,11 @@ th {
 
         </div>
 
-        {{-- CURRENT PERFORMANCE --}}
+        {{-- PERFORMANCE TABLES (UNCHANGED) --}}
         <h4 class="section-title">Current Assembly Performance (Last 4 Months)</h4>
 
         <div class="table-wrapper">
-        @if(isset($transfer->currentAssemblyPerformance) && $transfer->currentAssemblyPerformance->count())
-
+        @if($transfer->currentAssemblyPerformance->count())
             <table>
                 <thead>
                     <tr>
@@ -266,26 +271,22 @@ th {
                 <tbody>
                     @foreach($transfer->currentAssemblyPerformance as $perf)
                     <tr>
-                        <td>{{ $perf->month ?? '' }} {{ $perf->year ?? '' }}</td>
-                        <td>{{ number_format($perf->total ?? 0) }}</td>
+                        <td>{{ $perf->month }} {{ $perf->year }}</td>
+                        <td>{{ number_format($perf->total) }}</td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
-
         @else
-            <p style="color:#888;">No current assembly performance data.</p>
+            <p style="color:#888;">No data available.</p>
         @endif
         </div>
 
-        {{-- TARGET PERFORMANCE --}}
-        <h4 class="section-title" style="color:#27ae60;">
-            Target Assembly Performance (Last 4 Months)
-        </h4>
+        {{-- TARGET --}}
+        <h4 class="section-title" style="color:#27ae60;">Target Assembly Performance</h4>
 
         <div class="table-wrapper">
-        @if(isset($transfer->targetAssemblyPerformance) && $transfer->targetAssemblyPerformance->count())
-
+        @if($transfer->targetAssemblyPerformance->count())
             <table>
                 <thead>
                     <tr>
@@ -296,66 +297,53 @@ th {
                 <tbody>
                     @foreach($transfer->targetAssemblyPerformance as $perf)
                     <tr>
-                        <td>{{ $perf->month ?? '' }} {{ $perf->year ?? '' }}</td>
-                        <td>{{ number_format($perf->total ?? 0) }}</td>
+                        <td>{{ $perf->month }} {{ $perf->year }}</td>
+                        <td>{{ number_format($perf->total) }}</td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
-
         @else
-            <p style="color:#888;">No target assembly performance data.</p>
+            <p style="color:#888;">No data available.</p>
         @endif
         </div>
 
-        {{-- ATTACHMENTS --}}
-        <h4 class="section-title">Credentials / Attachments</h4>
-
-        @if($transfer->pastor->attachments)
-            @php $files = json_decode($transfer->pastor->attachments, true); @endphp
-
-            @if(is_array($files))
-                @foreach($files as $file)
-                    <div>📎 <a href="{{ asset('storage/' . $file) }}" target="_blank">View Document</a></div>
-                @endforeach
-            @else
-                <div>📎 <a href="{{ asset('storage/' . $transfer->pastor->attachments) }}" target="_blank">View Document</a></div>
-            @endif
-        @else
-            <p style="color:#888;">No credentials uploaded.</p>
-        @endif
-
-        {{-- AGE --}}
-        <p><b>Age:</b> {{ $age }}</p>
-
-        {{-- ACTIONS --}}
+        {{-- ACTIONS (ROLE BASED) --}}
         <div class="actions">
 
-            <form method="POST" action="{{ route('admin.transfers.approve', $transfer->id) }}">
-                @csrf
-                <button class="btn btn-approve">Approve (HQ)</button>
-            </form>
+            {{-- SECRETARY --}}
+            @if(auth()->user()->hasRole('general_secretary'))
+                @if($transfer->general_secretary_approved == 0)
+                <form method="POST" action="{{ route('admin.transfers.secretary.approve', $transfer->id) }}">
+                    @csrf
+                    <button class="btn btn-approve">Approve (Secretary)</button>
+                </form>
+                @endif
+            @endif
 
-            <form method="POST" action="{{ route('admin.transfers.reject', $transfer->id) }}" class="actions">
-                @csrf
+            {{-- HQ / SUPERINTENDENT --}}
+            @if(auth()->user()->hasRole(['general_superintendent','super_admin']))
 
-                <input type="text"
-                       name="rejection_reason"
-                       placeholder="Rejection reason..."
-                       required
-                       class="input">
+                <form method="POST" action="{{ route('admin.transfers.approve', $transfer->id) }}">
+                    @csrf
+                    <button class="btn btn-approve">Final Approve</button>
+                </form>
 
-                <button class="btn btn-reject">Reject</button>
-            </form>
+                <form method="POST" action="{{ route('admin.transfers.reject', $transfer->id) }}">
+                    @csrf
+                    <input type="text" name="rejection_reason" class="input" placeholder="Reason..." required>
+                    <button class="btn btn-reject">Reject</button>
+                </form>
 
+            @endif
+
+            {{-- LETTER --}}
             @if($transfer->status === 'approved')
-                <a href="{{ route('admin.pastoral_transfers.letter', $transfer->id) }}"
-                   class="btn btn-letter">
+                <a href="{{ route('admin.transfers.letter', $transfer->id) }}" class="btn btn-letter">
                     View Letter
                 </a>
 
-                <a href="{{ route('admin.transfers.download', $transfer->id) }}"
-                   class="btn btn-download">
+                <a href="{{ route('admin.transfers.download', $transfer->id) }}" class="btn btn-download">
                     Download PDF
                 </a>
             @endif
@@ -365,7 +353,15 @@ th {
     </div>
 
     @empty
-        <p>No pending transfers found.</p>
+        <p style="text-align:center; color:#888;">
+            @if(auth()->user()->hasRole('general_secretary'))
+                No transfers awaiting Secretary approval.
+            @elseif(auth()->user()->hasRole('general_superintendent'))
+                No transfers pending Superintendent approval.
+            @else
+                No pending transfers found.
+            @endif
+        </p>
     @endforelse
 
 </div>

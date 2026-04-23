@@ -41,7 +41,7 @@ class AssemblyApprovalController extends Controller
     public function approve($id)
     {
         // 🔐 ROLE CHECK (GENERAL SECRETARY + SUPER ADMIN ONLY)
-        if (!auth()->user()->hasRole(['super-admin', 'general-secretary'])) {
+        if (!auth()->user()->hasRole(['super_admin', 'general_secretary', 'general_superintendent'])) {
             abort(403, 'You are not authorized to approve assemblies.');
         }
 
@@ -68,7 +68,7 @@ class AssemblyApprovalController extends Controller
         ]);
 
         // 🔐 ROLE CHECK
-        if (!auth()->user()->hasRole(['super-admin', 'general-secretary'])) {
+        if (!auth()->user()->hasRole(['super_admin', 'general_secretary'])) {
             abort(403, 'You are not authorized to reject assemblies.');
         }
 

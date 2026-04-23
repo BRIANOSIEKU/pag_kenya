@@ -195,26 +195,62 @@ $contact = ContactInfo::first();
 }
 
   /* Only show X when menu is open */
+
+body.menu-open {
+  overflow: hidden;
+}
+
+function openMobileMenu() {
+  navRow.classList.add("show");
+  overlay.style.display = "block";
+  document.body.classList.add("menu-open");
+}
+
+function closeMobileMenu() {
+  navRow.classList.remove("show");
+  overlay.style.display = "none";
+  document.body.classList.remove("menu-open");
+}
+
+
   .nav-row.show .mobile-close-btn { display: block; }
 
-  .nav-row {
-    flex-direction: column;
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: 280px;
-    height: 100vh;
-    background: #065f88;
-    padding-top: 100px;
-    transition: 0.4s ease;
-    z-index: 2000;
-    overflow-y: auto;
-  }
+.nav-row {
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 280px;
+  height: 70vh;
+  background: #065f88;
+
+  padding-top: 60px;   /* ↓ reduced from 100px */
+  padding-bottom: 10px;
+
+  transition: 0.4s ease;
+  z-index: 2000;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+
+  gap: 15px; /* 🔥 key fix: controls spacing between nav items */
+}
   .nav-row.show { right: 0; }
 
   .nav-dropdown { width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); }
   .nav-dropdown a,
-  .nav-dropdown button { display: block; width: 100%; padding: 10px 25px; text-align: left; font-weight: 500; color: #fff; text-decoration: none; }
+  .nav-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 5px 14px;   /* reduced from 10px */
+  line-height: 1.1;    /* tighter text spacing */
+  font size:14px;
+  text-align: left;
+  font-weight: 500;
+  color: #fff;
+  text-decoration: none;
+}
   .nav-dropdown a:hover,
   .nav-dropdown button:hover { background: #d4af37; color: #000; }
 
@@ -229,7 +265,11 @@ $contact = ContactInfo::first();
      transform: translateX(100%);
      
   }
-  .dropdown-menu a { padding-left: 30px; padding-top: 8px; padding-bottom: 8px; }
+  .dropdown-menu a {
+  padding: 6px 15px 6px 28px;
+  line-height: 1.1;
+  font-size: 13px;
+}
   .dropdown-menu a:hover { background: #d4af37; color: #000; }
   .dropdown-menu.show { max-height: 1000px; }
 

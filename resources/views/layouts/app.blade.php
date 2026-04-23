@@ -13,7 +13,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #fffdd0; /* cream white */
+            background-color: #ffffff; /* cream white */
             color: #000;
         }
 

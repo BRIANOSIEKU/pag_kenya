@@ -12,24 +12,32 @@
     --quote-color: rgba(200, 169, 81, 0.3);
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     background: var(--soft-bg);
     font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
 }
 
+/* ================= WRAPPER ================= */
 .leaders-wrapper {
-    max-width: 1150px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 90px 24px;
+    padding: 70px 20px;
 }
 
+/* ================= TITLE ================= */
 .page-title {
     text-align: center;
-    font-size: 40px;
+    font-size: 38px;
     font-weight: 700;
     color: var(--primary);
-    margin-bottom: 80px;
-    position: relative;
+    margin-bottom: 50px;
 }
 
 .page-title::after {
@@ -38,164 +46,165 @@ body {
     height: 3px;
     background: var(--accent);
     display: block;
-    margin: 15px auto 0;
+    margin: 12px auto 0;
     border-radius: 2px;
 }
 
 /* ================= CARD ================= */
 .leader-card {
     display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-    margin-bottom: 70px;
-    padding: 35px;
-    border-radius: 22px;
-    background: #ffffff;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.06);
-    transition: all 0.4s ease;
-    opacity: 0;
-    transform: translateY(40px);
-}
-
-.leader-card.visible {
-    opacity: 1;
-    transform: translateY(0);
-    transition: all 0.8s ease;
+    gap: 25px;
+    padding: 30px;
+    margin-bottom: 40px;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+    transition: 0.3s ease;
 }
 
 .leader-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 30px 70px rgba(0,0,0,0.08);
+    transform: translateY(-5px);
 }
 
-/* LEFT COLUMN */
+/* ================= LEFT ================= */
 .leader-left {
-    flex: 0 0 220px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex: 0 0 200px;
     text-align: center;
 }
 
 .leader-photo {
-    width: 180px;
-    height: 180px;
+    width: 170px;
+    height: 170px;
     object-fit: cover;
-    border-radius: 16px; /* square with slightly rounded corners */
-    margin-bottom: 20px;
-    border: 5px solid #f1f5f9;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-    transition: transform 0.3s ease;
-}
-
-.leader-photo:hover {
-    transform: scale(1.05);
+    border-radius: 14px;
+    border: 4px solid #f1f5f9;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
 .leader-name {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--primary);
-    margin-bottom: 6px;
+    margin-top: 10px;
 }
 
 .leader-position {
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 13px;
     color: var(--accent);
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-top: 4px;
+    text-transform: uppercase;
 }
 
 .leader-email a {
     font-size: 13px;
     color: #2563eb;
     text-decoration: none;
-    transition: 0.3s;
 }
 
-.leader-email a:hover {
-    opacity: 0.7;
-}
-
-/* RIGHT COLUMN */
+/* ================= RIGHT ================= */
 .leader-right {
     flex: 1;
-    min-width: 250px;
 }
 
 .leader-description {
     font-size: 15px;
-    line-height: 1.6;
+    line-height: 1.7;
     color: #334155;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-align: justify;
 }
 
-/* MESSAGE CARD */
+/* ================= MESSAGE ================= */
 .leader-message {
-    display: inline-block;
     position: relative;
-    max-width: 100%;
-    padding: 20px 22px 20px 40px;
-    border-radius: 14px;
+    padding: 16px 18px 16px 38px;
+    border-radius: 12px;
     background: var(--message-bg);
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
     color: #1e293b;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    border-left: 6px solid var(--accent);
-    transition: all 0.3s ease;
-    overflow-wrap: break-word;
-}
-
-.leader-message:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    border-left: 5px solid var(--accent);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
 
 .leader-message::before {
     content: "“";
     position: absolute;
-    top: 8px;
-    left: 12px;
-    font-size: 36px;
-    font-weight: 700;
+    top: 5px;
+    left: 10px;
+    font-size: 32px;
     color: var(--quote-color);
-}
-
-.leader-message p {
-    margin: 0 0 6px 0;
-}
-
-.leader-message p:last-child {
-    margin-bottom: 0;
 }
 
 .signature {
     font-weight: 700;
 }
 
-/* ================= RESPONSIVE ================= */
-@media (max-width: 992px) {
+/* ================= TABLET ================= */
+@media (max-width: 900px) {
     .leader-card {
         flex-direction: column;
         align-items: center;
-    }
-
-    .leader-left {
-        flex: none;
-    }
-
-    .leader-right {
         text-align: center;
     }
 
-    .leader-description,
-    .leader-message {
+    .leader-right {
+        width: 100%;
+    }
+
+    .leader-description {
         text-align: justify;
-        max-width: 100%;
+    }
+}
+
+/* ================= MOBILE FINAL OPTIMIZED ================= */
+@media (max-width: 600px) {
+
+    .leaders-wrapper {
+        padding: 30px 12px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        margin-bottom: 30px;
+    }
+
+    .leader-card {
+        padding: 14px;
+        border-radius: 14px;
+        gap: 12px;
+    }
+
+    /* 🔥 BIG FULL-WIDTH IMAGE ON MOBILE */
+    .leader-left {
+        width: 100%;
+    }
+
+    .leader-photo {
+        width: 100%;
+        height: 300px;
+        border-radius: 12px;
+        object-fit: cover;
+    }
+
+    .leader-name {
+        font-size: 18px;
+        margin-top: 10px;
+    }
+
+    .leader-position {
+        font-size: 12px;
+    }
+
+    .leader-description {
+        font-size: 13.5px;
+        line-height: 1.6;
+    }
+
+    .leader-message {
+        font-size: 13px;
+        padding: 14px 14px 14px 34px;
     }
 }
 </style>
@@ -215,9 +224,9 @@ body {
 
         <div class="leader-card">
 
-            <!-- LEFT COLUMN -->
+            <!-- LEFT -->
             <div class="leader-left">
-                <img src="{{ $photo }}" alt="{{ $leader->full_name }}" class="leader-photo">
+                <img src="{{ $photo }}" class="leader-photo" alt="">
                 <div class="leader-name">{{ $leader->full_name }}</div>
                 <div class="leader-position">{{ $leader->position }}</div>
 
@@ -228,10 +237,13 @@ body {
                 @endif
             </div>
 
-            <!-- RIGHT COLUMN -->
+            <!-- RIGHT -->
             <div class="leader-right">
+
                 @if($leader->brief_description)
-                    <div class="leader-description">{{ $leader->brief_description }}</div>
+                    <div class="leader-description">
+                        {{ $leader->brief_description }}
+                    </div>
                 @endif
 
                 @if($leader->message)
@@ -239,6 +251,7 @@ body {
                         $lines = array_values(array_filter(explode("\n", $leader->message)));
                         $total = count($lines);
                     @endphp
+
                     <div class="leader-message">
                         @foreach($lines as $index => $line)
                             @if($index >= $total - 3)
@@ -249,27 +262,12 @@ body {
                         @endforeach
                     </div>
                 @endif
+
             </div>
 
         </div>
     @endforeach
 
 </div>
-
-<script>
-    const cards = document.querySelectorAll('.leader-card');
-
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if(entry.isIntersecting){
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.2 });
-
-    cards.forEach(card => {
-        observer.observe(card);
-    });
-</script>
 
 @endsection

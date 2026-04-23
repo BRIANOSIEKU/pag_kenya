@@ -68,28 +68,24 @@
 }
 
 .small-btn {
-    padding: 4px 8px;
+    padding: 5px 10px;
     font-size: 12px;
     border-radius: 4px;
     border: none;
     color: #fff;
     cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 5px;
+    margin-bottom: 5px;
 }
 
 .btn-view { background: #2196F3; }
 .btn-edit { background: #FFC107; }
 .btn-delete { background: #e53935; }
-.btn-upload { background: #4CAF50; }
 .btn-gallery { background: #8E24AA; }
+.btn-leadership { background: #4CAF50; }
 
-input, textarea {
-    width: 100%;
-    padding: 6px;
-    margin-bottom: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 13px;
-}
 </style>
 
 <div class="container">
@@ -124,7 +120,6 @@ input, textarea {
                     <th>Photo</th>
                     <th>Name</th>
                     <th>Leadership</th>
-                    <th>Documents</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -151,60 +146,6 @@ input, textarea {
                     {{-- LEADERSHIP --}}
                     <td>{{ $department->leadership ?? '-' }}</td>
 
-                    {{-- DOCUMENTS --}}
-                    <td>
-
-                        @if($department->documents->count())
-
-                            <ul style="padding-left:18px; margin:0;">
-
-                                @foreach($department->documents as $doc)
-                                    <li style="margin-bottom:6px;">
-
-                                        <a href="{{ Storage::url('departments_documents/'.$doc->file_path) }}"
-                                           target="_blank"
-                                           style="color:#2196F3; font-weight:bold;">
-                                            {{ $doc->name }}
-                                        </a>
-
-                                        <form action="{{ route('admin.departments.deleteDocument', $doc->id) }}"
-                                              method="POST"
-                                              style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="small-btn btn-delete">
-                                                Delete
-                                            </button>
-                                        </form>
-
-                                    </li>
-                                @endforeach
-
-                            </ul>
-
-                        @else
-                            <span style="color:#888;">No Documents</span>
-                        @endif
-
-                        {{-- UPLOAD DOCUMENT --}}
-                        <form action="{{ route('admin.departments.uploadDocument', $department->id) }}"
-                              method="POST"
-                              enctype="multipart/form-data"
-                              style="margin-top:8px;">
-
-                            @csrf
-
-                            <input type="text" name="name" placeholder="Document Name" required>
-                            <input type="file" name="document" required>
-
-                            <button type="submit" class="small-btn btn-upload">
-                                Upload
-                            </button>
-
-                        </form>
-
-                    </td>
-
                     {{-- ACTIONS --}}
                     <td>
 
@@ -228,15 +169,26 @@ input, textarea {
                                     onclick="return confirm('Delete this department?')">
                                 Delete
                             </button>
-
                         </form>
 
                         <a href="{{ route('admin.departments.gallery', $department->id) }}"
-                           class="small-btn btn-gallery"
-                           style="margin-top:5px; display:inline-block;">
+                           class="small-btn btn-gallery">
                             Gallery
                         </a>
 
+                        <a href="{{ route('admin.departments.other-leaders.index', $department->id) }}"
+                           class="small-btn btn-leadership">
+                            Other Leaders
+                        </a>
+                        <a href="{{ route('admin.departments.department_upcoming_events.index', ['department' => $department->id]) }}"
+                           class="small-btn btn-leadership">
+                            Upcoming Events
+                        </a>
+                        <a href="{{ route('admin.departments.finance.dashboard',['department' => $department->id]) }}"
+   class="small-btn"
+   style="background:#0D47A1;">
+    Finance
+</a>
                     </td>
 
                 </tr>

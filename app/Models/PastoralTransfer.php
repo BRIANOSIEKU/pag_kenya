@@ -23,6 +23,8 @@ class PastoralTransfer extends Model
         'from_district_approved',
         'to_district_approved',
         'main_admin_approved',
+            'general_secretary_approved',
+    'general_secretary_approved_at',
     ];
 
     // =========================
