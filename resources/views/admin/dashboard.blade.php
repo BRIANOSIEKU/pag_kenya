@@ -172,6 +172,8 @@
             <a href="{{ route('admin.leadership.index', ['type' => 'council']) }}" class="btn-blue">Church Council</a>
             <a href="{{ route('admin.committees.index') }}" class="btn-teal">Standing Committees</a>
             <a href="{{ route('admin.departments.index') }}" class="btn-purple">Church Departments</a>
+            <a href="{{ route('admin.leadership.index', ['type' => 'hq']) }}" class="btn-blue">Office Staff</a>
+
         </div>
     </div>
 
